@@ -10,33 +10,18 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
     <style>
-        :root {
-            --primary-color: #0056b3;
-            --accent-color: #ff9800;
-            --bg-color: #fdfbf7;
-            --text-color: #333;
-            --correct: #28a745;
-            --wrong: #dc3545;
-        }
+        :root { --primary-color: #0056b3; --accent-color: #ff9800; --bg-color: #fdfbf7; --text-color: #333; --correct: #28a745; --wrong: #dc3545; }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Roboto', sans-serif; background-color: var(--bg-color); color: var(--text-color); }
         
-        /* Header */
         header { background: linear-gradient(135deg, var(--primary-color), #004494); color: white; padding: 20px 40px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border-bottom: 4px solid var(--accent-color); }
         .header-content { max-width: 1000px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
         .logo-area { font-family: 'Source Code Pro', monospace; font-size: 1.8rem; font-weight: bold; }
         .sub-title { font-size: 1rem; opacity: 0.9; margin-top: 5px; }
 
-        /* Main Container */
         .container { max-width: 900px; margin: 40px auto; padding: 0 20px; display: none; }
         
-        /* Question Card */
-        .quiz-card { 
-            background: white; border-radius: 10px; padding: 25px; margin-bottom: 20px; 
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05); border-left: 5px solid var(--primary-color); 
-            page-break-inside: avoid; /* Tránh cắt trang PDF */
-            break-inside: avoid;
-        }
+        .quiz-card { background: white; border-radius: 10px; padding: 25px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border-left: 5px solid var(--primary-color); page-break-inside: avoid; }
         .q-title { font-weight: bold; font-size: 1.1rem; margin-bottom: 15px; color: var(--primary-color); }
         .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         
@@ -79,7 +64,7 @@
 
     <div id="loginScreen">
         <div class="login-box">
-            <h2 style="color: var(--primary-color); margin-bottom:20px;"><i class="fas fa-user-graduate"></i> Thông tin học sinh</h2>
+            <h2 style="color: var(--primary-color); margin-bottom:20px;"><i class="fas fa-user-graduate"></i> Học sinh Lớp 4</h2>
             <div class="input-group"><label>Họ và tên:</label><input type="text" id="studentName" placeholder="Nhập họ tên..."></div>
             <div class="input-group"><label>Lớp:</label><input type="text" id="studentClass" placeholder="Ví dụ: 4A"></div>
             <button class="btn btn-submit btn-start" onclick="startQuiz()">Vào làm bài</button>
@@ -88,9 +73,9 @@
 
     <div id="loadingOverlay">
         <div class="spinner"></div>
-        <h3 style="color: var(--primary-color);">Đang xuất file PDF...</h3>
-        <p>Hệ thống đang chấm điểm và tạo file bài làm cho em.</p>
-        <p style="color: red; font-weight: bold; font-size: 0.9rem;">Vui lòng đợi vài giây!</p>
+        <h3 style="color: var(--primary-color);">Đang nộp bài...</h3>
+        <p>Hệ thống đang lưu file PDF lên Google Drive của thầy cô.</p>
+        <p style="color: red; font-weight: bold; font-size: 0.9rem;">Vui lòng đợi 10-15 giây!</p>
     </div>
 
     <header id="mainHeader" style="display:none;">
@@ -104,29 +89,32 @@
             <h1 style="color: #0056b3;">KẾT QUẢ ÔN TẬP TIN HỌC 4</h1>
             <h3 id="pdf-student-info"></h3>
             <h2 id="pdf-score" style="color: red; margin: 10px 0;"></h2>
+            <p><i>(Chân trời sáng tạo - Học kì 1)</i></p>
         </div>
         <main class="container" id="quiz-container"></main>
     </div>
 
     <div style="height: 80px;"></div> 
-    <div class="footer-bar" id="footerBar"><button class="btn btn-submit" onclick="submitAndExport()"><i class="fas fa-file-pdf"></i> Nộp bài & Tải PDF</button></div>
+    <div class="footer-bar" id="footerBar"><button class="btn btn-submit" onclick="submitAndExport()"><i class="fas fa-cloud-upload-alt"></i> Nộp bài & Lưu Drive</button></div>
 
     <div id="resultModal" class="modal">
         <div class="modal-content">
             <h2 style="color: var(--primary-color);">Hoàn thành!</h2>
             <div class="score-circle" id="scoreDisplay">0/40</div>
             <p id="feedbackText" style="margin-bottom: 10px; font-weight: bold;">...</p>
-            <div style="font-size: 0.9rem; color: #0056b3; margin-top:10px; padding: 10px; background: #e3f2fd; border-radius: 5px; font-weight: bold;">
-                <i class="fas fa-check-circle"></i> File PDF bài làm đã được tải về máy của em.
-            </div>
+            <div id="statusMsg" style="font-size: 0.9rem; color: #0056b3; margin-top:10px; padding: 10px; background: #e3f2fd; border-radius: 5px; font-weight: bold;"></div>
             <button class="btn btn-submit" onclick="location.reload()" style="margin-top: 15px; background-color: #6c757d;">Làm lại</button>
         </div>
     </div>
 
     <script>
-        // --- KHÔNG CẦN CẤU HÌNH EMAIL HAY GOOGLE SCRIPT ---
-        
+        // --- !!! CẤU HÌNH LIÊN KẾT GOOGLE SCRIPT !!! ---
+        // Dán URL Web App bạn vừa tạo ở Bước 1 vào đây
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzf47ydfDHEthLPpB1UXgdGNp-K6vJU4Azp5T_AVTZr-fhrWsu3h8QPDWC0bEOoWaJ9/exec";
+
         let info = { name: "", class: "" };
+        
+        // --- BỘ CÂU HỎI TIN HỌC 4 ---
         const questions = [
             { q: "Câu 1: Thiết bị nào sau đây là Phần cứng của máy tính?", a: ["Phần mềm Word", "Chuột máy tính", "Phần mềm Paint", "Hệ điều hành Windows"], correct: 1 }, 
             { q: "Câu 2: Khi gõ bàn phím bằng 10 ngón, việc đặt tay lên hàng cơ sở (ASDF JKL;) giúp em điều gì?", a: ["Gõ nhanh, chính xác không cần nhìn phím", "Giúp máy tính khởi động nhanh hơn", "Giúp ngón tay nghỉ ngơi", "Giúp màn hình đẹp hơn"], correct: 0 }, 
@@ -251,15 +239,39 @@
             };
 
             try {
-                // Tải PDF về máy
-                await html2pdf().set(pdfOptions).from(elementToPrint).save();
+                // 1. Tạo dữ liệu PDF (Base64)
+                const pdfBase64 = await html2pdf().set(pdfOptions).from(elementToPrint).output('datauristring');
+
+                // 2. Gửi lên Google Drive
+                if (GOOGLE_SCRIPT_URL.includes("DÁN_URL")) {
+                    console.warn("Chưa cấu hình Google Script URL -> Chỉ tải về máy.");
+                } else {
+                    await fetch(GOOGLE_SCRIPT_URL, {
+                        method: "POST",
+                        body: JSON.stringify({
+                            fileName: fileName,
+                            fileData: pdfBase64,
+                            studentName: info.name,
+                            studentClass: info.class,
+                            score: totalScore
+                        })
+                    });
+                }
+
+                // 3. Tải về máy và Mở xem
+                await html2pdf().set(pdfOptions).from(elementToPrint).toPdf().get('pdf').then(function(pdf) {
+                    window.open(pdf.output('bloburl'), '_blank');
+                }).save();
+
+                document.getElementById('statusMsg').innerHTML = "<span style='color:green; font-weight:bold'><i class='fas fa-check-circle'></i> File PDF đã được lưu vào Google Drive của thầy cô.</span>";
                 
             } catch (error) {
                 console.error(error);
-                alert("Có lỗi khi tạo PDF. Nhưng điểm số đã được tính xong.");
+                document.getElementById('statusMsg').innerHTML = `<span style='color:red'>Lỗi kết nối Drive (Nhưng PDF đã được tải về máy).</span>`;
             } finally {
                 document.getElementById('loadingOverlay').style.display = 'none';
                 document.getElementById('scoreDisplay').innerText = totalScore;
+                
                 let msg = score >= 35 ? "Xuất sắc!" : (score >= 20 ? "Khá tốt!" : "Cố gắng hơn nhé!");
                 document.getElementById('feedbackText').innerText = msg;
                 document.getElementById('resultModal').style.display = 'flex';
