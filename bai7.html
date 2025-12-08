@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 7: Soạn thảo văn bản bằng tiếng Việt - Tin học 4</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Source+Code+Pro:wght@600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        /* --- CẤU HÌNH GIAO DIỆN CHUNG --- */
+        :root {
+            --primary-color: #0056b3; 
+            --accent-color: #00a8ff;
+            --bg-color: #f4f7f6;
+            --text-color: #333;
+            --card-bg: #ffffff;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --word-blue: #2b579a; /* Màu xanh đặc trưng của Word */
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Roboto', sans-serif; background-color: var(--bg-color); color: var(--text-color); }
+        
+        /* Header */
+        header { background: linear-gradient(135deg, var(--primary-color), var(--accent-color)); color: white; padding: 15px 40px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .logo-area { font-family: 'Source Code Pro', monospace; font-size: 1.5rem; font-weight: bold; }
+        .teacher-info { font-size: 0.9rem; opacity: 0.9; }
+        
+        /* Container */
+        .container { max-width: 1000px; margin: 30px auto; padding: 0 20px; }
+        .breadcrumb { margin-bottom: 20px; font-size: 0.9rem; color: #666; }
+        .breadcrumb a { text-decoration: none; color: var(--primary-color); font-weight: bold; }
+
+        .lesson-content { background: var(--card-bg); border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); padding: 40px; border-top: 5px solid var(--word-blue); }
+        h1.lesson-title { color: var(--word-blue); margin-bottom: 20px; font-size: 2rem; border-bottom: 2px solid #eee; padding-bottom: 15px; }
+
+        /* --- SLIDE BÀI GIẢNG --- */
+        .digital-lesson-wrapper { 
+            position: relative; width: 100%; padding-top: 56.25%; /* Tỉ lệ 16:9 */
+            background: #fff; border-radius: 10px; overflow: hidden; 
+            box-shadow: 0 0 15px rgba(0,0,0,0.1); border: 1px solid #ddd; margin-bottom: 30px; 
+        }
+        .lesson-slides { position: absolute; top: 0; left: 0; bottom: 0; right: 0; }
+        
+        .slide { 
+            position: absolute; width: 100%; height: 100%; 
+            opacity: 0; transition: opacity 0.4s ease-in-out; 
+            padding: 20px 40px; display: flex; align-items: center; justify-content: center; 
+            background: white; pointer-events: none; z-index: 1;
+        }
+        .slide.active { opacity: 1; pointer-events: auto; z-index: 10; }
+        
+        .slide-content { width: 100%; text-align: center; }
+        .slide h2 { color: #888; font-size: 1.1rem; text-transform: uppercase; margin-bottom: 10px; }
+        .slide h1 { color: var(--word-blue); font-size: 2rem; margin-bottom: 20px; }
+        .slide h3 { color: var(--word-blue); border-bottom: 2px solid var(--accent-color); display: inline-block; margin-bottom: 15px; }
+
+        /* Style riêng cho Bài 7 */
+        .word-icon { font-size: 4rem; color: var(--word-blue); margin: 20px 0; }
+        
+        /* Bảng Telex */
+        .telex-box { 
+            display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px; text-align: left; 
+        }
+        .telex-col { background: #e3f2fd; padding: 15px; border-radius: 10px; border: 1px solid #bbdefb; }
+        .telex-row { display: flex; justify-content: space-between; border-bottom: 1px dashed #ccc; padding: 5px 0; font-size: 1.1rem; }
+        .telex-row:last-child { border-bottom: none; }
+        .telex-key { font-weight: bold; color: var(--danger); background: #fff; padding: 0 5px; border-radius: 4px; }
+
+        /* Các bước thực hiện */
+        .step-box { background: #f5f5f5; padding: 15px; border-radius: 8px; margin-top: 10px; text-align: left; border-left: 4px solid var(--word-blue); }
+        .step-box p { margin-bottom: 8px; }
+        .step-icon { color: var(--word-blue); margin-right: 8px; font-size: 1.2rem; }
+
+        /* Nút điều khiển Slide */
+        .slider-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.1); border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; z-index: 20; transition: 0.3s; font-size: 1.2rem; color: #333; }
+        .slider-btn:hover { background: var(--primary-color); color: white; }
+        .prev-btn { left: 10px; }
+        .next-btn { right: 10px; }
+
+        /* --- 3. NÚT CHỨC NĂNG --- */
+        .action-buttons { display: flex; gap: 15px; margin-top: 30px; padding-top: 20px; border-top: 1px dashed #ccc; }
+        .btn { padding: 12px 25px; border-radius: 30px; text-decoration: none; font-weight: bold; display: inline-flex; align-items: center; cursor: pointer; border: none; font-size: 1rem; transition: transform 0.2s; color: white; }
+        .btn:hover { transform: translateY(-3px); }
+        .btn-download { background-color: var(--success); }
+        .btn-exercise { background-color: var(--warning); color: #333; }
+
+        /* --- 4. MODAL BÀI TẬP --- */
+        .quiz-modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); align-items: center; justify-content: center; }
+        .quiz-content { background-color: white; width: 90%; max-width: 600px; padding: 30px; border-radius: 15px; position: relative; animation: slideDown 0.4s ease; }
+        @keyframes slideDown { from {top: -50px; opacity: 0;} to {top: 0; opacity: 1;} }
+        .close-quiz { position: absolute; right: 20px; top: 15px; font-size: 1.5rem; cursor: pointer; color: #aaa; }
+        .quiz-question { font-size: 1.2rem; font-weight: bold; margin-bottom: 20px; color: var(--primary-color); }
+        .quiz-progress { font-size: 0.9rem; color: #666; margin-bottom: 10px; text-align: right; font-style: italic; }
+        
+        .quiz-options { display: flex; flex-direction: column; gap: 10px; }
+        .option-btn { padding: 12px; border: 2px solid #eee; border-radius: 8px; background: white; text-align: left; cursor: pointer; transition: 0.2s; }
+        .option-btn:hover { background: #f0f8ff; border-color: var(--accent-color); }
+        .option-btn.correct { background: #d4edda; border-color: #28a745; color: #155724; }
+        .option-btn.wrong { background: #f8d7da; border-color: #dc3545; color: #721c24; }
+        
+        .quiz-footer { margin-top: 20px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #eee; padding-top: 15px; }
+        .score-display { font-weight: bold; color: var(--primary-color); }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-area"><i class="fas fa-laptop-code"></i> TIN HỌC 4</div>
+        <div class="teacher-info">GV - Nguyễn Đình Bạch Long</div>
+    </header>
+
+    <main class="container">
+        <div class="breadcrumb">
+            <a href="index.html"><i class="fas fa-home"></i> Trang chủ</a> 
+            <span style="margin: 0 10px;">/</span> Chủ đề E 
+            <span style="margin: 0 10px;">/</span> Bài 7
+        </div>
+
+        <div class="lesson-content">
+            <h1 class="lesson-title">Bài 7: Soạn thảo văn bản bằng tiếng Việt</h1>
+
+            <div class="digital-lesson-wrapper">
+                <div class="lesson-slides" id="slideContainer">
+                   
+                    <div class="slide active">
+                        <div class="slide-content text-center">
+                            <h2 class="slide-title">CHỦ ĐỀ E: ỨNG DỤNG TIN HỌC</h2>
+                            <h1 class="main-topic">BÀI 7: SOẠN THẢO VĂN BẢN TIẾNG VIỆT</h1>
+                            <div class="word-icon">
+                                <i class="fas fa-file-word"></i>
+                            </div>
+                            <p>Mục tiêu: Biết cách gõ dấu tiếng Việt và lưu văn bản.</p>
+                        </div>
+                    </div>
+
+                    <div class="slide">
+                        <div class="slide-content">
+                            <h3>1. Kích hoạt Microsoft Word</h3>
+                            <p>Để mở phần mềm soạn thảo văn bản, em thực hiện:</p>
+                            <div class="step-box">
+                                <p><i class="fas fa-mouse-pointer step-icon"></i> Nháy đúp chuột vào biểu tượng <strong>Word</strong> <i class="fas fa-file-word" style="color: #2b579a;"></i> trên màn hình nền.</p>
+                                <p><i class="fas fa-keyboard step-icon"></i> Hoặc gõ "Word" vào ô tìm kiếm rồi nhấn Enter.</p>
+                            </div>
+                            <p style="margin-top: 15px; font-size: 0.9rem; color: #555;">(Con trỏ soạn thảo là vạch đứng nhấp nháy | )</p>
+                        </div>
+                    </div>
+
+                    <div class="slide">
+                        <div class="slide-content">
+                            <h3>2. Quy tắc gõ Telex</h3>
+                            <p>Để gõ tiếng Việt, em cần bật <strong>Unikey</strong> (Chế độ chữ V màu đỏ).</p>
+                            <div class="telex-box">
+                                <div class="telex-col">
+                                    <strong style="display:block; text-align: center; margin-bottom: 10px;">Gõ Dấu</strong>
+                                    <div class="telex-row"><span>Sắc ( ' )</span> <span class="telex-key">S</span></div>
+                                    <div class="telex-row"><span>Huyền ( ` )</span> <span class="telex-key">F</span></div>
+                                    <div class="telex-row"><span>Hỏi ( ? )</span> <span class="telex-key">R</span></div>
+                                    <div class="telex-row"><span>Ngã ( ~ )</span> <span class="telex-key">X</span></div>
+                                    <div class="telex-row"><span>Nặng ( . )</span> <span class="telex-key">J</span></div>
+                                </div>
+                                <div class="telex-col">
+                                    <strong style="display:block; text-align: center; margin-bottom: 10px;">Gõ Chữ</strong>
+                                    <div class="telex-row"><span>â</span> <span class="telex-key">aa</span></div>
+                                    <div class="telex-row"><span>ô</span> <span class="telex-key">oo</span></div>
+                                    <div class="telex-row"><span>ê</span> <span class="telex-key">ee</span></div>
+                                    <div class="telex-row"><span>đ</span> <span class="telex-key">dd</span></div>
+                                    <div class="telex-row"><span>ă</span> <span class="telex-key">aw</span></div>
+                                    <div class="telex-row"><span>ơ</span> <span class="telex-key">ow</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="slide">
+                        <div class="slide-content">
+                            <h3>3. Lưu văn bản và Thoát</h3>
+                            <div class="step-box" style="background: #e3f2fd; border-color: var(--accent-color);">
+                                <strong><i class="fas fa-save"></i> Lưu văn bản:</strong>
+                                <p>1. Chọn <strong>File</strong> -> <strong>Save</strong> (hoặc ấn <strong>Ctrl + S</strong>).</p>
+                                <p>2. Chọn thư mục lưu (Browse).</p>
+                                <p>3. Đặt tên tệp -> Nhấn <strong>Save</strong>.</p>
+                            </div>
+                            <div class="step-box" style="background: #ffebee; border-color: var(--danger); margin-top: 15px;">
+                                <strong><i class="fas fa-times-circle"></i> Thoát:</strong>
+                                <p>Nháy chuột vào nút <strong>Close (X)</strong> ở góc trên bên phải màn hình.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <button class="slider-btn prev-btn" onclick="changeSlide(-1)"><i class="fas fa-chevron-left"></i></button>
+                <button class="slider-btn next-btn" onclick="changeSlide(1)"><i class="fas fa-chevron-right"></i></button>
+            </div>
+
+            <p style="text-align: center; color: #666; font-style: italic;">
+                Bấm mũi tên Trái/Phải trên khung hình để xem bài giảng.
+            </p>
+
+            <div class="action-buttons">
+                <a href="Bai7.pdf" download class="btn btn-download">
+                    <i class="fas fa-file-download"></i> Tải bài giảng (PDF)
+                </a>
+                <button class="btn btn-exercise" onclick="openQuiz()">
+                    <i class="fas fa-puzzle-piece"></i> Bài tập
+                </button>
+            </div>
+        </div>
+        
+        <div style="margin-top: 20px; text-align: center;">
+            <a href="index.html" style="text-decoration: none; color: #555;"><i class="fas fa-arrow-left"></i> Quay lại danh sách bài học</a>
+        </div>
+    </main>
+
+    <div id="quizModal" class="quiz-modal">
+        <div class="quiz-content">
+            <span class="close-quiz" onclick="closeQuiz()">&times;</span>
+            <div style="text-align: center; margin-bottom: 20px;">
+                <h2 style="color: var(--word-blue);">Bài tập trắc nghiệm</h2>
+                <p style="font-size: 0.9rem; color: #666;">Em hãy chọn đáp án đúng nhất</p>
+            </div>
+            
+            <div id="quizContainer">
+                <div style="margin-bottom: 10px; font-style: italic; color: #666;" id="progressText">Câu 1 / 10</div>
+                <div class="quiz-question" id="questionText">Câu hỏi...</div>
+                <div class="quiz-options" id="optionsContainer"></div>
+            </div>
+
+            <div class="quiz-footer">
+                <div class="score-display">Điểm: <span id="scoreVal">0</span> / 10</div>
+                <button class="btn btn-exercise" id="nextBtn" style="padding: 8px 20px; font-size: 0.9rem;" onclick="nextQuestion()">Câu tiếp theo</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 1. XỬ LÝ SLIDE
+        document.addEventListener('DOMContentLoaded', function() {
+            const slides = document.querySelectorAll('.slide');
+            const prevBtn = document.querySelector('.prev-btn');
+            const nextBtn = document.querySelector('.next-btn');
+            let currentSlide = 0;
+
+            function showSlide(index) {
+                slides.forEach(s => s.classList.remove('active'));
+                if (index >= slides.length) currentSlide = 0;
+                else if (index < 0) currentSlide = slides.length - 1;
+                else currentSlide = index;
+                slides[currentSlide].classList.add('active');
+            }
+
+            prevBtn.addEventListener('click', () => showSlide(currentSlide - 1));
+            nextBtn.addEventListener('click', () => showSlide(currentSlide + 1));
+        });
+
+        // 2. DỮ LIỆU CÂU HỎI TRẮC NGHIỆM (Từ File PDF Bai 7)
+        const questions = [
+            { 
+                question: "1. Biểu tượng của phần mềm soạn thảo văn bản Word có màu gì?", 
+                options: ["Màu đỏ (P)", "Màu xanh dương (W)", "Màu xanh lá (X)", "Màu vàng"], 
+                correct: 1 
+            },
+            { 
+                question: "2. Để gõ chữ cái in hoa, em nhấn giữ phím nào?", 
+                options: ["Ctrl", "Alt", "Shift", "Tab"], 
+                correct: 2 
+            },
+            { 
+                question: "3. Trong kiểu gõ Telex, phím nào dùng để gõ dấu Sắc?", 
+                options: ["S", "F", "R", "J"], 
+                correct: 0 
+            },
+            { 
+                question: "4. Trong kiểu gõ Telex, phím nào dùng để gõ dấu Huyền?", 
+                options: ["S", "F", "R", "X"], 
+                correct: 1 
+            },
+            { 
+                question: "5. Để gõ chữ 'â', em gõ như thế nào?", 
+                options: ["aw", "aa", "ee", "dd"], 
+                correct: 1 
+            },
+            { 
+                question: "6. Phím nào dùng để xuống dòng?", 
+                options: ["Space", "Shift", "Enter", "Backspace"], 
+                correct: 2 
+            },
+            { 
+                question: "7. Phím Backspace dùng để làm gì?", 
+                options: ["Xóa kí tự bên phải con trỏ", "Xóa kí tự bên trái con trỏ", "Cách khoảng trắng", "Viết hoa"], 
+                correct: 1 
+            },
+            { 
+                question: "8. Tổ hợp phím nào dùng để Lưu văn bản?", 
+                options: ["Ctrl + C", "Ctrl + V", "Ctrl + S", "Ctrl + P"], 
+                correct: 2 
+            },
+            { 
+                question: "9. Để gõ chữ 'đ', em gõ phím nào 2 lần?", 
+                options: ["a", "e", "o", "d"], 
+                correct: 3 
+            },
+            { 
+                question: "10. Phần mềm nào hỗ trợ gõ tiếng Việt?", 
+                options: ["Unikey", "Paint", "Zoom", "Zalo"], 
+                correct: 0 
+            }
+        ];
+
+        // 3. LOGIC TRẮC NGHIỆM
+        let currentQ = 0, score = 0;
+        const modal = document.getElementById('quizModal');
+        const qText = document.getElementById('questionText');
+        const progressText = document.getElementById('progressText');
+        const optContainer = document.getElementById('optionsContainer');
+        const nextBtn = document.getElementById('nextBtn');
+        const scoreSpan = document.getElementById('scoreVal');
+
+        function openQuiz() {
+            modal.style.display = 'flex';
+            currentQ = 0;
+            score = 0;
+            scoreSpan.innerText = 0;
+            loadQuestion();
+        }
+
+        function closeQuiz() {
+            modal.style.display = 'none';
+        }
+
+        function loadQuestion() {
+            progressText.innerText = `Câu ${currentQ + 1} / ${questions.length}`;
+            if(currentQ >= questions.length) {
+                qText.innerText = `Chúc mừng! Em đã hoàn thành bài tập.\nĐiểm số: ${score}/${questions.length}`;
+                progressText.innerText = "Hoàn thành";
+                optContainer.innerHTML = '';
+                nextBtn.innerText = "Làm lại";
+                nextBtn.onclick = openQuiz;
+                return;
+            }
+            const q = questions[currentQ];
+            qText.innerText = q.question;
+            optContainer.innerHTML = '';
+            nextBtn.style.display = 'none';
+
+            q.options.forEach((opt, idx) => {
+                const btn = document.createElement('div');
+                btn.className = 'option-btn';
+                btn.innerText = opt;
+                btn.onclick = () => checkAnswer(btn, idx, q.correct);
+                optContainer.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(btn, idx, correctIdx) {
+            const allOpts = optContainer.children;
+            for(let o of allOpts) o.style.pointerEvents = 'none';
+            if(idx === correctIdx) {
+                btn.classList.add('correct');
+                score++;
+                scoreSpan.innerText = score;
+            } else {
+                btn.classList.add('wrong');
+                allOpts[correctIdx].classList.add('correct');
+            }
+            nextBtn.style.display = 'block';
+            nextBtn.innerText = "Câu tiếp theo";
+            nextBtn.onclick = nextQuestion;
+        }
+        
+        function nextQuestion() {
+            currentQ++;
+            loadQuestion();
+        }
+        
+        window.onclick = function(e) { if(e.target == modal) closeQuiz(); }
+    </script>
+</body>
+</html>

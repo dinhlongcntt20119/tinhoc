@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 3: Thông tin trên trang web - Tin học 4</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Source+Code+Pro:wght@600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        /* --- CẤU HÌNH GIAO DIỆN CHUNG --- */
+        :root {
+            --primary-color: #0056b3; 
+            --accent-color: #00a8ff;
+            --bg-color: #f4f7f6;
+            --text-color: #333;
+            --card-bg: #ffffff;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --web-purple: #673ab7; /* Màu tím cho chủ đề Web */
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Roboto', sans-serif; background-color: var(--bg-color); color: var(--text-color); }
+        
+        /* Header */
+        header { background: linear-gradient(135deg, var(--primary-color), var(--accent-color)); color: white; padding: 15px 40px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .logo-area { font-family: 'Source Code Pro', monospace; font-size: 1.5rem; font-weight: bold; }
+        .teacher-info { font-size: 0.9rem; opacity: 0.9; }
+        
+        /* Container */
+        .container { max-width: 1000px; margin: 30px auto; padding: 0 20px; }
+        .breadcrumb { margin-bottom: 20px; font-size: 0.9rem; color: #666; }
+        .breadcrumb a { text-decoration: none; color: var(--primary-color); font-weight: bold; }
+
+        .lesson-content { background: var(--card-bg); border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); padding: 40px; border-top: 5px solid var(--web-purple); }
+        h1.lesson-title { color: var(--web-purple); margin-bottom: 20px; font-size: 2rem; border-bottom: 2px solid #eee; padding-bottom: 15px; }
+
+        /* --- SLIDE BÀI GIẢNG --- */
+        .digital-lesson-wrapper { 
+            position: relative; width: 100%; padding-top: 56.25%; /* Tỉ lệ 16:9 */
+            background: #fff; border-radius: 10px; overflow: hidden; 
+            box-shadow: 0 0 15px rgba(0,0,0,0.1); border: 1px solid #ddd; margin-bottom: 30px; 
+        }
+        .lesson-slides { position: absolute; top: 0; left: 0; bottom: 0; right: 0; }
+        
+        .slide { 
+            position: absolute; width: 100%; height: 100%; 
+            opacity: 0; transition: opacity 0.4s ease-in-out; 
+            padding: 20px 40px; display: flex; align-items: center; justify-content: center; 
+            background: white; pointer-events: none; z-index: 1;
+        }
+        .slide.active { opacity: 1; pointer-events: auto; z-index: 10; }
+        
+        .slide-content { width: 100%; text-align: center; }
+        .slide h2 { color: #888; font-size: 1.1rem; text-transform: uppercase; margin-bottom: 10px; }
+        .slide h1 { color: var(--web-purple); font-size: 2rem; margin-bottom: 20px; }
+        .slide h3 { color: var(--web-purple); border-bottom: 2px solid var(--accent-color); display: inline-block; margin-bottom: 15px; }
+
+        /* Style riêng cho Bài 3 */
+        .web-icon { font-size: 4rem; color: var(--web-purple); margin: 20px 0; }
+        
+        /* Các loại thông tin */
+        .info-types-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 20px; }
+        .info-card { 
+            background: #f3e5f5; padding: 15px; border-radius: 8px; text-align: center;
+            display: flex; flex-direction: column; align-items: center; gap: 10px;
+            border: 1px solid #e1bee7; transition: 0.3s;
+        }
+        .info-card:hover { transform: translateY(-3px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .info-card i { font-size: 2rem; color: var(--web-purple); }
+        .info-card span { font-weight: bold; color: #4a148c; }
+
+        /* Siêu liên kết */
+        .hyperlink-demo {
+            display: inline-block; padding: 15px 25px; background: #e3f2fd; border-radius: 50px;
+            border: 2px dashed #2196f3; margin-top: 20px; font-size: 1.2rem; color: #0d47a1;
+            cursor: pointer; transition: 0.3s;
+        }
+        .hyperlink-demo:hover { background: #bbdefb; text-decoration: underline; }
+        .mouse-pointer { font-size: 2.5rem; margin-right: 10px; }
+
+        /* Tác hại */
+        .harm-box { background: #ffebee; padding: 20px; border-radius: 10px; text-align: left; display: inline-block; border-left: 5px solid var(--danger); }
+        .harm-list li { margin-bottom: 8px; font-size: 0.95rem; }
+
+        /* Nút điều khiển Slide */
+        .slider-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.1); border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; z-index: 20; transition: 0.3s; font-size: 1.2rem; color: #333; }
+        .slider-btn:hover { background: var(--primary-color); color: white; }
+        .prev-btn { left: 10px; }
+        .next-btn { right: 10px; }
+
+        /* --- 3. NÚT CHỨC NĂNG --- */
+        .action-buttons { display: flex; gap: 15px; margin-top: 30px; padding-top: 20px; border-top: 1px dashed #ccc; }
+        .btn { padding: 12px 25px; border-radius: 30px; text-decoration: none; font-weight: bold; display: inline-flex; align-items: center; cursor: pointer; border: none; font-size: 1rem; transition: transform 0.2s; color: white; }
+        .btn:hover { transform: translateY(-3px); }
+        .btn-download { background-color: var(--success); }
+        .btn-exercise { background-color: var(--warning); color: #333; }
+
+        /* --- 4. MODAL BÀI TẬP --- */
+        .quiz-modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); align-items: center; justify-content: center; }
+        .quiz-content { background-color: white; width: 90%; max-width: 600px; padding: 30px; border-radius: 15px; position: relative; animation: slideDown 0.4s ease; }
+        @keyframes slideDown { from {top: -50px; opacity: 0;} to {top: 0; opacity: 1;} }
+        .close-quiz { position: absolute; right: 20px; top: 15px; font-size: 1.5rem; cursor: pointer; color: #aaa; }
+        .quiz-question { font-size: 1.2rem; font-weight: bold; margin-bottom: 20px; color: var(--primary-color); }
+        .quiz-options { display: flex; flex-direction: column; gap: 10px; }
+        .option-btn { padding: 12px; border: 2px solid #eee; border-radius: 8px; background: white; text-align: left; cursor: pointer; transition: 0.2s; }
+        .option-btn:hover { background: #f0f8ff; border-color: var(--accent-color); }
+        .option-btn.correct { background: #d4edda; border-color: #28a745; color: #155724; }
+        .option-btn.wrong { background: #f8d7da; border-color: #dc3545; color: #721c24; }
+        
+        .quiz-footer { margin-top: 20px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #eee; padding-top: 15px; }
+        .score-display { font-weight: bold; color: var(--primary-color); }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-area"><i class="fas fa-laptop-code"></i> TIN HỌC 4</div>
+        <div class="teacher-info">GV - Nguyễn Đình Bạch Long</div>
+    </header>
+
+    <main class="container">
+        <div class="breadcrumb">
+            <a href="index.html"><i class="fas fa-home"></i> Trang chủ</a> 
+            <span style="margin: 0 10px;">/</span> Chủ đề B 
+            <span style="margin: 0 10px;">/</span> Bài 3
+        </div>
+
+        <div class="lesson-content">
+            <h1 class="lesson-title">Bài 3: Thông tin trên trang web</h1>
+
+            <div class="digital-lesson-wrapper">
+                <div class="lesson-slides" id="slideContainer">
+                   
+                    <div class="slide active">
+                        <div class="slide-content text-center">
+                            <h2 class="slide-title">CHỦ ĐỀ B: MẠNG MÁY TÍNH VÀ INTERNET</h2>
+                            <h1 class="main-topic">BÀI 3: THÔNG TIN TRÊN TRANG WEB</h1>
+                            <div class="web-icon"><i class="fas fa-globe"></i></div>
+                            <p>Mục tiêu: Nhận biết các dạng thông tin và tác hại của trang web xấu.</p>
+                        </div>
+                    </div>
+
+                    <div class="slide">
+                        <div class="slide-content">
+                            <h3>1. Các loại thông tin chính</h3>
+                            <p>Trên trang web có 5 loại thông tin cơ bản:</p>
+                            <div class="info-types-grid">
+                                <div class="info-card"><i class="fas fa-font"></i><span>Văn bản</span></div>
+                                <div class="info-card"><i class="fas fa-image"></i><span>Hình ảnh</span></div>
+                                <div class="info-card"><i class="fas fa-music"></i><span>Âm thanh</span></div>
+                                <div class="info-card"><i class="fas fa-video"></i><span>Video</span></div>
+                                <div class="info-card" style="grid-column: span 2; background: #e1bee7;">
+                                    <i class="fas fa-link"></i><span>Siêu liên kết</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="slide">
+                        <div class="slide-content">
+                            <h3>2. Nhận biết Siêu liên kết</h3>
+                            <p>Siêu liên kết giúp chuyển từ trang này sang trang khác.</p>
+                            <div class="hyperlink-demo">
+                                <i class="fas fa-hand-pointer mouse-pointer"></i>
+                                Khi trỏ chuột vào, con trỏ biến thành <strong>Bàn tay</strong>
+                            </div>
+                            <p style="margin-top: 15px; font-size: 0.9rem; color: #666;">(Thường là dòng chữ màu xanh hoặc hình ảnh)</p>
+                        </div>
+                    </div>
+
+                    <div class="slide">
+                        <div class="slide-content">
+                            <h3>3. Tác hại của trang web xấu</h3>
+                            <div class="harm-box">
+                                <strong style="color: var(--danger); display: block; margin-bottom: 10px;"><i class="fas fa-exclamation-triangle"></i> CẢNH BÁO:</strong>
+                                <ul class="harm-list fa-ul">
+                                    <li><span class="fa-li"><i class="fas fa-times"></i></span> Ám ảnh, sợ hãi, nhiễm thói hư tật xấu.</li>
+                                    <li><span class="fa-li"><i class="fas fa-times"></i></span> Bị lừa đảo, bắt nạt, dụ dỗ.</li>
+                                    <li><span class="fa-li"><i class="fas fa-times"></i></span> Mất cắp thông tin, hỏng máy tính (virus).</li>
+                                </ul>
+                                <p style="margin-top: 10px; font-weight: bold;">-> Không được truy cập trang web lạ!</p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <button class="slider-btn prev-btn" onclick="changeSlide(-1)"><i class="fas fa-chevron-left"></i></button>
+                <button class="slider-btn next-btn" onclick="changeSlide(1)"><i class="fas fa-chevron-right"></i></button>
+            </div>
+
+            <p style="text-align: center; color: #666; font-style: italic;">
+                Bấm mũi tên Trái/Phải trên khung hình để xem bài giảng.
+            </p>
+
+            <div class="action-buttons">
+                <a href="Bai3.pdf" download class="btn btn-download">
+                    <i class="fas fa-file-download"></i> Tải bài giảng (PDF)
+                </a>
+                <button class="btn btn-exercise" onclick="openQuiz()">
+                    <i class="fas fa-puzzle-piece"></i> Bài tập
+                </button>
+            </div>
+        </div>
+        
+        <div style="margin-top: 20px; text-align: center;">
+            <a href="index.html" style="text-decoration: none; color: #555;"><i class="fas fa-arrow-left"></i> Quay lại danh sách bài học</a>
+        </div>
+    </main>
+
+    <div id="quizModal" class="quiz-modal">
+        <div class="quiz-content">
+            <span class="close-quiz" onclick="closeQuiz()">&times;</span>
+            <div style="text-align: center; margin-bottom: 20px;">
+                <h2 style="color: var(--web-purple);">Bài tập trắc nghiệm</h2>
+                <p style="font-size: 0.9rem; color: #666;">Em hãy chọn đáp án đúng nhất</p>
+            </div>
+            
+            <div id="quizContainer">
+                <div style="margin-bottom: 10px; font-style: italic; color: #666;" id="progressText">Câu 1 / 10</div>
+                <div class="quiz-question" id="questionText">Câu hỏi...</div>
+                <div class="quiz-options" id="optionsContainer"></div>
+            </div>
+
+            <div class="quiz-footer">
+                <div class="score-display">Điểm: <span id="scoreVal">0</span> / 10</div>
+                <button class="btn btn-exercise" id="nextBtn" style="padding: 8px 20px; font-size: 0.9rem;" onclick="nextQuestion()">Câu tiếp theo</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 1. XỬ LÝ SLIDE
+        document.addEventListener('DOMContentLoaded', function() {
+            const slides = document.querySelectorAll('.slide');
+            const prevBtn = document.querySelector('.prev-btn');
+            const nextBtn = document.querySelector('.next-btn');
+            let currentSlide = 0;
+
+            function showSlide(index) {
+                slides.forEach(s => s.classList.remove('active'));
+                if (index >= slides.length) currentSlide = 0;
+                else if (index < 0) currentSlide = slides.length - 1;
+                else currentSlide = index;
+                slides[currentSlide].classList.add('active');
+            }
+
+            prevBtn.addEventListener('click', () => showSlide(currentSlide - 1));
+            nextBtn.addEventListener('click', () => showSlide(currentSlide + 1));
+        });
+
+        // 2. DỮ LIỆU CÂU HỎI TRẮC NGHIỆM (Từ File PDF Bai 3)
+        const questions = [
+            { 
+                question: "1. Đâu KHÔNG phải là một dạng thông tin trên trang web?", 
+                options: ["Văn bản", "Mùi hương", "Hình ảnh", "Âm thanh"], 
+                correct: 1 
+            },
+            { 
+                question: "2. Dấu hiệu nhận biết một siêu liên kết là gì?", 
+                options: ["Con trỏ chuột biến mất", "Con trỏ chuột chuyển thành hình bàn tay", "Con trỏ chuột chuyển thành hình cái bút", "Màn hình tối đi"], 
+                correct: 1 
+            },
+            { 
+                question: "3. Video là sự kết hợp của những dạng thông tin nào?", 
+                options: ["Văn bản và hình ảnh", "Hình ảnh và âm thanh", "Chỉ có âm thanh", "Chỉ có văn bản"], 
+                correct: 1 
+            },
+            { 
+                question: "4. Tác hại của việc truy cập trang web không phù hợp lứa tuổi?", 
+                options: ["Máy tính chạy nhanh hơn", "Học tập tốt hơn", "Bị lừa đảo, dụ dỗ, nhiễm thói hư", "Được nhiều bạn bè khen"], 
+                correct: 2 
+            },
+            { 
+                question: "5. Siêu liên kết (Hyperlink) có chức năng gì?", 
+                options: ["Liên kết đến một trang web khác", "Tắt máy tính", "Xóa dữ liệu", "Chơi nhạc"], 
+                correct: 0 
+            },
+            { 
+                question: "6. Em nên làm gì khi gặp một trang web có nội dung xấu?", 
+                options: ["Tò mò xem tiếp", "Chia sẻ cho bạn bè", "Thoát ngay và thông báo cho người lớn", "Lưu lại để xem sau"], 
+                correct: 2 
+            },
+            { 
+                question: "7. Trang web chứa nhiều loại thông tin khác nhau được gọi là gì?", 
+                options: ["Siêu văn bản", "Văn bản thường", "Sách giáo khoa", "Tờ báo giấy"], 
+                correct: 0 
+            },
+            { 
+                question: "8. Thông tin dạng Âm thanh trên web có đặc điểm gì?", 
+                options: ["Có thể nhìn thấy", "Có thể đọc được", "Có thể nghe được", "Có thể cầm nắm được"], 
+                correct: 2 
+            },
+            { 
+                question: "9. Tại sao không nên tự ý bấm vào các đường link lạ?", 
+                options: ["Sợ bị hỏng chuột", "Có thể bị mất cắp thông tin hoặc nhiễm virus", "Sợ tốn điện", "Không có lý do gì"], 
+                correct: 1 
+            },
+            { 
+                question: "10. Loại thông tin nào giúp trang web sinh động và hấp dẫn nhất?", 
+                options: ["Chỉ toàn chữ viết", "Video và hình ảnh động", "Màn hình đen", "Các con số"], 
+                correct: 1 
+            }
+        ];
+
+        // 3. LOGIC TRẮC NGHIỆM
+        let currentQ = 0, score = 0;
+        const modal = document.getElementById('quizModal');
+        const qText = document.getElementById('questionText');
+        const progressText = document.getElementById('progressText');
+        const optContainer = document.getElementById('optionsContainer');
+        const nextBtn = document.getElementById('nextBtn');
+        const scoreSpan = document.getElementById('scoreVal');
+
+        function openQuiz() {
+            modal.style.display = 'flex';
+            currentQ = 0;
+            score = 0;
+            scoreSpan.innerText = 0;
+            loadQuestion();
+        }
+
+        function closeQuiz() {
+            modal.style.display = 'none';
+        }
+
+        function loadQuestion() {
+            progressText.innerText = `Câu ${currentQ + 1} / ${questions.length}`;
+            if(currentQ >= questions.length) {
+                qText.innerText = `Chúc mừng! Em đã hoàn thành bài tập.\nĐiểm số: ${score}/${questions.length}`;
+                progressText.innerText = "Hoàn thành";
+                optContainer.innerHTML = '';
+                nextBtn.innerText = "Làm lại";
+                nextBtn.onclick = openQuiz;
+                return;
+            }
+            const q = questions[currentQ];
+            qText.innerText = q.question;
+            optContainer.innerHTML = '';
+            nextBtn.style.display = 'none';
+
+            q.options.forEach((opt, idx) => {
+                const btn = document.createElement('div');
+                btn.className = 'option-btn';
+                btn.innerText = opt;
+                btn.onclick = () => checkAnswer(btn, idx, q.correct);
+                optContainer.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(btn, idx, correctIdx) {
+            const allOpts = optContainer.children;
+            for(let o of allOpts) o.style.pointerEvents = 'none';
+            if(idx === correctIdx) {
+                btn.classList.add('correct');
+                score++;
+                scoreSpan.innerText = score;
+            } else {
+                btn.classList.add('wrong');
+                allOpts[correctIdx].classList.add('correct');
+            }
+            nextBtn.style.display = 'block';
+            nextBtn.innerText = "Câu tiếp theo";
+            nextBtn.onclick = nextQuestion;
+        }
+        
+        function nextQuestion() {
+            currentQ++;
+            loadQuestion();
+        }
+        
+        window.onclick = function(e) { if(e.target == modal) closeQuiz(); }
+    </script>
+</body>
+</html>

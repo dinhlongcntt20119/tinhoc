@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 12: Làm quen với Scratch - Tin học 4</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Source+Code+Pro:wght@600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        /* --- CẤU HÌNH GIAO DIỆN --- */
+        :root {
+            --primary-color: #0056b3; 
+            --accent-color: #00a8ff;
+            --bg-color: #f4f7f6;
+            --text-color: #333;
+            --card-bg: #ffffff;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --scratch-orange: #ffab00; /* Màu cam đặc trưng của Scratch */
+            --block-motion: #4c97ff;   /* Màu xanh khối Chuyển động */
+            --block-looks: #9966ff;    /* Màu tím khối Hiển thị */
+            --block-events: #ffbf00;   /* Màu vàng khối Sự kiện */
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Roboto', sans-serif; background-color: var(--bg-color); color: var(--text-color); background-image: radial-gradient(#ffe0b2 1px, transparent 1px); background-size: 20px 20px; }
+        
+        /* Header */
+        header { background: linear-gradient(135deg, var(--primary-color), var(--accent-color)); color: white; padding: 15px 40px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .logo-area { font-family: 'Source Code Pro', monospace; font-size: 1.5rem; font-weight: bold; }
+        .teacher-info { font-size: 0.9rem; opacity: 0.9; }
+        
+        /* Container */
+        .container { max-width: 1000px; margin: 30px auto; padding: 0 20px; }
+        .breadcrumb { margin-bottom: 20px; font-size: 0.9rem; color: #666; }
+        .breadcrumb a { text-decoration: none; color: var(--primary-color); font-weight: bold; }
+
+        .lesson-content { background: var(--card-bg); border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); padding: 40px; border-top: 5px solid var(--scratch-orange); }
+        h1.lesson-title { color: var(--scratch-orange); margin-bottom: 20px; font-size: 2rem; border-bottom: 2px solid #eee; padding-bottom: 15px; text-shadow: 1px 1px 2px rgba(0,0,0,0.1); }
+
+        /* --- SLIDE BÀI GIẢNG --- */
+        .digital-lesson-wrapper { 
+            position: relative; width: 100%; padding-top: 56.25%; 
+            background: #fff; border-radius: 10px; overflow: hidden; 
+            box-shadow: 0 0 15px rgba(0,0,0,0.1); border: 1px solid #ddd; margin-bottom: 30px; 
+        }
+        .lesson-slides { position: absolute; top: 0; left: 0; bottom: 0; right: 0; width: 100%; height: 100%; }
+        
+        /* Slide Item */
+        .slide { 
+            position: absolute; width: 100%; height: 100%; 
+            opacity: 0; transition: opacity 0.4s ease-in-out; 
+            padding: 30px 50px; display: flex; align-items: center; justify-content: center; 
+            background: white; pointer-events: none; z-index: 1;
+        }
+        .slide.active { opacity: 1; pointer-events: auto; z-index: 10; }
+        
+        .slide-content { width: 100%; text-align: center; }
+        .slide h2 { color: #888; font-size: 1.1rem; text-transform: uppercase; margin-bottom: 10px; }
+        .slide h1 { color: var(--scratch-orange); font-size: 2rem; margin-bottom: 20px; }
+        .slide h3 { color: var(--scratch-orange); border-bottom: 2px solid var(--accent-color); display: inline-block; margin-bottom: 15px; }
+
+        /* Style riêng cho Bài 12 */
+        .scratch-logo { font-size: 4rem; color: var(--scratch-orange); margin: 20px 0; }
+        
+        /* Giao diện Scratch Mô phỏng */
+        .scratch-ui {
+            display: grid; grid-template-columns: 20% 40% 40%; height: 300px; width: 90%; margin: 20px auto;
+            border: 2px solid #ccc; border-radius: 10px; background: #f0f0f0; overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .ui-col { padding: 10px; border-right: 1px solid #ddd; position: relative; }
+        .ui-col:last-child { border-right: none; background: white; }
+        .ui-header { font-weight: bold; font-size: 0.8rem; color: #666; margin-bottom: 10px; text-transform: uppercase; text-align: center; }
+        
+        /* Khối lệnh giả lập */
+        .code-block {
+            padding: 8px 12px; color: white; border-radius: 4px; margin-bottom: 8px; font-size: 0.8rem; font-family: sans-serif; cursor: default;
+            box-shadow: 1px 1px 2px rgba(0,0,0,0.2); text-align: left;
+        }
+        .block-m { background: var(--block-motion); border: 1px solid #3373cc; }
+        .block-l { background: var(--block-looks); border: 1px solid #774dff; }
+        .block-e { background: var(--block-events); color: #333; border: 1px solid #cc9900; }
+
+        /* Sân khấu giả lập */
+        .stage-area { 
+            height: 200px; border: 1px solid #ccc; margin-top: 10px; position: relative; 
+            display: flex; align-items: center; justify-content: center;
+        }
+        .cat-sprite { font-size: 4rem; color: var(--scratch-orange); }
+        .flag-icon { color: green; font-size: 1.5rem; position: absolute; top: 10px; right: 40px; }
+        .stop-icon { color: red; font-size: 1.5rem; position: absolute; top: 10px; right: 10px; }
+
+        /* Hộp thao tác */
+        .step-box { background: #fff3e0; padding: 15px; border-radius: 8px; text-align: left; display: inline-block; width: 80%; }
+        .step-box li { margin-bottom: 8px; font-size: 1rem; }
+        .step-box i { color: var(--scratch-orange); margin-right: 10px; width: 20px; text-align: center; }
+
+        /* Nút điều khiển Slide */
+        .slider-btn { 
+            position: absolute; top: 50%; transform: translateY(-50%); 
+            background: rgba(0,0,0,0.1); border: none; width: 50px; height: 50px; 
+            border-radius: 50%; cursor: pointer; z-index: 100; transition: 0.3s; font-size: 1.5rem; color: #333;
+        }
+        .slider-btn:hover { background: var(--primary-color); color: white; }
+        .prev-btn { left: 10px; }
+        .next-btn { right: 10px; }
+
+        /* --- 3. NÚT CHỨC NĂNG --- */
+        .action-buttons { display: flex; gap: 15px; margin-top: 30px; padding-top: 20px; border-top: 1px dashed #ccc; }
+        .btn { padding: 12px 25px; border-radius: 30px; text-decoration: none; font-weight: bold; display: inline-flex; align-items: center; cursor: pointer; border: none; font-size: 1rem; transition: transform 0.2s; color: white; }
+        .btn:hover { transform: translateY(-3px); }
+        .btn-download { background-color: var(--success); }
+        .btn-exercise { background-color: var(--warning); color: #333; }
+
+        /* --- 4. MODAL BÀI TẬP --- */
+        .quiz-modal { display: none; position: fixed; z-index: 200; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); align-items: center; justify-content: center; }
+        .quiz-content { background-color: white; width: 90%; max-width: 600px; padding: 30px; border-radius: 15px; position: relative; animation: slideDown 0.4s ease; }
+        @keyframes slideDown { from {top: -50px; opacity: 0;} to {top: 0; opacity: 1;} }
+        .close-quiz { position: absolute; right: 20px; top: 15px; font-size: 1.5rem; cursor: pointer; color: #aaa; }
+        .quiz-question { font-size: 1.2rem; font-weight: bold; margin-bottom: 20px; color: var(--primary-color); }
+        .quiz-options { display: flex; flex-direction: column; gap: 10px; }
+        .option-btn { padding: 12px; border: 2px solid #eee; border-radius: 8px; background: white; text-align: left; cursor: pointer; transition: 0.2s; }
+        .option-btn:hover { background: #f0f8ff; border-color: var(--accent-color); }
+        .option-btn.correct { background: #d4edda; border-color: #28a745; color: #155724; }
+        .option-btn.wrong { background: #f8d7da; border-color: #dc3545; color: #721c24; }
+        
+        .quiz-footer { margin-top: 20px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #eee; padding-top: 15px; }
+        .score-display { font-weight: bold; color: var(--primary-color); }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-area"><i class="fas fa-laptop-code"></i> TIN HỌC 4</div>
+        <div class="teacher-info">GV - Nguyễn Đình Bạch Long</div>
+    </header>
+
+    <main class="container">
+        <div class="breadcrumb">
+            <a href="index.html"><i class="fas fa-home"></i> Trang chủ</a> 
+            <span style="margin: 0 10px;">/</span> Chủ đề F 
+            <span style="margin: 0 10px;">/</span> Bài 12
+        </div>
+
+        <div class="lesson-content">
+            <h1 class="lesson-title">Bài 12: Làm quen với Scratch</h1>
+
+            <div class="digital-lesson-wrapper">
+                <div class="lesson-slides" id="slideContainer">
+                   
+                    <div class="slide active">
+                        <div class="slide-content text-center">
+                            <h2 class="slide-title">CHỦ ĐỀ F: GIẢI QUYẾT VẤN ĐỀ VỚI MÁY TÍNH</h2>
+                            <h1 class="main-topic">BÀI 12: LÀM QUEN VỚI SCRATCH</h1>
+                            <div class="scratch-logo"><i class="fas fa-cat"></i></div>
+                            <p>Mục tiêu: Nhận biết giao diện Scratch, mở và chơi được trò chơi đơn giản.</p>
+                        </div>
+                    </div>
+
+                    <div class="slide">
+                        <div class="slide-content">
+                            <h3>1. Giao diện Scratch</h3>
+                            <p>Màn hình Scratch gồm 3 khu vực chính:</p>
+                            
+                            <div class="scratch-ui">
+                                <div class="ui-col">
+                                    <div class="ui-header">1. Nhóm lệnh</div>
+                                    <div style="background:var(--block-motion); width:20px; height:20px; border-radius:50%; margin:5px auto;"></div>
+                                    <div style="background:var(--block-looks); width:20px; height:20px; border-radius:50%; margin:5px auto;"></div>
+                                    <div style="background:var(--block-events); width:20px; height:20px; border-radius:50%; margin:5px auto;"></div>
+                                </div>
+                                <div class="ui-col">
+                                    <div class="ui-header">2. Vùng lập trình</div>
+                                    <div class="code-block block-e">Khi bấm vào <i class="fas fa-flag" style="color:green;"></i></div>
+                                    <div class="code-block block-m">Di chuyển 10 bước</div>
+                                    <div class="code-block block-l">Nói "Xin chào!"</div>
+                                </div>
+                                <div class="ui-col">
+                                    <div class="ui-header">3. Sân khấu (Stage)</div>
+                                    <div class="stage-area">
+                                        <i class="fas fa-flag flag-icon"></i>
+                                        <i class="fas fa-stop-circle stop-icon"></i>
+                                        <div class="cat-sprite"><i class="fas fa-cat"></i></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="slide">
+                        <div class="slide-content">
+                            <h3>2. Chạy chương trình</h3>
+                            <div style="display: flex; justify-content: center; gap: 40px; margin-top: 30px;">
+                                <div style="text-align: center;">
+                                    <i class="fas fa-flag" style="font-size: 4rem; color: green;"></i>
+                                    <p style="margin-top: 10px; font-weight: bold;">Bắt đầu (Start)</p>
+                                </div>
+                                <div style="text-align: center;">
+                                    <i class="fas fa-stop-circle" style="font-size: 4rem; color: red;"></i>
+                                    <p style="margin-top: 10px; font-weight: bold;">Dừng lại (Stop)</p>
+                                </div>
+                            </div>
+                            <p style="margin-top: 20px;">Nhấn vào <strong>Cờ xanh</strong> để nhân vật bắt đầu hoạt động!</p>
+                        </div>
+                    </div>
+
+                    <div class="slide">
+                        <div class="slide-content">
+                            <h3>3. Mở chương trình có sẵn</h3>
+                            <ul class="step-box">
+                                <li><i class="fas fa-folder-open"></i> 1. Chọn thẻ <strong>Tập tin (File)</strong>.</li>
+                                <li><i class="fas fa-upload"></i> 2. Chọn <strong>Mở từ máy tính (Load from your computer)</strong>.</li>
+                                <li><i class="fas fa-file-code"></i> 3. Chọn tệp trò chơi (ví dụ: <em>MeoBatBong.sb3</em>).</li>
+                                <li><i class="fas fa-check-circle"></i> 4. Nhấn <strong>Open</strong>.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="slide">
+                        <div class="slide-content">
+                            <h3>4. Khám phá & Thay đổi</h3>
+                            <p>Em có thể thay đổi các con số trong khối lệnh để trò chơi thú vị hơn.</p>
+                            
+                            <div style="background: #e1f5fe; padding: 20px; border-radius: 10px; display: inline-block; margin-top: 20px;">
+                                <div class="code-block block-m" style="font-size: 1.2rem; padding: 15px;">
+                                    Di chuyển <span style="background: white; color: black; padding: 2px 10px; border-radius: 10px;">10</span> bước
+                                </div>
+                                <p><i class="fas fa-arrow-right" style="color: blue;"></i> Thử đổi số <strong>10</strong> thành <strong>50</strong> xem sao nhé!</p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                
+                <button class="slider-btn prev-btn" onclick="changeSlide(-1)"><i class="fas fa-chevron-left"></i></button>
+                <button class="slider-btn next-btn" onclick="changeSlide(1)"><i class="fas fa-chevron-right"></i></button>
+            </div>
+
+            <p style="text-align: center; color: #666; font-style: italic;">
+                Bấm mũi tên Trái/Phải trên khung hình để xem bài giảng.
+            </p>
+
+            <div class="action-buttons">
+                <a href="Bai12.pdf" download class="btn btn-download">
+                    <i class="fas fa-file-download"></i> Tải bài giảng (PDF)
+                </a>
+                <button class="btn btn-exercise" onclick="openQuiz()">
+                    <i class="fas fa-puzzle-piece"></i> Bài tập
+                </button>
+            </div>
+        </div>
+        
+        <div style="margin-top: 20px; text-align: center;">
+            <a href="index.html" style="text-decoration: none; color: #555;"><i class="fas fa-arrow-left"></i> Quay lại danh sách bài học</a>
+        </div>
+    </main>
+
+    <div id="quizModal" class="quiz-modal">
+        <div class="quiz-content">
+            <span class="close-quiz" onclick="closeQuiz()">&times;</span>
+            <div style="text-align: center; margin-bottom: 20px;">
+                <h2 style="color: var(--scratch-orange);">Bài tập trắc nghiệm</h2>
+                <p style="font-size: 0.9rem; color: #666;">Em hãy chọn đáp án đúng nhất</p>
+            </div>
+            
+            <div id="quizContainer">
+                <div style="margin-bottom: 10px; font-style: italic; color: #666;" id="progressText">Câu 1 / 4</div>
+                <div class="quiz-question" id="questionText">Câu hỏi...</div>
+                <div class="quiz-options" id="optionsContainer"></div>
+            </div>
+
+            <div class="quiz-footer">
+                <div class="score-display">Điểm: <span id="scoreVal">0</span> / 4</div>
+                <button class="btn btn-exercise" id="nextBtn" style="padding: 8px 20px; font-size: 0.9rem;" onclick="nextQuestion()">Câu tiếp theo</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 1. XỬ LÝ SLIDE
+        document.addEventListener('DOMContentLoaded', function() {
+            const slides = document.querySelectorAll('.slide');
+            const prevBtn = document.querySelector('.prev-btn');
+            const nextBtn = document.querySelector('.next-btn');
+            let currentSlide = 0;
+
+            function showSlide(index) {
+                slides.forEach(s => s.classList.remove('active'));
+                if (index >= slides.length) currentSlide = 0;
+                else if (index < 0) currentSlide = slides.length - 1;
+                else currentSlide = index;
+                slides[currentSlide].classList.add('active');
+            }
+
+            prevBtn.addEventListener('click', () => showSlide(currentSlide - 1));
+            nextBtn.addEventListener('click', () => showSlide(currentSlide + 1));
+        });
+
+        // 2. DỮ LIỆU CÂU HỎI TRẮC NGHIỆM
+        const questions = [
+            { 
+                question: "1. Biểu tượng của phần mềm Scratch là hình gì?", 
+                options: ["Con chim xanh", "Chú mèo màu cam", "Con rùa", "Quả táo"], 
+                correct: 1 
+            },
+            { 
+                question: "2. Để bắt đầu chương trình, em nhấn vào biểu tượng nào?", 
+                options: ["Hình bát giác đỏ", "Lá cờ xanh", "Hình tam giác", "Hình tròn"], 
+                correct: 1 
+            },
+            { 
+                question: "3. Khu vực nào là nơi nhân vật biểu diễn hành động?", 
+                options: ["Vùng lập trình", "Nhóm lệnh", "Sân khấu (Stage)", "Thanh thực đơn"], 
+                correct: 2 
+            },
+            { 
+                question: "4. Để mở một chương trình có sẵn trong máy tính, em chọn thẻ nào?", 
+                options: ["Chỉnh sửa", "Tập tin (File)", "Hướng dẫn", "Cài đặt"], 
+                correct: 1 
+            }
+        ];
+
+        // 3. LOGIC TRẮC NGHIỆM
+        let currentQ = 0, score = 0;
+        const modal = document.getElementById('quizModal');
+        const qText = document.getElementById('questionText');
+        const progressText = document.getElementById('progressText');
+        const optContainer = document.getElementById('optionsContainer');
+        const nextBtn = document.getElementById('nextBtn');
+        const scoreSpan = document.getElementById('scoreVal');
+
+        function openQuiz() {
+            modal.style.display = 'flex';
+            currentQ = 0;
+            score = 0;
+            scoreSpan.innerText = 0;
+            loadQuestion();
+        }
+
+        function closeQuiz() {
+            modal.style.display = 'none';
+        }
+
+        function loadQuestion() {
+            progressText.innerText = `Câu ${currentQ + 1} / ${questions.length}`;
+            if(currentQ >= questions.length) {
+                qText.innerText = `Chúc mừng! Em đã hoàn thành bài tập.\nĐiểm số: ${score}/${questions.length}`;
+                progressText.innerText = "Hoàn thành";
+                optContainer.innerHTML = '';
+                nextBtn.innerText = "Làm lại";
+                nextBtn.onclick = openQuiz;
+                return;
+            }
+            const q = questions[currentQ];
+            qText.innerText = q.question;
+            optContainer.innerHTML = '';
+            nextBtn.style.display = 'none';
+
+            q.options.forEach((opt, idx) => {
+                const btn = document.createElement('div');
+                btn.className = 'option-btn';
+                btn.innerText = opt;
+                btn.onclick = () => checkAnswer(btn, idx, q.correct);
+                optContainer.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(btn, idx, correctIdx) {
+            const allOpts = optContainer.children;
+            for(let o of allOpts) o.style.pointerEvents = 'none';
+            if(idx === correctIdx) {
+                btn.classList.add('correct');
+                score++;
+                scoreSpan.innerText = score;
+            } else {
+                btn.classList.add('wrong');
+                allOpts[correctIdx].classList.add('correct');
+            }
+            nextBtn.style.display = 'block';
+            nextBtn.innerText = "Câu tiếp theo";
+            nextBtn.onclick = nextQuestion;
+        }
+        
+        function nextQuestion() {
+            currentQ++;
+            loadQuestion();
+        }
+        
+        window.onclick = function(e) { if(e.target == modal) closeQuiz(); }
+    </script>
+</body>
+</html>

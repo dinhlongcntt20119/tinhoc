@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 13: Tạo chương trình máy tính để kể chuyện - Tin học 4</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Source+Code+Pro:wght@600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        /* --- CẤU HÌNH GIAO DIỆN --- */
+        :root {
+            --primary-color: #0056b3; 
+            --accent-color: #00a8ff;
+            --bg-color: #f4f7f6;
+            --text-color: #333;
+            --card-bg: #ffffff;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --scratch-purple: #8e24aa; /* Màu tím đặc trưng của khối Lời thoại (Looks) */
+            --block-event: #ffbf00;    /* Màu vàng khối Sự kiện */
+            --block-looks: #9966ff;    /* Màu tím khối Hiển thị */
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Roboto', sans-serif; background-color: var(--bg-color); color: var(--text-color); background-image: radial-gradient(#d1c4e9 1px, transparent 1px); background-size: 20px 20px; }
+        
+        /* Header */
+        header { background: linear-gradient(135deg, var(--primary-color), var(--accent-color)); color: white; padding: 15px 40px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .logo-area { font-family: 'Source Code Pro', monospace; font-size: 1.5rem; font-weight: bold; }
+        .teacher-info { font-size: 0.9rem; opacity: 0.9; }
+        
+        /* Container */
+        .container { max-width: 1000px; margin: 30px auto; padding: 0 20px; }
+        .breadcrumb { margin-bottom: 20px; font-size: 0.9rem; color: #666; }
+        .breadcrumb a { text-decoration: none; color: var(--primary-color); font-weight: bold; }
+
+        .lesson-content { background: var(--card-bg); border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); padding: 40px; border-top: 5px solid var(--scratch-purple); }
+        h1.lesson-title { color: var(--scratch-purple); margin-bottom: 20px; font-size: 2rem; border-bottom: 2px solid #eee; padding-bottom: 15px; }
+
+        /* --- SLIDE BÀI GIẢNG --- */
+        .digital-lesson-wrapper { 
+            position: relative; width: 100%; padding-top: 56.25%; 
+            background: #fff; border-radius: 10px; overflow: hidden; 
+            box-shadow: 0 0 15px rgba(0,0,0,0.1); border: 1px solid #ddd; margin-bottom: 30px; 
+        }
+        .lesson-slides { position: absolute; top: 0; left: 0; bottom: 0; right: 0; width: 100%; height: 100%; }
+        
+        .slide { 
+            position: absolute; width: 100%; height: 100%; 
+            opacity: 0; transition: opacity 0.4s ease-in-out; 
+            padding: 20px 40px; display: flex; align-items: center; justify-content: center; 
+            background: white; pointer-events: none; z-index: 1;
+        }
+        .slide.active { opacity: 1; pointer-events: auto; z-index: 10; }
+        
+        .slide-content { width: 100%; text-align: center; }
+        .slide h2 { color: #888; font-size: 1.1rem; text-transform: uppercase; margin-bottom: 10px; }
+        .slide h1 { color: var(--scratch-purple); font-size: 2rem; margin-bottom: 20px; }
+        .slide h3 { color: var(--scratch-purple); border-bottom: 2px solid var(--accent-color); display: inline-block; margin-bottom: 15px; }
+
+        /* Style riêng cho Bài 13 */
+        .story-icon { font-size: 4rem; color: var(--scratch-purple); margin: 20px 0; }
+        
+        /* Mô phỏng kịch bản Scratch */
+        .script-box {
+            background: #f0f0f0; border: 2px solid #ccc; border-radius: 10px; padding: 20px; 
+            display: inline-flex; flex-direction: column; align-items: flex-start; gap: 0; 
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.05); margin-top: 20px;
+        }
+        .scratch-block {
+            padding: 10px 15px; color: white; border-radius: 4px; font-family: sans-serif; font-weight: bold; font-size: 0.9rem;
+            box-shadow: 1px 1px 0px rgba(0,0,0,0.3); text-align: left; min-width: 300px; cursor: default;
+            position: relative; margin-bottom: -3px; /* Hiệu ứng khớp nối */
+            display: flex; align-items: center; gap: 5px;
+        }
+        /* Tạo khớp nối giả */
+        .scratch-block::before { 
+            content: ''; position: absolute; top: 0; left: 10px; width: 15px; height: 4px; background: rgba(0,0,0,0.1); border-bottom-left-radius: 4px; border-bottom-right-radius: 4px;
+        }
+        .scratch-block::after {
+            content: ''; position: absolute; bottom: -4px; left: 10px; width: 15px; height: 4px; background: inherit; border-bottom-left-radius: 4px; border-bottom-right-radius: 4px; z-index: 2;
+        }
+
+        .block-event { background-color: var(--block-event); color: #333; border: 1px solid #d4a000; z-index: 10; border-top-left-radius: 20px; border-top-right-radius: 20px;}
+        /* Xóa khớp nối trên cho khối sự kiện */
+        .block-event::before { display: none; } 
+        
+        .block-looks { background-color: var(--block-looks); border: 1px solid #774dff; z-index: 9; }
+        .input-white { background: white; color: black; padding: 2px 8px; border-radius: 10px; display: inline-block; border: 1px solid #ccc; font-weight: normal; font-size: 0.85rem; }
+
+        /* Minh họa truyện tranh */
+        .story-panel {
+            display: flex; align-items: flex-start; justify-content: center; gap: 30px; margin-top: 15px; 
+            background: #f3e5f5; padding: 20px; border-radius: 10px; border: 2px dashed var(--scratch-purple);
+        }
+        .cat-sprite { font-size: 5rem; color: #ff9800; position: relative; }
+        .speech-bubble {
+            position: relative; background: white; border: 2px solid #333; border-radius: 20px; padding: 15px; font-size: 1.1rem; max-width: 250px;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+        }
+        .speech-bubble::after {
+            content: ''; position: absolute; left: -12px; top: 30px;
+            border-width: 12px 12px 12px 0; border-style: solid; border-color: transparent #333 transparent transparent;
+        }
+
+        /* Quy trình */
+        .process-steps { text-align: left; display: inline-block; width: 90%; }
+        .process-steps li { margin-bottom: 12px; font-size: 1rem; background: #fff; padding: 10px; border-radius: 5px; border-left: 5px solid var(--scratch-purple); box-shadow: 0 2px 5px rgba(0,0,0,0.05); list-style: none; }
+        .highlight-step { color: var(--scratch-purple); font-weight: bold; background: #f3e5f5; padding: 2px 5px; border-radius: 3px; }
+
+        /* Nút điều khiển Slide */
+        .slider-btn { 
+            position: absolute; top: 50%; transform: translateY(-50%); 
+            background: rgba(0,0,0,0.1); border: none; width: 50px; height: 50px; 
+            border-radius: 50%; cursor: pointer; z-index: 100; transition: 0.3s; font-size: 1.5rem; color: #333;
+        }
+        .slider-btn:hover { background: var(--primary-color); color: white; }
+        .prev-btn { left: 10px; }
+        .next-btn { right: 10px; }
+
+        /* --- 3. NÚT CHỨC NĂNG --- */
+        .action-buttons { display: flex; gap: 15px; margin-top: 30px; padding-top: 20px; border-top: 1px dashed #ccc; }
+        .btn { padding: 12px 25px; border-radius: 30px; text-decoration: none; font-weight: bold; display: inline-flex; align-items: center; cursor: pointer; border: none; font-size: 1rem; transition: transform 0.2s; color: white; }
+        .btn:hover { transform: translateY(-3px); }
+        .btn-download { background-color: var(--success); }
+        .btn-exercise { background-color: var(--warning); color: #333; }
+
+        /* --- 4. MODAL BÀI TẬP --- */
+        .quiz-modal { display: none; position: fixed; z-index: 200; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); align-items: center; justify-content: center; }
+        .quiz-content { background-color: white; width: 90%; max-width: 600px; padding: 30px; border-radius: 15px; position: relative; animation: slideDown 0.4s ease; }
+        @keyframes slideDown { from {top: -50px; opacity: 0;} to {top: 0; opacity: 1;} }
+        .close-quiz { position: absolute; right: 20px; top: 15px; font-size: 1.5rem; cursor: pointer; color: #aaa; }
+        .quiz-question { font-size: 1.2rem; font-weight: bold; margin-bottom: 20px; color: var(--primary-color); }
+        .quiz-options { display: flex; flex-direction: column; gap: 10px; }
+        .option-btn { padding: 12px; border: 2px solid #eee; border-radius: 8px; background: white; text-align: left; cursor: pointer; transition: 0.2s; }
+        .option-btn:hover { background: #f0f8ff; border-color: var(--accent-color); }
+        .option-btn.correct { background: #d4edda; border-color: #28a745; color: #155724; }
+        .option-btn.wrong { background: #f8d7da; border-color: #dc3545; color: #721c24; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-area"><i class="fas fa-laptop-code"></i> TIN HỌC 4</div>
+        <div class="teacher-info">GV - Nguyễn Đình Bạch Long</div>
+    </header>
+
+    <main class="container">
+        <div class="breadcrumb">
+            <a href="index.html"><i class="fas fa-home"></i> Trang chủ</a> 
+            <span style="margin: 0 10px;">/</span> Chủ đề F 
+            <span style="margin: 0 10px;">/</span> Bài 13
+        </div>
+
+        <div class="lesson-content">
+            <h1 class="lesson-title">Bài 13: Tạo chương trình máy tính để kể chuyện</h1>
+
+            <div class="digital-lesson-wrapper">
+                <div class="lesson-slides">
+                    
+                    <div class="slide active">
+                        <div class="slide-content">
+                            <h2>CHỦ ĐỀ F: GIẢI QUYẾT VẤN ĐỀ VỚI MÁY TÍNH</h2>
+                            <h1>BÀI 13: KỂ CHUYỆN VỚI SCRATCH</h1>
+                            <div class="story-icon">
+                                <i class="fas fa-comments"></i> <i class="fas fa-cat"></i>
+                            </div>
+                            <p>Mục tiêu: Sử dụng các khối lệnh Hiển thị để nhân vật kể lại câu chuyện theo trình tự.</p>
+                        </div>
+                    </div>
+
+                    <div class="slide">
+                        <div class="slide-content">
+                            <h3>1. Câu chuyện: Chú mèo không vâng lời</h3>
+                            <p>Mèo con mải chơi quên lời mẹ dặn và bị lạc đường.</p>
+                            
+                            <div class="story-panel">
+                                <div class="cat-sprite"><i class="fas fa-cat"></i></div>
+                                <div class="speech-bubble">
+                                    "Hu hu... Tớ bị lạc rồi!<br>
+                                    Tớ xin lỗi mẹ vì đã mải chơi!"
+                                </div>
+                            </div>
+                            <p style="margin-top: 15px; font-size: 0.9rem;">(Chúng ta sẽ lập trình để Mèo nói ra những lời này trên máy tính)</p>
+                        </div>
+                    </div>
+
+                    <div class="slide">
+                        <div class="slide-content">
+                            <h3>2. Ghép khối lệnh "Nói"</h3>
+                            <p>Sử dụng nhóm lệnh <strong>Hiển thị (Looks)</strong> màu tím.</p>
+                            
+                            <div class="script-box">
+                                <div class="scratch-block block-event">
+                                    Khi bấm vào <i class="fas fa-flag" style="color:green; background:white; border-radius:50%;"></i>
+                                </div>
+                                <div class="scratch-block block-looks">
+                                    nói <span class="input-white">Chào các bạn!</span> trong <span class="input-white">2</span> giây
+                                </div>
+                                <div class="scratch-block block-looks">
+                                    nói <span class="input-white">Tớ là Mèo Mướp đây.</span> trong <span class="input-white">3</span> giây
+                                </div>
+                            </div>
+                            
+                            <div style="margin-top: 20px; font-size: 0.9rem; text-align: left; display: inline-block;">
+                                <i class="fas fa-arrow-down" style="color: var(--scratch-purple);"></i> Máy tính thực hiện lệnh từ trên xuống dưới.<br>
+                                <i class="fas fa-clock" style="color: var(--scratch-purple);"></i> Hết thời gian (giây) của câu trước mới nói câu sau.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="slide">
+                        <div class="slide-content">
+                            <h3>3. Các bước tạo chương trình</h3>
+                            <ul class="process-steps">
+                                <li><i class="fas fa-mouse-pointer" style="color:#ffbf00"></i> 1. Chọn thẻ <span class="highlight-step">Sự kiện</span> -> Kéo lệnh "Khi bấm vào cờ xanh".</li>
+                                <li><i class="fas fa-mouse-pointer" style="color:#9966ff"></i> 2. Chọn thẻ <span class="highlight-step">Hiển thị</span> -> Kéo lệnh "nói... trong... giây".</li>
+                                <li><i class="fas fa-puzzle-piece" style="color:#333"></i> 3. Ghép nối các lệnh lại với nhau theo thứ tự câu chuyện.</li>
+                                <li><i class="fas fa-keyboard" style="color:#333"></i> 4. Nhập lời thoại vào ô trắng và chỉnh thời gian.</li>
+                                <li><i class="fas fa-play-circle" style="color:green"></i> 5. Nhấn <strong>Cờ xanh</strong> để chạy thử.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="slide">
+                        <div class="slide-content">
+                            <h3>4. Lưu chương trình</h3>
+                            <p>Để lưu bài làm vào máy tính, em thực hiện:</p>
+                            <div style="background: #e3f2fd; padding: 20px; border-radius: 10px; display: inline-block; text-align: left; width: 80%; border: 1px solid #bbdefb;">
+                                <div style="margin-bottom: 10px; font-weight: bold; color: #0277bd;"><i class="fas fa-folder"></i> Quy trình lưu:</div>
+                                <ol style="margin-left: 20px; line-height: 1.8;">
+                                    <li>Nháy chuột vào menu <strong>Tập tin (File)</strong>.</li>
+                                    <li>Chọn <strong>Lưu về máy tính (Save to your computer)</strong>.</li>
+                                    <li>Chọn thư mục lưu trữ (Ví dụ: <em>D:\BaiTapScratch</em>).</li>
+                                    <li>Đặt tên tệp rồi nhấn <strong>Save</strong>.</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                
+                <button class="slider-btn prev-btn"><i class="fas fa-chevron-left"></i></button>
+                <button class="slider-btn next-btn"><i class="fas fa-chevron-right"></i></button>
+            </div>
+
+            <p style="text-align: center; color: #666; font-style: italic;">
+                Bấm mũi tên Trái/Phải trên khung hình để xem bài giảng.
+            </p>
+
+            <div class="action-buttons">
+                <a href="Bai13.pdf" download class="btn btn-download">
+                    <i class="fas fa-file-download"></i> Tải bài giảng (PDF)
+                </a>
+                <button class="btn btn-exercise" onclick="openQuiz()">
+                    <i class="fas fa-puzzle-piece"></i> Làm bài tập Trắc nghiệm
+                </button>
+            </div>
+        </div>
+        
+        <div style="margin-top: 20px; text-align: center;">
+            <a href="index.html" style="text-decoration: none; color: #555;"><i class="fas fa-arrow-left"></i> Quay lại</a>
+        </div>
+    </main>
+
+    <div id="quizModal" class="quiz-modal">
+        <div class="quiz-content">
+            <span class="close-quiz" onclick="closeQuiz()">&times;</span>
+            <div style="text-align: center; margin-bottom: 20px;">
+                <h2 style="color: var(--primary-color);">Luyện tập nhanh</h2>
+                <p>Chọn đáp án đúng nhất</p>
+            </div>
+            
+            <div class="quiz-question" id="questionText">Đang tải câu hỏi...</div>
+            <div class="quiz-options" id="optionsContainer"></div>
+
+            <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;">
+                <div style="font-weight: bold; color: var(--primary-color);">Điểm: <span id="scoreVal">0</span></div>
+                <button class="btn btn-exercise" id="nextBtn" style="padding: 8px 20px; font-size: 0.9rem; display: none;" onclick="nextQuestion()">Tiếp theo</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 1. XỬ LÝ SLIDE
+        document.addEventListener('DOMContentLoaded', function() {
+            const slides = document.querySelectorAll('.slide');
+            const prevBtn = document.querySelector('.prev-btn');
+            const nextBtn = document.querySelector('.next-btn');
+            let currentSlide = 0;
+
+            function showSlide(index) {
+                slides.forEach(s => s.classList.remove('active'));
+                if (index >= slides.length) currentSlide = 0;
+                else if (index < 0) currentSlide = slides.length - 1;
+                else currentSlide = index;
+                slides[currentSlide].classList.add('active');
+            }
+
+            prevBtn.addEventListener('click', () => showSlide(currentSlide - 1));
+            nextBtn.addEventListener('click', () => showSlide(currentSlide + 1));
+        });
+
+        // 2. DỮ LIỆU CÂU HỎI TRẮC NGHIỆM
+        const questions = [
+            { 
+                question: "1. Để nhân vật hiển thị lời thoại (bóng nói), em dùng nhóm lệnh nào?", 
+                options: ["Sự kiện (Màu vàng)", "Chuyển động (Màu xanh dương)", "Hiển thị (Màu tím)"], 
+                correct: 2 
+            },
+            { 
+                question: "2. Khối lệnh nào sau đây giúp nhân vật nói trong một khoảng thời gian nhất định?", 
+                options: ["nghĩ... trong... giây", "nói... trong... giây", "đợi... giây"], 
+                correct: 1 
+            },
+            { 
+                question: "3. Khi ghép nhiều lệnh 'Nói' lại với nhau, máy tính sẽ thực hiện như thế nào?", 
+                options: ["Thực hiện ngẫu nhiên", "Thực hiện tuần tự từ trên xuống dưới", "Thực hiện từ dưới lên trên"], 
+                correct: 1 
+            },
+            { 
+                question: "4. Để xóa một khối lệnh sai, em làm thế nào?", 
+                options: ["Kéo lệnh đó thả ngược lại vào vùng nhóm lệnh", "Nhấn nút Tắt nguồn", "Nháy đúp chuột vào sân khấu"], 
+                correct: 0 
+            }
+        ];
+
+        // 3. LOGIC TRẮC NGHIỆM
+        let currentQ = 0, score = 0;
+        const modal = document.getElementById('quizModal');
+        const qText = document.getElementById('questionText');
+        const optContainer = document.getElementById('optionsContainer');
+        const nextBtn = document.getElementById('nextBtn');
+        const scoreSpan = document.getElementById('scoreVal');
+
+        function openQuiz() { modal.style.display = 'flex'; currentQ = 0; score = 0; scoreSpan.innerText = 0; loadQuestion(); }
+        function closeQuiz() { modal.style.display = 'none'; }
+        
+        function loadQuestion() {
+            if(currentQ >= questions.length) {
+                qText.innerText = "Hoàn thành! Số câu đúng: " + score + "/" + questions.length;
+                optContainer.innerHTML = '';
+                nextBtn.innerText = "Làm lại";
+                nextBtn.style.display = 'block';
+                nextBtn.onclick = openQuiz;
+                return;
+            }
+            const q = questions[currentQ];
+            qText.innerText = q.question;
+            optContainer.innerHTML = '';
+            nextBtn.style.display = 'none';
+
+            q.options.forEach((opt, idx) => {
+                const btn = document.createElement('div');
+                btn.className = 'option-btn';
+                btn.innerText = opt;
+                btn.onclick = () => checkAnswer(btn, idx, q.correct);
+                optContainer.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(btn, idx, correctIdx) {
+            const allOpts = optContainer.children;
+            for(let o of allOpts) o.style.pointerEvents = 'none';
+            if(idx === correctIdx) {
+                btn.classList.add('correct');
+                score++;
+                scoreSpan.innerText = score;
+            } else {
+                btn.classList.add('wrong');
+                allOpts[correctIdx].classList.add('correct');
+            }
+            nextBtn.style.display = 'block';
+            nextBtn.innerText = "Câu tiếp theo";
+            nextBtn.onclick = () => { currentQ++; loadQuestion(); };
+        }
+        
+        window.onclick = function(e) { if(e.target == modal) closeQuiz(); }
+    </script>
+</body>
+</html>

@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 8: Chèn hình ảnh và chỉnh sửa văn bản - Tin học 4</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Source+Code+Pro:wght@600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        /* --- CẤU HÌNH GIAO DIỆN CHUNG --- */
+        :root {
+            --primary-color: #0056b3; 
+            --accent-color: #00a8ff;
+            --bg-color: #f4f7f6;
+            --text-color: #333;
+            --card-bg: #ffffff;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --word-blue: #2b579a; /* Màu xanh đặc trưng của Word */
+            --edit-purple: #9c27b0; /* Màu tím cho phần chỉnh sửa */
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Roboto', sans-serif; background-color: var(--bg-color); color: var(--text-color); }
+        
+        /* Header */
+        header { background: linear-gradient(135deg, var(--primary-color), var(--accent-color)); color: white; padding: 15px 40px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .logo-area { font-family: 'Source Code Pro', monospace; font-size: 1.5rem; font-weight: bold; }
+        .teacher-info { font-size: 0.9rem; opacity: 0.9; }
+        
+        /* Container */
+        .container { max-width: 1000px; margin: 30px auto; padding: 0 20px; }
+        .breadcrumb { margin-bottom: 20px; font-size: 0.9rem; color: #666; }
+        .breadcrumb a { text-decoration: none; color: var(--primary-color); font-weight: bold; }
+
+        .lesson-content { background: var(--card-bg); border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); padding: 40px; border-top: 5px solid var(--word-blue); }
+        h1.lesson-title { color: var(--word-blue); margin-bottom: 20px; font-size: 2rem; border-bottom: 2px solid #eee; padding-bottom: 15px; }
+
+        /* --- SLIDE BÀI GIẢNG --- */
+        .digital-lesson-wrapper { 
+            position: relative; width: 100%; padding-top: 56.25%; /* Tỉ lệ 16:9 */
+            background: #fff; border-radius: 10px; overflow: hidden; 
+            box-shadow: 0 0 15px rgba(0,0,0,0.1); border: 1px solid #ddd; margin-bottom: 30px; 
+        }
+        .lesson-slides { position: absolute; top: 0; left: 0; bottom: 0; right: 0; width: 100%; height: 100%; }
+        
+        .slide { 
+            position: absolute; width: 100%; height: 100%; 
+            opacity: 0; transition: opacity 0.4s ease-in-out; 
+            padding: 20px 40px; display: flex; align-items: center; justify-content: center; 
+            background: white; pointer-events: none; z-index: 1;
+        }
+        .slide.active { opacity: 1; pointer-events: auto; z-index: 10; }
+        
+        .slide-content { width: 100%; text-align: center; }
+        .slide h2 { color: #888; font-size: 1.1rem; text-transform: uppercase; margin-bottom: 10px; }
+        .slide h1 { color: var(--word-blue); font-size: 2rem; margin-bottom: 20px; }
+        .slide h3 { color: var(--word-blue); border-bottom: 2px solid var(--accent-color); display: inline-block; margin-bottom: 15px; }
+
+        /* Style riêng cho Bài 8 */
+        .main-icon { font-size: 4rem; color: var(--edit-purple); margin: 20px 0; }
+        
+        /* Quy trình chèn ảnh */
+        .step-process { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; margin-top: 20px; }
+        .step-box { background: #e3f2fd; padding: 10px 20px; border-radius: 50px; border: 1px solid #bbdefb; font-weight: bold; color: #0277bd; }
+        .step-arrow { color: #ccc; display: flex; align-items: center; }
+
+        /* So sánh thao tác văn bản */
+        .edit-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px; text-align: left; }
+        .edit-card { padding: 20px; border-radius: 10px; border: 1px solid #ddd; }
+        .edit-copy { background: #e8f5e9; border-top: 5px solid var(--success); }
+        .edit-cut { background: #fff3e0; border-top: 5px solid var(--warning); }
+        .edit-header { font-weight: bold; font-size: 1.2rem; margin-bottom: 10px; display: flex; align-items: center; gap: 10px; }
+        
+        .key-badge { background: #333; color: white; padding: 2px 8px; border-radius: 4px; font-family: monospace; font-size: 0.9rem; }
+
+        /* Nút điều khiển Slide */
+        .slider-btn { 
+            position: absolute; top: 50%; transform: translateY(-50%); 
+            background: rgba(0,0,0,0.1); border: none; width: 50px; height: 50px; 
+            border-radius: 50%; cursor: pointer; z-index: 100; transition: 0.3s; font-size: 1.5rem; color: #333; 
+        }
+        .slider-btn:hover { background: var(--primary-color); color: white; }
+        .prev-btn { left: 10px; }
+        .next-btn { right: 10px; }
+
+        /* --- 3. NÚT CHỨC NĂNG --- */
+        .action-buttons { display: flex; gap: 15px; margin-top: 30px; padding-top: 20px; border-top: 1px dashed #ccc; }
+        .btn { padding: 12px 25px; border-radius: 30px; text-decoration: none; font-weight: bold; display: inline-flex; align-items: center; cursor: pointer; border: none; font-size: 1rem; transition: transform 0.2s; color: white; }
+        .btn:hover { transform: translateY(-3px); }
+        .btn-download { background-color: var(--success); }
+        .btn-exercise { background-color: var(--warning); color: #333; }
+
+        /* --- 4. MODAL BÀI TẬP --- */
+        .quiz-modal { display: none; position: fixed; z-index: 200; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); align-items: center; justify-content: center; }
+        .quiz-content { background-color: white; width: 90%; max-width: 600px; padding: 30px; border-radius: 15px; position: relative; animation: slideDown 0.4s ease; }
+        @keyframes slideDown { from {top: -50px; opacity: 0;} to {top: 0; opacity: 1;} }
+        .close-quiz { position: absolute; right: 20px; top: 15px; font-size: 1.5rem; cursor: pointer; color: #aaa; }
+        .quiz-question { font-size: 1.2rem; font-weight: bold; margin-bottom: 20px; color: var(--primary-color); }
+        .quiz-options { display: flex; flex-direction: column; gap: 10px; }
+        .option-btn { padding: 12px; border: 2px solid #eee; border-radius: 8px; background: white; text-align: left; cursor: pointer; transition: 0.2s; }
+        .option-btn:hover { background: #f0f8ff; border-color: var(--accent-color); }
+        .option-btn.correct { background: #d4edda; border-color: #28a745; color: #155724; }
+        .option-btn.wrong { background: #f8d7da; border-color: #dc3545; color: #721c24; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-area"><i class="fas fa-laptop-code"></i> TIN HỌC 4</div>
+        <div class="teacher-info">GV - Nguyễn Đình Bạch Long</div>
+    </header>
+
+    <main class="container">
+        <div class="breadcrumb">
+            <a href="index.html"><i class="fas fa-home"></i> Trang chủ</a> 
+            <span style="margin: 0 10px;">/</span> Chủ đề E 
+            <span style="margin: 0 10px;">/</span> Bài 8
+        </div>
+
+        <div class="lesson-content">
+            <h1 class="lesson-title">Bài 8: Chèn hình ảnh, sao chép, di chuyển, xóa văn bản</h1>
+
+            <div class="digital-lesson-wrapper">
+                <div class="lesson-slides">
+                    
+                    <div class="slide active">
+                        <div class="slide-content">
+                            <h2>CHỦ ĐỀ E: ỨNG DỤNG TIN HỌC</h2>
+                            <h1>BÀI 8: CHỈNH SỬA VĂN BẢN</h1>
+                            <div class="main-icon">
+                                <i class="fas fa-image"></i> <i class="fas fa-cut"></i> <i class="fas fa-paste"></i>
+                            </div>
+                            <p>Mục tiêu: Biết chèn ảnh vào văn bản và thực hiện các thao tác chỉnh sửa (Copy, Cut, Delete).</p>
+                        </div>
+                    </div>
+
+                    <div class="slide">
+                        <div class="slide-content">
+                            <h3>1. Chèn hình ảnh vào văn bản</h3>
+                            <p>Để bài văn thêm sinh động, em có thể chèn thêm ảnh minh họa.</p>
+                            <div class="step-process">
+                                <div class="step-box">1. Đặt con trỏ</div>
+                                <div class="step-arrow"><i class="fas fa-arrow-right"></i></div>
+                                <div class="step-box">2. Thẻ Insert</div>
+                                <div class="step-arrow"><i class="fas fa-arrow-right"></i></div>
+                                <div class="step-box">3. Chọn Pictures</div>
+                                <div class="step-arrow"><i class="fas fa-arrow-right"></i></div>
+                                <div class="step-box">4. Chọn Ảnh -> Insert</div>
+                            </div>
+                            <p style="margin-top: 20px; font-size: 0.9rem; color: #555;">
+                                (Dùng chuột kéo các chấm tròn ở góc ảnh để thay đổi kích thước)
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="slide">
+                        <div class="slide-content">
+                            <h3>2. Sao chép & Di chuyển văn bản</h3>
+                            <p>Trước hết, em cần <strong>Chọn (bôi đen)</strong> phần văn bản.</p>
+                            <div class="edit-grid">
+                                <div class="edit-card edit-copy">
+                                    <div class="edit-header"><i class="fas fa-copy"></i> Sao chép (Copy)</div>
+                                    <p>Giữ nguyên bản gốc, tạo thêm bản mới.</p>
+                                    <p>1. Nhấn <span class="key-badge">Ctrl+C</span></p>
+                                    <p>2. Đến nơi mới, nhấn <span class="key-badge">Ctrl+V</span></p>
+                                </div>
+                                <div class="edit-card edit-cut">
+                                    <div class="edit-header"><i class="fas fa-cut"></i> Di chuyển (Cut)</div>
+                                    <p>Chuyển văn bản sang vị trí khác (mất ở chỗ cũ).</p>
+                                    <p>1. Nhấn <span class="key-badge">Ctrl+X</span></p>
+                                    <p>2. Đến nơi mới, nhấn <span class="key-badge">Ctrl+V</span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="slide">
+                        <div class="slide-content">
+                            <h3>3. Xóa văn bản</h3>
+                            <div style="background: #ffebee; padding: 20px; border-radius: 10px; margin-top: 20px; border: 1px dashed #ef5350;">
+                                <i class="fas fa-trash-alt" style="font-size: 3rem; color: var(--danger); margin-bottom: 10px;"></i>
+                                <p>Để xóa một đoạn văn bản dài:</p>
+                                <ul style="text-align: left; margin-left: 20px; margin-top: 10px;">
+                                    <li><strong>Bước 1:</strong> Chọn (bôi đen) phần văn bản muốn xóa.</li>
+                                    <li><strong>Bước 2:</strong> Nhấn phím <span class="key-badge">Delete</span> hoặc <span class="key-badge">Backspace</span>.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <button class="slider-btn prev-btn"><i class="fas fa-chevron-left"></i></button>
+                <button class="slider-btn next-btn"><i class="fas fa-chevron-right"></i></button>
+            </div>
+
+            <p style="text-align: center; color: #666; font-style: italic;">
+                Bấm mũi tên Trái/Phải trên khung hình để xem bài giảng.
+            </p>
+
+            <div class="action-buttons">
+                <a href="Bai8.pdf" download class="btn btn-download">
+                    <i class="fas fa-file-download"></i> Tải bài giảng (PDF)
+                </a>
+                <button class="btn btn-exercise" onclick="openQuiz()">
+                    <i class="fas fa-puzzle-piece"></i> Bài tập
+                </button>
+            </div>
+        </div>
+        
+        <div style="margin-top: 20px; text-align: center;">
+            <a href="index.html" style="text-decoration: none; color: #555;"><i class="fas fa-arrow-left"></i> Quay lại danh sách bài học</a>
+        </div>
+    </main>
+
+    <div id="quizModal" class="quiz-modal">
+        <div class="quiz-content">
+            <span class="close-quiz" onclick="closeQuiz()">&times;</span>
+            <div style="text-align: center; margin-bottom: 20px;">
+                <h2 style="color: var(--edit-purple);">Bài tập trắc nghiệm</h2>
+                <p style="font-size: 0.9rem; color: #666;">Em hãy chọn đáp án đúng nhất</p>
+            </div>
+            
+            <div id="quizContainer">
+                <div style="margin-bottom: 10px; font-style: italic; color: #666;" id="progressText">Câu 1 / 10</div>
+                <div class="quiz-question" id="questionText">Câu hỏi...</div>
+                <div class="quiz-options" id="optionsContainer"></div>
+            </div>
+
+            <div class="quiz-footer">
+                <div class="score-display">Điểm: <span id="scoreVal">0</span> / 10</div>
+                <button class="btn btn-exercise" id="nextBtn" style="padding: 8px 20px; font-size: 0.9rem;" onclick="nextQuestion()">Câu tiếp theo</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 1. XỬ LÝ SLIDE
+        document.addEventListener('DOMContentLoaded', function() {
+            const slides = document.querySelectorAll('.slide');
+            const prevBtn = document.querySelector('.prev-btn');
+            const nextBtn = document.querySelector('.next-btn');
+            let currentSlide = 0;
+
+            function showSlide(index) {
+                slides.forEach(s => s.classList.remove('active'));
+                if (index >= slides.length) currentSlide = 0;
+                else if (index < 0) currentSlide = slides.length - 1;
+                else currentSlide = index;
+                slides[currentSlide].classList.add('active');
+            }
+
+            prevBtn.addEventListener('click', () => showSlide(currentSlide - 1));
+            nextBtn.addEventListener('click', () => showSlide(currentSlide + 1));
+        });
+
+        // 2. DỮ LIỆU CÂU HỎI TRẮC NGHIỆM (Từ File PDF Bai 8)
+        const questions = [
+            { 
+                question: "1. Để chèn hình ảnh vào văn bản, em chọn thẻ nào?", 
+                options: ["Home", "Insert", "View", "Layout"], 
+                correct: 1 
+            },
+            { 
+                question: "2. Nút lệnh nào dùng để sao chép văn bản?", 
+                options: ["Cut (Kéo)", "Copy (Hai tờ giấy)", "Paste (Bảng kẹp)", "Delete"], 
+                correct: 1 
+            },
+            { 
+                question: "3. Tổ hợp phím nào dùng để Cắt (Di chuyển) văn bản?", 
+                options: ["Ctrl + C", "Ctrl + V", "Ctrl + X", "Ctrl + Z"], 
+                correct: 2 
+            },
+            { 
+                question: "4. Để dán văn bản vào vị trí mới, em nhấn tổ hợp phím nào?", 
+                options: ["Ctrl + V", "Ctrl + C", "Ctrl + P", "Ctrl + S"], 
+                correct: 0 
+            },
+            { 
+                question: "5. Muốn xóa một đoạn văn bản, việc đầu tiên cần làm là gì?", 
+                options: ["Nhấn phím Delete ngay", "Chọn (bôi đen) đoạn văn bản đó", "Nhấn phím Enter", "Tắt máy"], 
+                correct: 1 
+            },
+            { 
+                question: "6. Sau khi chọn hình ảnh, xuất hiện các nút tròn xung quanh để làm gì?", 
+                options: ["Để xóa ảnh", "Để thay đổi kích thước ảnh", "Để tô màu ảnh", "Để viết chữ lên ảnh"], 
+                correct: 1 
+            },
+            { 
+                question: "7. Lệnh nào giúp văn bản bao quanh hình ảnh (Layout Options)?", 
+                options: ["Square", "Copy", "Cut", "Bold"], 
+                correct: 0 
+            },
+            { 
+                question: "8. Phím nào có thể dùng để xóa văn bản đã chọn?", 
+                options: ["Shift", "Caps Lock", "Delete", "Tab"], 
+                correct: 2 
+            },
+            { 
+                question: "9. Sự khác nhau giữa Sao chép (Copy) và Di chuyển (Cut) là gì?", 
+                options: ["Không có gì khác nhau", "Copy giữ lại bản gốc, Cut xóa bản gốc ở vị trí cũ", "Cut giữ lại bản gốc, Copy xóa bản gốc", "Cả hai đều xóa bản gốc"], 
+                correct: 1 
+            },
+            { 
+                question: "10. Để di chuyển hình ảnh đến vị trí khác, em dùng thao tác nào?", 
+                options: ["Nháy đúp chuột", "Kéo thả chuột", "Nháy chuột phải", "Lăn chuột"], 
+                correct: 1 
+            }
+        ];
+
+        // 3. LOGIC TRẮC NGHIỆM
+        let currentQ = 0, score = 0;
+        const modal = document.getElementById('quizModal');
+        const qText = document.getElementById('questionText');
+        const progressText = document.getElementById('progressText');
+        const optContainer = document.getElementById('optionsContainer');
+        const nextBtn = document.getElementById('nextBtn');
+        const scoreSpan = document.getElementById('scoreVal');
+
+        function openQuiz() {
+            modal.style.display = 'flex';
+            currentQ = 0;
+            score = 0;
+            scoreSpan.innerText = 0;
+            loadQuestion();
+        }
+
+        function closeQuiz() {
+            modal.style.display = 'none';
+        }
+
+        function loadQuestion() {
+            progressText.innerText = `Câu ${currentQ + 1} / ${questions.length}`;
+            if(currentQ >= questions.length) {
+                qText.innerText = `Chúc mừng! Em đã hoàn thành bài tập.\nĐiểm số: ${score}/${questions.length}`;
+                progressText.innerText = "Hoàn thành";
+                optContainer.innerHTML = '';
+                nextBtn.innerText = "Làm lại";
+                nextBtn.onclick = openQuiz;
+                return;
+            }
+            const q = questions[currentQ];
+            qText.innerText = q.question;
+            optContainer.innerHTML = '';
+            nextBtn.style.display = 'none';
+
+            q.options.forEach((opt, idx) => {
+                const btn = document.createElement('div');
+                btn.className = 'option-btn';
+                btn.innerText = opt;
+                btn.onclick = () => checkAnswer(btn, idx, q.correct);
+                optContainer.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(btn, idx, correctIdx) {
+            const allOpts = optContainer.children;
+            for(let o of allOpts) o.style.pointerEvents = 'none';
+            if(idx === correctIdx) {
+                btn.classList.add('correct');
+                score++;
+                scoreSpan.innerText = score;
+            } else {
+                btn.classList.add('wrong');
+                allOpts[correctIdx].classList.add('correct');
+            }
+            nextBtn.style.display = 'block';
+            nextBtn.innerText = "Câu tiếp theo";
+            nextBtn.onclick = nextQuestion;
+        }
+        
+        function nextQuestion() {
+            currentQ++;
+            loadQuestion();
+        }
+        
+        window.onclick = function(e) { if(e.target == modal) closeQuiz(); }
+    </script>
+</body>
+</html>

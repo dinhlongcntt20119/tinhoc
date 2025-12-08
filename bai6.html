@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 6: Sử dụng phần mềm khi được phép - Tin học 4</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Source+Code+Pro:wght@600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        /* --- CẤU HÌNH GIAO DIỆN CHUNG --- */
+        :root {
+            --primary-color: #0056b3; 
+            --accent-color: #00a8ff;
+            --bg-color: #f4f7f6;
+            --text-color: #333;
+            --card-bg: #ffffff;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --ethics-purple: #7b1fa2; /* Màu tím cho chủ đề Đạo đức */
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Roboto', sans-serif; background-color: var(--bg-color); color: var(--text-color); }
+        
+        /* Header */
+        header { background: linear-gradient(135deg, var(--primary-color), var(--accent-color)); color: white; padding: 15px 40px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .logo-area { font-family: 'Source Code Pro', monospace; font-size: 1.5rem; font-weight: bold; }
+        .teacher-info { font-size: 0.9rem; opacity: 0.9; }
+        
+        /* Container */
+        .container { max-width: 1000px; margin: 30px auto; padding: 0 20px; }
+        .breadcrumb { margin-bottom: 20px; font-size: 0.9rem; color: #666; }
+        .breadcrumb a { text-decoration: none; color: var(--primary-color); font-weight: bold; }
+
+        .lesson-content { background: var(--card-bg); border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); padding: 40px; border-top: 5px solid var(--ethics-purple); }
+        h1.lesson-title { color: var(--ethics-purple); margin-bottom: 20px; font-size: 2rem; border-bottom: 2px solid #eee; padding-bottom: 15px; }
+
+        /* --- SLIDE BÀI GIẢNG --- */
+        .digital-lesson-wrapper { 
+            position: relative; width: 100%; padding-top: 56.25%; /* Tỉ lệ 16:9 */
+            background: #fff; border-radius: 10px; overflow: hidden; 
+            box-shadow: 0 0 15px rgba(0,0,0,0.1); border: 1px solid #ddd; margin-bottom: 30px; 
+        }
+        .lesson-slides { position: absolute; top: 0; left: 0; bottom: 0; right: 0; }
+        
+        .slide { 
+            position: absolute; width: 100%; height: 100%; 
+            opacity: 0; transition: opacity 0.4s ease-in-out; 
+            padding: 20px 40px; display: flex; align-items: center; justify-content: center; 
+            background: white; pointer-events: none; z-index: 1;
+        }
+        .slide.active { opacity: 1; pointer-events: auto; z-index: 10; }
+        
+        .slide-content { width: 100%; text-align: center; }
+        .slide h2 { color: #888; font-size: 1.1rem; text-transform: uppercase; margin-bottom: 10px; }
+        .slide h1 { color: var(--ethics-purple); font-size: 2rem; margin-bottom: 20px; }
+        .slide h3 { color: var(--ethics-purple); border-bottom: 2px solid var(--accent-color); display: inline-block; margin-bottom: 15px; }
+
+        /* Style riêng cho Bài 6 */
+        .shield-icon { font-size: 4rem; color: var(--ethics-purple); margin: 20px 0; }
+        
+        /* Bản quyền */
+        .copyright-box { background: #f3e5f5; padding: 20px; border-radius: 10px; border-left: 5px solid var(--ethics-purple); text-align: left; display: inline-block; }
+        .copyright-box p { margin-bottom: 10px; font-size: 1.1rem; }
+        
+        /* So sánh phần mềm */
+        .compare-software { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px; }
+        .sw-col { padding: 20px; border-radius: 10px; border: 1px solid #eee; }
+        .sw-free { background: #e8f5e9; border-top: 5px solid var(--success); }
+        .sw-paid { background: #fff3e0; border-top: 5px solid var(--warning); }
+        .sw-header { font-weight: bold; font-size: 1.2rem; margin-bottom: 15px; display: block; }
+
+        /* Hành động đúng sai */
+        .action-list { text-align: left; display: inline-block; margin-top: 15px; }
+        .action-list li { margin-bottom: 10px; display: flex; align-items: center; gap: 10px; }
+
+        /* Nút điều khiển Slide */
+        .slider-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.1); border: none; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; z-index: 20; transition: 0.3s; font-size: 1.5rem; color: #333; }
+        .slider-btn:hover { background: var(--primary-color); color: white; }
+        .prev-btn { left: 10px; }
+        .next-btn { right: 10px; }
+
+        /* --- 3. NÚT CHỨC NĂNG --- */
+        .action-buttons { display: flex; gap: 15px; margin-top: 30px; padding-top: 20px; border-top: 1px dashed #ccc; }
+        .btn { padding: 12px 25px; border-radius: 30px; text-decoration: none; font-weight: bold; display: inline-flex; align-items: center; cursor: pointer; border: none; font-size: 1rem; transition: transform 0.2s; color: white; }
+        .btn:hover { transform: translateY(-3px); }
+        .btn-download { background-color: var(--success); }
+        .btn-exercise { background-color: var(--warning); color: #333; }
+
+        /* --- 4. MODAL BÀI TẬP --- */
+        .quiz-modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); align-items: center; justify-content: center; }
+        .quiz-content { background-color: white; width: 90%; max-width: 600px; padding: 30px; border-radius: 15px; position: relative; animation: slideDown 0.4s ease; }
+        @keyframes slideDown { from {top: -50px; opacity: 0;} to {top: 0; opacity: 1;} }
+        .close-quiz { position: absolute; right: 20px; top: 15px; font-size: 1.5rem; cursor: pointer; color: #aaa; }
+        .quiz-question { font-size: 1.2rem; font-weight: bold; margin-bottom: 20px; color: var(--primary-color); }
+        .quiz-progress { font-size: 0.9rem; color: #666; margin-bottom: 10px; text-align: right; font-style: italic; }
+        
+        .quiz-options { display: flex; flex-direction: column; gap: 10px; }
+        .option-btn { padding: 12px; border: 2px solid #eee; border-radius: 8px; background: white; text-align: left; cursor: pointer; transition: 0.2s; }
+        .option-btn:hover { background: #f0f8ff; border-color: var(--accent-color); }
+        .option-btn.correct { background: #d4edda; border-color: #28a745; color: #155724; }
+        .option-btn.wrong { background: #f8d7da; border-color: #dc3545; color: #721c24; }
+        
+        .quiz-footer { margin-top: 20px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #eee; padding-top: 15px; }
+        .score-display { font-weight: bold; color: var(--primary-color); }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-area"><i class="fas fa-laptop-code"></i> TIN HỌC 4</div>
+        <div class="teacher-info">GV - Nguyễn Đình Bạch Long</div>
+    </header>
+
+    <main class="container">
+        <div class="breadcrumb">
+            <a href="index.html"><i class="fas fa-home"></i> Trang chủ</a> 
+            <span style="margin: 0 10px;">/</span> Chủ đề D 
+            <span style="margin: 0 10px;">/</span> Bài 6
+        </div>
+
+        <div class="lesson-content">
+            <h1 class="lesson-title">Bài 6: Sử dụng phần mềm khi được phép</h1>
+
+            <div class="digital-lesson-wrapper">
+                <div class="lesson-slides" id="slideContainer">
+                   
+                    <div class="slide active">
+                        <div class="slide-content text-center">
+                            <h2 class="slide-title">CHỦ ĐỀ D: ĐẠO ĐỨC, PHÁP LUẬT VÀ VĂN HÓA TRONG MÔI TRƯỜNG SỐ</h2>
+                            <h1 class="main-topic">BÀI 6: SỬ DỤNG PHẦN MỀM KHI ĐƯỢC PHÉP</h1>
+                            <div class="shield-icon">
+                                <i class="fas fa-user-shield"></i> <i class="fas fa-copyright" style="font-size: 3rem; color: #ff9800;"></i>
+                            </div>
+                            <p>Mục tiêu: Hiểu về bản quyền phần mềm và sử dụng đúng cách.</p>
+                        </div>
+                    </div>
+
+                    <div class="slide">
+                        <div class="slide-content">
+                            <h3>1. Phần mềm có bản quyền</h3>
+                            <div class="copyright-box">
+                                <p><i class="fas fa-user-edit"></i> <strong>Tác giả:</strong> Là người/tổ chức tạo ra phần mềm.</p>
+                                <p><i class="fas fa-lock"></i> <strong>Quyền:</strong> Tác giả có quyền cho phép hoặc không cho phép người khác sử dụng, sao chép.</p>
+                                <p><i class="fas fa-key"></i> <strong>Bảo vệ:</strong> Tác giả có thể dùng Khóa (Key) để bảo vệ phần mềm.</p>
+                            </div>
+                            <p style="margin-top: 15px; font-weight: bold;">-> Chỉ sử dụng phần mềm khi được phép!</p>
+                        </div>
+                    </div>
+
+                    <div class="slide">
+                        <div class="slide-content">
+                            <h3>2. Phân loại phần mềm</h3>
+                            <div class="compare-software">
+                                <div class="sw-col sw-free">
+                                    <span class="sw-header"><i class="fas fa-gift"></i> Phần mềm Miễn phí</span>
+                                    <p>Không phải trả tiền.</p>
+                                    <p>Được tự do sử dụng, sao chép.</p>
+                                    <p><em>Ví dụ: Unikey, Scratch, Chrome.</em></p>
+                                </div>
+                                <div class="sw-col sw-paid">
+                                    <span class="sw-header"><i class="fas fa-file-invoice-dollar"></i> Phần mềm Không miễn phí</span>
+                                    <p>Phải trả tiền mua bản quyền.</p>
+                                    <p>Cần xin phép tác giả.</p>
+                                    <p><em>Ví dụ: Windows, Office, Game bản quyền.</em></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="slide">
+                        <div class="slide-content">
+                            <h3>3. Hành động đúng đắn</h3>
+                            <ul class="action-list fa-ul">
+                                <li><span class="fa-li"><i class="fas fa-check-circle" style="color: green;"></i></span> Chỉ dùng phần mềm khi được phép.</li>
+                                <li><span class="fa-li"><i class="fas fa-check-circle" style="color: green;"></i></span> Tôn trọng công sức của tác giả.</li>
+                                <li><span class="fa-li"><i class="fas fa-times-circle" style="color: red;"></i></span> Không dùng phần mềm bẻ khóa (crack).</li>
+                                <li><span class="fa-li"><i class="fas fa-times-circle" style="color: red;"></i></span> Không tự ý sao chép phần mềm của người khác.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                </div>
+                <button class="slider-btn prev-btn" onclick="changeSlide(-1)"><i class="fas fa-chevron-left"></i></button>
+                <button class="slider-btn next-btn" onclick="changeSlide(1)"><i class="fas fa-chevron-right"></i></button>
+            </div>
+
+            <p style="text-align: center; color: #666; font-style: italic;">
+                Bấm mũi tên Trái/Phải trên khung hình để xem bài giảng.
+            </p>
+
+            <div class="action-buttons">
+                <a href="Bai6.pdf" download class="btn btn-download">
+                    <i class="fas fa-file-download"></i> Tải bài giảng (PDF)
+                </a>
+                <button class="btn btn-exercise" onclick="openQuiz()">
+                    <i class="fas fa-puzzle-piece"></i> Bài tập
+                </button>
+            </div>
+        </div>
+        
+        <div style="margin-top: 20px; text-align: center;">
+            <a href="index.html" style="text-decoration: none; color: #555;"><i class="fas fa-arrow-left"></i> Quay lại danh sách bài học</a>
+        </div>
+    </main>
+
+    <div id="quizModal" class="quiz-modal">
+        <div class="quiz-content">
+            <span class="close-quiz" onclick="closeQuiz()">&times;</span>
+            <div style="text-align: center; margin-bottom: 20px;">
+                <h2 style="color: var(--ethics-purple);">Bài tập trắc nghiệm</h2>
+                <p style="font-size: 0.9rem; color: #666;">Em hãy chọn đáp án đúng nhất</p>
+            </div>
+            
+            <div id="quizContainer">
+                <div style="margin-bottom: 10px; font-style: italic; color: #666;" id="progressText">Câu 1 / 10</div>
+                <div class="quiz-question" id="questionText">Câu hỏi...</div>
+                <div class="quiz-options" id="optionsContainer"></div>
+            </div>
+
+            <div class="quiz-footer">
+                <div class="score-display">Điểm: <span id="scoreVal">0</span> / 10</div>
+                <button class="btn btn-exercise" id="nextBtn" style="padding: 8px 20px; font-size: 0.9rem;" onclick="nextQuestion()">Câu tiếp theo</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 1. XỬ LÝ SLIDE
+        document.addEventListener('DOMContentLoaded', function() {
+            const slides = document.querySelectorAll('.slide');
+            const prevBtn = document.querySelector('.prev-btn');
+            const nextBtn = document.querySelector('.next-btn');
+            let currentSlide = 0;
+
+            function showSlide(index) {
+                slides.forEach(s => s.classList.remove('active'));
+                if (index >= slides.length) currentSlide = 0;
+                else if (index < 0) currentSlide = slides.length - 1;
+                else currentSlide = index;
+                slides[currentSlide].classList.add('active');
+            }
+
+            prevBtn.addEventListener('click', () => showSlide(currentSlide - 1));
+            nextBtn.addEventListener('click', () => showSlide(currentSlide + 1));
+        });
+
+        // 2. DỮ LIỆU CÂU HỎI TRẮC NGHIỆM (Từ File PDF Bai 6)
+        const questions = [
+            { 
+                question: "1. Ai là người có quyền cho phép sử dụng phần mềm?", 
+                options: ["Người bán máy tính", "Tác giả (người tạo ra phần mềm)", "Bạn bè của em", "Người dùng"], 
+                correct: 1 
+            },
+            { 
+                question: "2. Phần mềm miễn phí là gì?", 
+                options: ["Phần mềm phải trả tiền mới dùng được", "Phần mềm không phải trả phí và có thể chia sẻ", "Phần mềm bị khóa", "Phần mềm cũ"], 
+                correct: 1 
+            },
+            { 
+                question: "3. Phần mềm không miễn phí là gì?", 
+                options: ["Phần mềm phải trả phí và cần xin phép tác giả", "Phần mềm ai cũng dùng được", "Phần mềm không có bản quyền", "Phần mềm xấu"], 
+                correct: 0 
+            },
+            { 
+                question: "4. Việc bạn Ngọc tự ý sao chép trò chơi từ máy bạn Nam là đúng hay sai?", 
+                options: ["Đúng, vì là bạn bè", "Sai, nếu đó là phần mềm có bản quyền", "Đúng, vì đỡ tốn tiền", "Không sao cả"], 
+                correct: 1 
+            },
+            { 
+                question: "5. Em có được phép sử dụng phần mềm bẻ khóa (crack) không?", 
+                options: ["Có, vì nó miễn phí", "Không, vì đó là hành vi vi phạm bản quyền", "Có, nếu không ai biết", "Tùy thích"], 
+                correct: 1 
+            },
+            { 
+                question: "6. Đâu là ví dụ về phần mềm miễn phí?", 
+                options: ["Windows 10", "Microsoft Word", "Unikey (Bộ gõ tiếng Việt)", "Photoshop"], 
+                correct: 2 
+            },
+            { 
+                question: "7. Tác giả dùng gì để bảo vệ phần mềm của mình?", 
+                options: ["Dùng khóa (Key) hoặc mật khẩu", "Dùng ổ khóa thật", "Giấu phần mềm đi", "Không cho ai biết"], 
+                correct: 0 
+            },
+            { 
+                question: "8. Hành động nào sau đây là ĐÚNG?", 
+                options: ["Tự ý chia sẻ phần mềm bản quyền lên mạng", "Chỉ sử dụng phần mềm khi được phép", "Bẻ khóa phần mềm để dùng", "Sao chép trộm phần mềm"], 
+                correct: 1 
+            },
+            { 
+                question: "9. Tại sao không nên dùng phần mềm không rõ nguồn gốc?", 
+                options: ["Sợ máy tính bị nặng", "Có thể chứa virus hoặc vi phạm pháp luật", "Sợ bị cười chê", "Không đẹp"], 
+                correct: 1 
+            },
+            { 
+                question: "10. Phần mềm Scratch là loại phần mềm nào?", 
+                options: ["Phần mềm không miễn phí", "Phần mềm miễn phí", "Phần mềm độc hại", "Phần mềm trò chơi trả tiền"], 
+                correct: 1 
+            }
+        ];
+
+        // 3. LOGIC TRẮC NGHIỆM
+        let currentQ = 0, score = 0;
+        const modal = document.getElementById('quizModal');
+        const qText = document.getElementById('questionText');
+        const progressText = document.getElementById('progressText');
+        const optContainer = document.getElementById('optionsContainer');
+        const nextBtn = document.getElementById('nextBtn');
+        const scoreSpan = document.getElementById('scoreVal');
+
+        function openQuiz() {
+            modal.style.display = 'flex';
+            currentQ = 0;
+            score = 0;
+            scoreSpan.innerText = 0;
+            loadQuestion();
+        }
+
+        function closeQuiz() {
+            modal.style.display = 'none';
+        }
+
+        function loadQuestion() {
+            progressText.innerText = `Câu ${currentQ + 1} / ${questions.length}`;
+            if(currentQ >= questions.length) {
+                qText.innerText = `Chúc mừng! Em đã hoàn thành bài tập.\nĐiểm số: ${score}/${questions.length}`;
+                progressText.innerText = "Hoàn thành";
+                optContainer.innerHTML = '';
+                nextBtn.innerText = "Làm lại";
+                nextBtn.onclick = openQuiz;
+                return;
+            }
+            const q = questions[currentQ];
+            qText.innerText = q.question;
+            optContainer.innerHTML = '';
+            nextBtn.style.display = 'none';
+
+            q.options.forEach((opt, idx) => {
+                const btn = document.createElement('div');
+                btn.className = 'option-btn';
+                btn.innerText = opt;
+                btn.onclick = () => checkAnswer(btn, idx, q.correct);
+                optContainer.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(btn, idx, correctIdx) {
+            const allOpts = optContainer.children;
+            for(let o of allOpts) o.style.pointerEvents = 'none';
+            if(idx === correctIdx) {
+                btn.classList.add('correct');
+                score++;
+                scoreSpan.innerText = score;
+            } else {
+                btn.classList.add('wrong');
+                allOpts[correctIdx].classList.add('correct');
+            }
+            nextBtn.style.display = 'block';
+            nextBtn.innerText = "Câu tiếp theo";
+            nextBtn.onclick = nextQuestion;
+        }
+        
+        function nextQuestion() {
+            currentQ++;
+            loadQuestion();
+        }
+        
+        window.onclick = function(e) { if(e.target == modal) closeQuiz(); }
+    </script>
+</body>
+</html>

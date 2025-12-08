@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 5: Thao tác với thư mục, tệp - Tin học 4</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Source+Code+Pro:wght@600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        /* --- CẤU HÌNH GIAO DIỆN CHUNG --- */
+        :root {
+            --primary-color: #0056b3; 
+            --accent-color: #00a8ff;
+            --bg-color: #f4f7f6;
+            --text-color: #333;
+            --card-bg: #ffffff;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --folder-yellow: #ffb300; /* Màu vàng cho chủ đề Thư mục */
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Roboto', sans-serif; background-color: var(--bg-color); color: var(--text-color); }
+        
+        /* Header */
+        header { background: linear-gradient(135deg, var(--primary-color), var(--accent-color)); color: white; padding: 15px 40px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .logo-area { font-family: 'Source Code Pro', monospace; font-size: 1.5rem; font-weight: bold; }
+        .teacher-info { font-size: 0.9rem; opacity: 0.9; }
+        
+        /* Container */
+        .container { max-width: 1000px; margin: 30px auto; padding: 0 20px; }
+        .breadcrumb { margin-bottom: 20px; font-size: 0.9rem; color: #666; }
+        .breadcrumb a { text-decoration: none; color: var(--primary-color); font-weight: bold; }
+
+        .lesson-content { background: var(--card-bg); border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); padding: 40px; border-top: 5px solid var(--folder-yellow); }
+        h1.lesson-title { color: var(--folder-yellow); margin-bottom: 20px; font-size: 2rem; border-bottom: 2px solid #eee; padding-bottom: 15px; }
+
+        /* --- SLIDE BÀI GIẢNG --- */
+        .digital-lesson-wrapper { 
+            position: relative; width: 100%; padding-top: 56.25%; /* Tỉ lệ 16:9 */
+            background: #fff; border-radius: 10px; overflow: hidden; 
+            box-shadow: 0 0 15px rgba(0,0,0,0.1); border: 1px solid #ddd; margin-bottom: 30px; 
+        }
+        .lesson-slides { position: absolute; top: 0; left: 0; bottom: 0; right: 0; }
+        
+        .slide { 
+            position: absolute; width: 100%; height: 100%; 
+            opacity: 0; transition: opacity 0.4s ease-in-out; 
+            padding: 20px 40px; display: flex; align-items: center; justify-content: center; 
+            background: white; pointer-events: none; z-index: 1;
+        }
+        .slide.active { opacity: 1; pointer-events: auto; z-index: 10; }
+        
+        .slide-content { width: 100%; text-align: center; }
+        .slide h2 { color: #888; font-size: 1.1rem; text-transform: uppercase; margin-bottom: 10px; }
+        .slide h1 { color: var(--folder-yellow); font-size: 2rem; margin-bottom: 20px; }
+        .slide h3 { color: var(--folder-yellow); border-bottom: 2px solid var(--accent-color); display: inline-block; margin-bottom: 15px; }
+
+        /* Style riêng cho Bài 5 */
+        .folder-icon-main { font-size: 4rem; color: var(--folder-yellow); margin: 20px 0; }
+        
+        /* So sánh Sao chép - Di chuyển */
+        .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px; }
+        .compare-col { 
+            padding: 20px; border-radius: 10px; text-align: left; border: 1px solid #ddd;
+        }
+        .col-copy { background: #e8f5e9; border-color: var(--success); }
+        .col-move { background: #fff3e0; border-color: var(--warning); }
+        .col-header { font-weight: bold; font-size: 1.2rem; margin-bottom: 10px; display: flex; align-items: center; gap: 10px; }
+        
+        /* Icon thao tác */
+        .action-icons { display: flex; justify-content: space-around; margin-top: 20px; }
+        .action-item { text-align: center; color: #555; }
+        .action-item i { font-size: 2.5rem; margin-bottom: 10px; }
+        .action-item p { font-weight: bold; }
+
+        /* Phím tắt */
+        .shortcut-key { 
+            display: inline-block; padding: 2px 8px; border-radius: 5px; 
+            background: #333; color: white; font-family: monospace; font-size: 0.9rem;
+        }
+
+        /* Cảnh báo */
+        .warning-box { 
+            background: #ffebee; color: #c62828; padding: 15px; border-radius: 10px; 
+            border: 1px dashed #ef5350; margin-top: 20px; font-weight: 500;
+        }
+
+        /* Nút điều khiển Slide */
+        .slider-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.1); border: none; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; z-index: 20; transition: 0.3s; font-size: 1.5rem; color: #333; }
+        .slider-btn:hover { background: var(--primary-color); color: white; }
+        .prev-btn { left: 10px; }
+        .next-btn { right: 10px; }
+
+        /* --- 3. NÚT CHỨC NĂNG --- */
+        .action-buttons { display: flex; gap: 15px; margin-top: 30px; padding-top: 20px; border-top: 1px dashed #ccc; }
+        .btn { padding: 12px 25px; border-radius: 30px; text-decoration: none; font-weight: bold; display: inline-flex; align-items: center; cursor: pointer; border: none; font-size: 1rem; transition: transform 0.2s; color: white; }
+        .btn:hover { transform: translateY(-3px); }
+        .btn-download { background-color: var(--success); }
+        .btn-exercise { background-color: var(--warning); color: #333; }
+
+        /* --- 4. MODAL BÀI TẬP --- */
+        .quiz-modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); align-items: center; justify-content: center; }
+        .quiz-content { background-color: white; width: 90%; max-width: 600px; padding: 30px; border-radius: 15px; position: relative; animation: slideDown 0.4s ease; }
+        @keyframes slideDown { from {top: -50px; opacity: 0;} to {top: 0; opacity: 1;} }
+        .close-quiz { position: absolute; right: 20px; top: 15px; font-size: 1.5rem; cursor: pointer; color: #aaa; }
+        .quiz-question { font-size: 1.2rem; font-weight: bold; margin-bottom: 20px; color: var(--primary-color); }
+        .quiz-progress { font-size: 0.9rem; color: #666; margin-bottom: 10px; text-align: right; font-style: italic; }
+        
+        .quiz-options { display: flex; flex-direction: column; gap: 10px; }
+        .option-btn { padding: 12px; border: 2px solid #eee; border-radius: 8px; background: white; text-align: left; cursor: pointer; transition: 0.2s; }
+        .option-btn:hover { background: #f0f8ff; border-color: var(--accent-color); }
+        .option-btn.correct { background: #d4edda; border-color: #28a745; color: #155724; }
+        .option-btn.wrong { background: #f8d7da; border-color: #dc3545; color: #721c24; }
+        
+        .quiz-footer { margin-top: 20px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #eee; padding-top: 15px; }
+        .score-display { font-weight: bold; color: var(--primary-color); }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-area"><i class="fas fa-laptop-code"></i> TIN HỌC 4</div>
+        <div class="teacher-info">GV - Nguyễn Đình Bạch Long</div>
+    </header>
+
+    <main class="container">
+        <div class="breadcrumb">
+            <a href="index.html"><i class="fas fa-home"></i> Trang chủ</a> 
+            <span style="margin: 0 10px;">/</span> Chủ đề C 
+            <span style="margin: 0 10px;">/</span> Bài 5
+        </div>
+
+        <div class="lesson-content">
+            <h1 class="lesson-title">Bài 5: Thao tác với thư mục, tệp</h1>
+
+            <div class="digital-lesson-wrapper">
+                <div class="lesson-slides" id="slideContainer">
+                   
+                    <div class="slide active">
+                        <div class="slide-content text-center">
+                            <h2 class="slide-title">CHỦ ĐỀ C: TỔ CHỨC LƯU TRỮ, TÌM KIẾM VÀ TRAO ĐỔI THÔNG TIN</h2>
+                            <h1 class="main-topic">BÀI 5: THAO TÁC VỚI THƯ MỤC, TỆP</h1>
+                            <div class="folder-icon-main">
+                                <i class="fas fa-folder-open"></i> <i class="fas fa-file-alt" style="font-size: 3rem; color: #90caf9;"></i>
+                            </div>
+                            <p>Mục tiêu: Thực hiện được các thao tác Sao chép, Di chuyển, Đổi tên và Xóa.</p>
+                        </div>
+                    </div>
+
+                    <div class="slide">
+                        <div class="slide-content">
+                            <h3>1. Sao chép (Copy) & Di chuyển (Move)</h3>
+                            <div class="compare-grid">
+                                <div class="compare-col col-copy">
+                                    <div class="col-header"><i class="fas fa-copy"></i> Sao chép</div>
+                                    <p>Tạo ra bản sao mới.</p>
+                                    <p><strong>Kết quả:</strong> Có ở cả nơi cũ và nơi mới.</p>
+                                    <p>Phím tắt: <span class="shortcut-key">Ctrl+C</span></p>
+                                </div>
+                                <div class="compare-col col-move">
+                                    <div class="col-header"><i class="fas fa-cut"></i> Di chuyển (Cắt)</div>
+                                    <p>Chuyển sang vị trí khác.</p>
+                                    <p><strong>Kết quả:</strong> Mất ở nơi cũ, chỉ còn ở nơi mới.</p>
+                                    <p>Phím tắt: <span class="shortcut-key">Ctrl+X</span></p>
+                                </div>
+                            </div>
+                            <p style="margin-top: 15px; font-weight: bold;">Dán (Paste): <span class="shortcut-key">Ctrl+V</span></p>
+                        </div>
+                    </div>
+
+                    <div class="slide">
+                        <div class="slide-content">
+                            <h3>2. Đổi tên (Rename) & Xóa (Delete)</h3>
+                            <div class="action-icons">
+                                <div class="action-item">
+                                    <i class="fas fa-i-cursor" style="color: var(--primary-color);"></i>
+                                    <p>Đổi tên (Rename)</p>
+                                    <small>Sửa lại tên cho đúng.</small>
+                                </div>
+                                <div class="action-item">
+                                    <i class="fas fa-trash-alt" style="color: var(--danger);"></i>
+                                    <p>Xóa (Delete)</p>
+                                    <small>Loại bỏ khi không cần.</small>
+                                </div>
+                            </div>
+                            <p style="margin-top: 20px;">Lưu ý: Cần <strong>Chọn (bôi đen)</strong> đối tượng trước khi thực hiện thao tác.</p>
+                        </div>
+                    </div>
+
+                    <div class="slide">
+                        <div class="slide-content">
+                            <h3>3. Lưu ý an toàn</h3>
+                            <div class="warning-box">
+                                <i class="fas fa-exclamation-triangle" style="font-size: 2rem; margin-bottom: 10px; display: block;"></i>
+                                Thao tác nhầm (đặc biệt là Xóa) có thể làm <strong>mất dữ liệu</strong> quan trọng hoặc gây lỗi phần mềm.
+                            </div>
+                            <ul style="text-align: left; margin-top: 20px; display: inline-block;">
+                                <li><i class="fas fa-check"></i> Chỉ xóa những gì mình tạo ra.</li>
+                                <li><i class="fas fa-check"></i> Không tự ý đổi tên, xóa tệp của hệ thống/người khác.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                </div>
+                <button class="slider-btn prev-btn" onclick="changeSlide(-1)"><i class="fas fa-chevron-left"></i></button>
+                <button class="slider-btn next-btn" onclick="changeSlide(1)"><i class="fas fa-chevron-right"></i></button>
+            </div>
+
+            <p style="text-align: center; color: #666; font-style: italic;">
+                Bấm mũi tên Trái/Phải trên khung hình để xem bài giảng.
+            </p>
+
+            <div class="action-buttons">
+                <a href="Bai5.pdf" download class="btn btn-download">
+                    <i class="fas fa-file-download"></i> Tải bài giảng (PDF)
+                </a>
+                <button class="btn btn-exercise" onclick="openQuiz()">
+                    <i class="fas fa-puzzle-piece"></i> Bài tập
+                </button>
+            </div>
+        </div>
+        
+        <div style="margin-top: 20px; text-align: center;">
+            <a href="index.html" style="text-decoration: none; color: #555;"><i class="fas fa-arrow-left"></i> Quay lại danh sách bài học</a>
+        </div>
+    </main>
+
+    <div id="quizModal" class="quiz-modal">
+        <div class="quiz-content">
+            <span class="close-quiz" onclick="closeQuiz()">&times;</span>
+            <div style="text-align: center; margin-bottom: 20px;">
+                <h2 style="color: var(--folder-yellow);">Bài tập trắc nghiệm</h2>
+                <p style="font-size: 0.9rem; color: #666;">Em hãy chọn đáp án đúng nhất</p>
+            </div>
+            
+            <div id="quizContainer">
+                <div style="margin-bottom: 10px; font-style: italic; color: #666;" id="progressText">Câu 1 / 10</div>
+                <div class="quiz-question" id="questionText">Câu hỏi...</div>
+                <div class="quiz-options" id="optionsContainer"></div>
+            </div>
+
+            <div class="quiz-footer">
+                <div class="score-display">Điểm: <span id="scoreVal">0</span> / 10</div>
+                <button class="btn btn-exercise" id="nextBtn" style="padding: 8px 20px; font-size: 0.9rem;" onclick="nextQuestion()">Câu tiếp theo</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 1. XỬ LÝ SLIDE
+        document.addEventListener('DOMContentLoaded', function() {
+            const slides = document.querySelectorAll('.slide');
+            const prevBtn = document.querySelector('.prev-btn');
+            const nextBtn = document.querySelector('.next-btn');
+            let currentSlide = 0;
+
+            function showSlide(index) {
+                slides.forEach(s => s.classList.remove('active'));
+                if (index >= slides.length) currentSlide = 0;
+                else if (index < 0) currentSlide = slides.length - 1;
+                else currentSlide = index;
+                slides[currentSlide].classList.add('active');
+            }
+
+            prevBtn.addEventListener('click', () => showSlide(currentSlide - 1));
+            nextBtn.addEventListener('click', () => showSlide(currentSlide + 1));
+        });
+
+        // 2. DỮ LIỆU CÂU HỎI TRẮC NGHIỆM (Từ File PDF Bai 5)
+        const questions = [
+            { 
+                question: "1. Để sao chép thư mục, em sử dụng nút lệnh nào?", 
+                options: ["Cut (Cây kéo)", "Copy (Hai tờ giấy)", "Delete (Chữ X)", "Rename"], 
+                correct: 1 
+            },
+            { 
+                question: "2. Tổ hợp phím nào dùng để Dán (Paste) thư mục/tệp?", 
+                options: ["Ctrl + C", "Ctrl + X", "Ctrl + V", "Ctrl + P"], 
+                correct: 2 
+            },
+            { 
+                question: "3. Khi di chuyển (Move) thư mục, kết quả sẽ như thế nào?", 
+                options: ["Thư mục vẫn còn ở nơi cũ", "Thư mục biến mất ở nơi cũ và xuất hiện ở nơi mới", "Thư mục bị xóa hoàn toàn", "Thư mục được đổi tên"], 
+                correct: 1 
+            },
+            { 
+                question: "4. Để xóa thư mục, em chọn nút lệnh nào?", 
+                options: ["Delete", "Rename", "Copy", "Paste"], 
+                correct: 0 
+            },
+            { 
+                question: "5. Tại sao cần cẩn thận khi thực hiện thao tác với thư mục/tệp?", 
+                options: ["Sợ máy tính bị nóng", "Có thể làm mất dữ liệu hoặc gây lỗi phần mềm", "Sợ tốn điện", "Không có gì nguy hiểm cả"], 
+                correct: 1 
+            },
+            { 
+                question: "6. Tổ hợp phím tắt để Sao chép (Copy) là gì?", 
+                options: ["Ctrl + V", "Ctrl + X", "Ctrl + C", "Ctrl + A"], 
+                correct: 2 
+            },
+            { 
+                question: "7. Để đổi tên thư mục, em chọn lệnh nào?", 
+                options: ["Delete", "Rename", "New Folder", "Properties"], 
+                correct: 1 
+            },
+            { 
+                question: "8. Muốn chọn nhiều thư mục rời rạc, em nhấn giữ phím nào?", 
+                options: ["Shift", "Ctrl", "Alt", "Tab"], 
+                correct: 1 
+            },
+            { 
+                question: "9. Tổ hợp phím tắt để Cắt (Cut) là gì?", 
+                options: ["Ctrl + C", "Ctrl + V", "Ctrl + X", "Ctrl + Z"], 
+                correct: 2 
+            },
+            { 
+                question: "10. Thư mục nguồn là gì?", 
+                options: ["Thư mục chứa tệp cần sao chép/di chuyển", "Thư mục nơi tệp sẽ đến", "Thư mục rác", "Thư mục trống"], 
+                correct: 0 
+            }
+        ];
+
+        // 3. LOGIC TRẮC NGHIỆM
+        let currentQ = 0, score = 0;
+        const modal = document.getElementById('quizModal');
+        const qText = document.getElementById('questionText');
+        const progressText = document.getElementById('progressText');
+        const optContainer = document.getElementById('optionsContainer');
+        const nextBtn = document.getElementById('nextBtn');
+        const scoreSpan = document.getElementById('scoreVal');
+
+        function openQuiz() {
+            modal.style.display = 'flex';
+            currentQ = 0;
+            score = 0;
+            scoreSpan.innerText = 0;
+            loadQuestion();
+        }
+
+        function closeQuiz() {
+            modal.style.display = 'none';
+        }
+
+        function loadQuestion() {
+            progressText.innerText = `Câu ${currentQ + 1} / ${questions.length}`;
+            if(currentQ >= questions.length) {
+                qText.innerText = `Chúc mừng! Em đã hoàn thành bài tập.\nĐiểm số: ${score}/${questions.length}`;
+                progressText.innerText = "Hoàn thành";
+                optContainer.innerHTML = '';
+                nextBtn.innerText = "Làm lại";
+                nextBtn.onclick = openQuiz;
+                return;
+            }
+            const q = questions[currentQ];
+            qText.innerText = q.question;
+            optContainer.innerHTML = '';
+            nextBtn.style.display = 'none';
+
+            q.options.forEach((opt, idx) => {
+                const btn = document.createElement('div');
+                btn.className = 'option-btn';
+                btn.innerText = opt;
+                btn.onclick = () => checkAnswer(btn, idx, q.correct);
+                optContainer.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(btn, idx, correctIdx) {
+            const allOpts = optContainer.children;
+            for(let o of allOpts) o.style.pointerEvents = 'none';
+            if(idx === correctIdx) {
+                btn.classList.add('correct');
+                score++;
+                scoreSpan.innerText = score;
+            } else {
+                btn.classList.add('wrong');
+                allOpts[correctIdx].classList.add('correct');
+            }
+            nextBtn.style.display = 'block';
+            nextBtn.innerText = "Câu tiếp theo";
+            nextBtn.onclick = nextQuestion;
+        }
+        
+        function nextQuestion() {
+            currentQ++;
+            loadQuestion();
+        }
+        
+        window.onclick = function(e) { if(e.target == modal) closeQuiz(); }
+    </script>
+</body>
+</html>

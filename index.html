@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tin học 4 - Chân Trời Sáng Tạo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Source+Code+Pro:wght@600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary-color: #0056b3; 
+            --accent-color: #00a8ff; 
+            --bg-color: #f4f7f6;
+            --text-color: #333;
+            --card-bg: #ffffff;
+            --review-color: #ff9800; /* Màu cam cho phần ôn tập */
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            background-image: radial-gradient(#dbe9f4 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        /* --- HEADER --- */
+        header {
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            color: white;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            border-bottom: 5px solid #ffcc00;
+        }
+
+        .header-left h1 {
+            font-family: 'Source Code Pro', monospace;
+            font-size: 2.2rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+
+        .header-left h2 { font-size: 1.1rem; font-weight: 400; opacity: 0.9; }
+
+        .header-right {
+            text-align: right;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .teacher-name { font-size: 1.1rem; font-weight: bold; color: #fff; margin-top: 5px; }
+
+        /* --- WEB MAP --- */
+        .container { max-width: 1200px; margin: 40px auto; padding: 0 20px; }
+
+        .sitemap-title {
+            text-align: center; margin-bottom: 40px; font-size: 1.8rem;
+            color: var(--primary-color); position: relative; text-transform: uppercase;
+        }
+        .sitemap-title::after {
+            content: ''; display: block; width: 80px; height: 4px;
+            background: var(--accent-color); margin: 10px auto; border-radius: 2px;
+        }
+
+        .topic-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 25px;
+        }
+
+        .topic-card {
+            background: var(--card-bg); border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            overflow: hidden; transition: transform 0.3s ease;
+            border-top: 4px solid var(--accent-color);
+            display: flex;
+            flex-direction: column;
+        }
+        .topic-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+
+        /* Card Ôn tập có màu khác để nổi bật */
+        .review-card { border-top-color: var(--review-color); }
+        .review-card .topic-header { color: #d35400; background-color: #fff3e0; }
+        .review-card .lesson-link:hover { border-left-color: var(--review-color); color: #d35400; }
+
+        .topic-header {
+            background: #eef7ff; padding: 15px; font-weight: bold;
+            color: var(--primary-color); border-bottom: 1px solid #dae1e7;
+            display: flex; align-items: center; gap: 10px; font-size: 1.05rem;
+            min-height: 60px; /* Đảm bảo chiều cao tiêu đề đều nhau */
+        }
+
+        .lesson-list { list-style: none; padding: 10px; flex-grow: 1;}
+        .lesson-list li { margin-bottom: 5px; }
+
+        .lesson-link {
+            display: block; text-decoration: none; color: #555;
+            padding: 10px 12px; border-radius: 6px; font-size: 0.95rem;
+            transition: all 0.2s; border-left: 4px solid transparent;
+        }
+        .lesson-link:hover {
+            background-color: #f8f9fa; color: var(--primary-color);
+            border-left: 4px solid var(--accent-color); padding-left: 18px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .lesson-link i { margin-right: 10px; color: #aaa; width: 20px; text-align: center; }
+
+        footer {
+            text-align: center; padding: 20px; margin-top: 50px;
+            color: #777; font-size: 0.9rem; border-top: 1px solid #ddd;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            header { flex-direction: column; text-align: center; gap: 15px; }
+            .header-right { text-align: center; width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-left">
+            <h1><i class="fas fa-laptop-code"></i> TIN HỌC 4</h1>
+            <h2>Bộ sách: Chân Trời Sáng Tạo</h2>
+        </div>
+        <div class="header-right">
+            
+            <div class="teacher-name">GV - Nguyễn Đình Bạch Long</div>
+        </div>
+    </header>
+
+    <main class="container">
+        <h2 class="sitemap-title">Sơ đồ bài học</h2>
+
+        <div class="topic-grid">
+            
+            <div class="topic-card">
+                <div class="topic-header"><i class="fas fa-desktop"></i> Chủ đề A: Máy tính và em</div>
+                <ul class="lesson-list">
+                    <li><a href="bai1.html" class="lesson-link"><i class="fas fa-play-circle"></i> Bài 1: Phần cứng và phần mềm máy tính</a></li>
+                    <li><a href="bai2.html" class="lesson-link"><i class="fas fa-play-circle"></i> Bài 2: Gõ bàn phím đúng cách</a></li>
+                </ul>
+            </div>
+
+            <div class="topic-card">
+                <div class="topic-header"><i class="fas fa-network-wired"></i> Chủ đề B: Mạng máy tính và Internet</div>
+                <ul class="lesson-list">
+                    <li><a href="bai3.html" class="lesson-link"><i class="fas fa-play-circle"></i> Bài 3: Thông tin trên trang web</a></li>
+                </ul>
+            </div>
+
+            <div class="topic-card">
+                <div class="topic-header"><i class="fas fa-folder-open"></i> Chủ đề C: Tổ chức lưu trữ, tìm kiếm...</div>
+                <ul class="lesson-list">
+                    <li><a href="bai4.html" class="lesson-link"><i class="fas fa-play-circle"></i> Bài 4: Tìm kiếm thông tin trên Internet</a></li>
+                    <li><a href="bai5.html" class="lesson-link"><i class="fas fa-play-circle"></i> Bài 5: Thao tác với thư mục, tệp</a></li>
+                </ul>
+            </div>
+
+            <div class="topic-card">
+                <div class="topic-header"><i class="fas fa-user-shield"></i> Chủ đề D: Đạo đức, Pháp luật & Văn hóa số</div>
+                <ul class="lesson-list">
+                    <li><a href="bai6.html" class="lesson-link"><i class="fas fa-play-circle"></i> Bài 6: Sử dụng phần mềm khi được phép</a></li>
+                </ul>
+            </div>
+
+             <div class="topic-card">
+                <div class="topic-header"><i class="fas fa-laptop-house"></i> Chủ đề E: Ứng dụng tin học</div>
+                <ul class="lesson-list">
+                    <li><a href="bai7.html" class="lesson-link"><i class="fas fa-play-circle"></i> Bài 7: Soạn thảo văn bản tiếng Việt</a></li>
+                    <li><a href="bai8.html" class="lesson-link"><i class="fas fa-play-circle"></i> Bài 8: Chèn hình ảnh, sao chép, di chuyển, xoá văn bản</a></li>
+                    <li><a href="bai9.html" class="lesson-link"><i class="fas fa-play-circle"></i> Bài 9: Bài trình chiếu của em</a></li>
+                    <li><a href="bai10.html" class="lesson-link"><i class="fas fa-play-circle"></i> Bài 10: Định dạng, tạo hiệu ứng cho trang chiếu</a></li>
+                    <li><a href="bai11a.html" class="lesson-link"><i class="fas fa-play-circle"></i> Bài 11A: Xem video về lịch sử, văn hoá</a></li>
+                    <li><a href="bai11b.html" class="lesson-link"><i class="fas fa-play-circle"></i> Bài 11B: Thực hành luyện tập gõ bàn phím</a></li>
+                </ul>
+            </div>
+
+            <div class="topic-card">
+                <div class="topic-header"><i class="fas fa-code"></i> Chủ đề F: Giải quyết vấn đề với máy tính</div>
+                <ul class="lesson-list">
+                    <li><a href="bai12.html" class="lesson-link"><i class="fas fa-play-circle"></i> Bài 12: Làm quen với Scratch</a></li>
+                    <li><a href="bai13.html" class="lesson-link"><i class="fas fa-play-circle"></i> Bài 13: Tạo chương trình máy tính để kể chuyện</a></li>
+                    <li><a href="bai14.html" class="lesson-link"><i class="fas fa-play-circle"></i> Bài 14: Điều khiển nhân vật chuyển động trên sân khấu</a></li>
+                </ul>
+            </div>
+
+            <div class="topic-card review-card">
+                <div class="topic-header"><i class="fas fa-star"></i> Tổng kết & Ôn tập</div>
+                <ul class="lesson-list">
+                    <li><a href="ontaphk1.html" class="lesson-link"><i class="fas fa-book-reader"></i> <strong>Ôn tập Học kì 1</strong></a></li>
+                    <li><a href="ontaphk2.html" class="lesson-link"><i class="fas fa-book-reader"></i> <strong>Ôn tập Học kì 2</strong></a></li>
+                </ul>
+            </div>
+
+        </div>
+    </main>
+
+    <footer>
+        &copy; 2025 - Website hỗ trợ học tập Tin học 4 | GV Nguyễn Đình Bạch Long
+        <div>Tài liệu giảng dạy trên website có thể là nguồn tham khảo</div>
+    </footer>
+
+</body>
+</html>

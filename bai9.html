@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 9: Bài trình chiếu của em - Tin học 4</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Source+Code+Pro:wght@600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        /* --- CẤU HÌNH GIAO DIỆN --- */
+        :root {
+            --primary-color: #0056b3; 
+            --accent-color: #00a8ff;
+            --bg-color: #f4f7f6;
+            --text-color: #333;
+            --card-bg: #ffffff;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --ppt-orange: #d24726; /* Màu cam PowerPoint */
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Roboto', sans-serif; background-color: var(--bg-color); color: var(--text-color); background-image: radial-gradient(#ffe0b2 1px, transparent 1px); background-size: 20px 20px; }
+        
+        /* Header */
+        header { background: linear-gradient(135deg, var(--primary-color), var(--accent-color)); color: white; padding: 15px 40px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .logo-area { font-family: 'Source Code Pro', monospace; font-size: 1.5rem; font-weight: bold; }
+        .teacher-info { font-size: 0.9rem; opacity: 0.9; }
+        
+        /* Container */
+        .container { max-width: 1000px; margin: 30px auto; padding: 0 20px; }
+        .breadcrumb { margin-bottom: 20px; font-size: 0.9rem; color: #666; }
+        .breadcrumb a { text-decoration: none; color: var(--primary-color); font-weight: bold; }
+
+        .lesson-content { background: var(--card-bg); border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); padding: 40px; border-top: 5px solid var(--ppt-orange); }
+        h1.lesson-title { color: var(--ppt-orange); margin-bottom: 20px; font-size: 2rem; border-bottom: 2px solid #eee; padding-bottom: 15px; }
+
+        /* --- SLIDE BÀI GIẢNG --- */
+        .digital-lesson-wrapper { 
+            position: relative; width: 100%; padding-top: 56.25%; 
+            background: #fff; border-radius: 10px; overflow: hidden; 
+            box-shadow: 0 0 15px rgba(0,0,0,0.1); border: 1px solid #ddd; margin-bottom: 30px; 
+        }
+        .lesson-slides { position: absolute; top: 0; left: 0; bottom: 0; right: 0; width: 100%; height: 100%; }
+        
+        /* Slide Item */
+        .slide { 
+            position: absolute; width: 100%; height: 100%; 
+            opacity: 0; transition: opacity 0.4s ease-in-out; 
+            padding: 30px 50px; display: flex; align-items: center; justify-content: center; 
+            background: white; pointer-events: none; z-index: 1;
+        }
+        .slide.active { opacity: 1; pointer-events: auto; z-index: 10; }
+        
+        .slide-content { width: 100%; text-align: center; }
+        .slide h2 { color: #888; font-size: 1.1rem; text-transform: uppercase; margin-bottom: 10px; }
+        .slide h1 { color: var(--ppt-orange); font-size: 2rem; margin-bottom: 20px; }
+        .slide h3 { color: var(--ppt-orange); border-bottom: 2px solid var(--accent-color); display: inline-block; margin-bottom: 15px; }
+
+        /* Style riêng cho Bài 9 */
+        .ppt-icon { font-size: 4rem; color: var(--ppt-orange); margin: 20px 0; }
+        
+        /* Khu vực Khởi động */
+        .start-exit-box { display: flex; justify-content: center; gap: 50px; margin-top: 20px; }
+        .action-item { text-align: center; width: 45%; }
+        .icon-container { position: relative; display: inline-block; }
+        .ppt-app-icon { font-size: 3.5rem; color: var(--ppt-orange); }
+        .cursor-icon { 
+            font-size: 1.5rem; color: #333; position: absolute; bottom: -5px; right: -5px; 
+            animation: clickAnim 1s infinite; text-shadow: 2px 2px 0px white;
+        }
+        @keyframes clickAnim { 0% { transform: scale(1); } 50% { transform: scale(0.8); } 100% { transform: scale(1); } }
+
+        /* Khu vực Các loại trang chiếu */
+        .layout-preview { display: flex; gap: 30px; justify-content: center; margin-top: 25px; }
+        .layout-wrapper { text-align: center; }
+        .layout-card { 
+            width: 200px; height: 140px; border: 1px solid #ccc; background: #fff; 
+            padding: 10px; position: relative; box-shadow: 0 4px 8px rgba(0,0,0,0.1); 
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            border-radius: 4px;
+        }
+        /* Trang tiêu đề mockup */
+        .layout-title-slide .mock-title { width: 80%; height: 12px; background: var(--ppt-orange); margin-bottom: 8px; opacity: 0.8; }
+        .layout-title-slide .mock-subtitle { width: 50%; height: 8px; background: #999; }
+        
+        /* Trang nội dung mockup */
+        .layout-content-slide { justify-content: flex-start; align-items: flex-start; padding-top: 20px; padding-left: 20px; }
+        .layout-content-slide .mock-header { width: 80%; height: 12px; background: var(--ppt-orange); margin-bottom: 15px; opacity: 0.8; }
+        .layout-content-slide .mock-list { width: 100%; text-align: left; }
+        .layout-content-slide .mock-bullet { width: 60%; height: 6px; background: #bbb; margin-bottom: 6px; display: block; position: relative; padding-left: 15px; }
+        .layout-content-slide .mock-bullet::before { content: '•'; position: absolute; left: 0; top: -4px; font-size: 12px; color: var(--ppt-orange); }
+
+        .layout-name { margin-top: 10px; font-weight: bold; color: #555; }
+
+        .step-list { text-align: left; display: inline-block; background: #fff3e0; padding: 20px; border-radius: 10px; border-left: 5px solid var(--ppt-orange); }
+        .step-list li { margin-bottom: 10px; list-style: none; }
+        .step-list i { color: var(--ppt-orange); margin-right: 10px; width: 20px; text-align: center; }
+
+        /* Nút điều khiển Slide */
+        .slider-btn { 
+            position: absolute; top: 50%; transform: translateY(-50%); 
+            background: rgba(0,0,0,0.1); border: none; width: 50px; height: 50px; 
+            border-radius: 50%; cursor: pointer; z-index: 100; transition: 0.3s; font-size: 1.5rem; color: #333;
+        }
+        .slider-btn:hover { background: var(--primary-color); color: white; }
+        .prev-btn { left: 10px; }
+        .next-btn { right: 10px; }
+
+        /* --- NÚT CHỨC NĂNG --- */
+        .action-buttons { display: flex; gap: 15px; margin-top: 30px; padding-top: 20px; border-top: 1px dashed #ccc; }
+        .btn { padding: 12px 25px; border-radius: 30px; text-decoration: none; font-weight: bold; display: inline-flex; align-items: center; cursor: pointer; border: none; font-size: 1rem; transition: transform 0.2s; color: white; }
+        .btn:hover { transform: translateY(-3px); }
+        .btn-download { background-color: var(--success); }
+        .btn-exercise { background-color: var(--warning); color: #333; }
+
+        /* --- MODAL BÀI TẬP --- */
+        .quiz-modal { display: none; position: fixed; z-index: 200; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); align-items: center; justify-content: center; }
+        .quiz-content { background-color: white; width: 90%; max-width: 600px; padding: 30px; border-radius: 15px; position: relative; animation: slideDown 0.4s ease; }
+        @keyframes slideDown { from {top: -50px; opacity: 0;} to {top: 0; opacity: 1;} }
+        .close-quiz { position: absolute; right: 20px; top: 15px; font-size: 1.5rem; cursor: pointer; color: #aaa; }
+        .quiz-question { font-size: 1.2rem; font-weight: bold; margin-bottom: 20px; color: var(--primary-color); }
+        .quiz-options { display: flex; flex-direction: column; gap: 10px; }
+        .option-btn { padding: 12px; border: 2px solid #eee; border-radius: 8px; background: white; text-align: left; cursor: pointer; transition: 0.2s; }
+        .option-btn:hover { background: #f0f8ff; border-color: var(--accent-color); }
+        .option-btn.correct { background: #d4edda; border-color: #28a745; color: #155724; }
+        .option-btn.wrong { background: #f8d7da; border-color: #dc3545; color: #721c24; }
+        
+        .quiz-footer { margin-top: 20px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #eee; padding-top: 15px; }
+        .score-display { font-weight: bold; color: var(--primary-color); }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-area"><i class="fas fa-laptop-code"></i> TIN HỌC 4</div>
+        <div class="teacher-info">GV - Nguyễn Đình Bạch Long</div>
+    </header>
+
+    <main class="container">
+        <div class="breadcrumb">
+            <a href="index.html"><i class="fas fa-home"></i> Trang chủ</a> 
+            <span style="margin: 0 10px;">/</span> Chủ đề E 
+            <span style="margin: 0 10px;">/</span> Bài 9
+        </div>
+
+        <div class="lesson-content">
+            <h1 class="lesson-title">Bài 9: Bài trình chiếu của em</h1>
+
+            <div class="digital-lesson-wrapper">
+                <div class="lesson-slides">
+                    
+                    <div class="slide active">
+                        <div class="slide-content">
+                            <h2>CHỦ ĐỀ E: ỨNG DỤNG TIN HỌC</h2>
+                            <h1>BÀI 9: BÀI TRÌNH CHIẾU CỦA EM</h1>
+                            <div class="ppt-icon"><i class="fas fa-file-powerpoint"></i></div>
+                            <p>Mục tiêu: Tạo bài trình chiếu đơn giản, biết cách lưu và thoát phần mềm.</p>
+                        </div>
+                    </div>
+
+                    <div class="slide">
+                        <div class="slide-content">
+                            <h3>1. Khởi động và Thoát PowerPoint</h3>
+                            <div class="start-exit-box">
+                                <div class="action-item action-start">
+                                    <div class="icon-container">
+                                        <i class="fas fa-file-powerpoint ppt-app-icon"></i>
+                                        <i class="fas fa-mouse-pointer cursor-icon"></i>
+                                    </div>
+                                    <p style="margin-top: 15px;"><strong>Khởi động</strong><br>Nháy đúp chuột vào biểu tượng <span style="color:var(--ppt-orange); font-weight:bold;"><i class="fas fa-file-powerpoint"></i></span> trên màn hình.</p>
+                                </div>
+                                <div class="action-item action-exit">
+                                    <i class="fas fa-times-circle" style="color: var(--danger);"></i>
+                                    <p style="margin-top: 15px;"><strong>Thoát</strong><br>Nhấn nút <strong>Close (X)</strong> hoặc phím <strong>Alt + F4</strong>.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="slide">
+                        <div class="slide-content">
+                            <h3>2. Các loại trang chiếu</h3>
+                            <p>Một bài trình chiếu thường gồm:</p>
+                            
+                            <div class="layout-preview">
+                                <div class="layout-wrapper">
+                                    <div class="layout-card layout-title-slide">
+                                        <div class="mock-title"></div>
+                                        <div class="mock-subtitle"></div>
+                                    </div>
+                                    <div class="layout-name">1. Trang tiêu đề<br><small>(Trang đầu tiên)</small></div>
+                                </div>
+
+                                <div class="layout-wrapper">
+                                    <div class="layout-card layout-content-slide">
+                                        <div class="mock-header"></div>
+                                        <div class="mock-list">
+                                            <div class="mock-bullet"></div>
+                                            <div class="mock-bullet"></div>
+                                            <div class="mock-bullet"></div>
+                                        </div>
+                                    </div>
+                                    <div class="layout-name">2. Trang nội dung<br><small>(Các trang tiếp theo)</small></div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="slide">
+                        <div class="slide-content">
+                            <h3>3. Các thao tác cơ bản</h3>
+                            <ul class="step-list">
+                                <li><i class="fas fa-plus-square"></i> <strong>Thêm trang mới:</strong> Thẻ Home -> New Slide.</li>
+                                <li><i class="fas fa-list"></i> <strong>Đổi dấu đầu dòng:</strong> Thẻ Home -> Bullets.</li>
+                                <li><i class="fas fa-save"></i> <strong>Lưu bài:</strong> File -> Save (hoặc Ctrl + S) -> Đặt tên -> Save.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                </div>
+                
+                <button class="slider-btn prev-btn"><i class="fas fa-chevron-left"></i></button>
+                <button class="slider-btn next-btn"><i class="fas fa-chevron-right"></i></button>
+            </div>
+
+            <p style="text-align: center; color: #666; font-style: italic;">
+                Bấm mũi tên Trái/Phải trên khung hình để xem bài giảng.
+            </p>
+
+            <div class="action-buttons">
+                <a href="Bai9.pdf" download class="btn btn-download">
+                    <i class="fas fa-file-download"></i> Tải bài giảng (PDF)
+                </a>
+                <button class="btn btn-exercise" onclick="openQuiz()">
+                    <i class="fas fa-puzzle-piece"></i> Bài tập
+                </button>
+            </div>
+        </div>
+        
+        <div style="margin-top: 20px; text-align: center;">
+            <a href="index.html" style="text-decoration: none; color: #555;"><i class="fas fa-arrow-left"></i> Quay lại danh sách bài học</a>
+        </div>
+    </main>
+
+    <div id="quizModal" class="quiz-modal">
+        <div class="quiz-content">
+            <span class="close-quiz" onclick="closeQuiz()">&times;</span>
+            <div style="text-align: center; margin-bottom: 20px;">
+                <h2 style="color: var(--ppt-orange);">Bài tập trắc nghiệm</h2>
+                <p style="font-size: 0.9rem; color: #666;">Em hãy chọn đáp án đúng nhất</p>
+            </div>
+            
+            <div id="quizContainer">
+                <div style="margin-bottom: 10px; font-style: italic; color: #666;" id="progressText">Câu 1 / 10</div>
+                <div class="quiz-question" id="questionText">Câu hỏi...</div>
+                <div class="quiz-options" id="optionsContainer"></div>
+            </div>
+
+            <div class="quiz-footer">
+                <div class="score-display">Điểm: <span id="scoreVal">0</span> / 10</div>
+                <button class="btn btn-exercise" id="nextBtn" style="padding: 8px 20px; font-size: 0.9rem;" onclick="nextQuestion()">Câu tiếp theo</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 1. XỬ LÝ SLIDE
+        document.addEventListener('DOMContentLoaded', function() {
+            const slides = document.querySelectorAll('.slide');
+            const prevBtn = document.querySelector('.prev-btn');
+            const nextBtn = document.querySelector('.next-btn');
+            let currentSlide = 0;
+
+            function showSlide(index) {
+                slides.forEach(s => s.classList.remove('active'));
+                if (index >= slides.length) currentSlide = 0;
+                else if (index < 0) currentSlide = slides.length - 1;
+                else currentSlide = index;
+                slides[currentSlide].classList.add('active');
+            }
+
+            prevBtn.addEventListener('click', () => showSlide(currentSlide - 1));
+            nextBtn.addEventListener('click', () => showSlide(currentSlide + 1));
+        });
+
+        // 2. DỮ LIỆU CÂU HỎI TRẮC NGHIỆM
+        const questions = [
+            { 
+                question: "1. Biểu tượng của phần mềm PowerPoint có đặc điểm gì?", 
+                options: ["Màu xanh dương, chữ W", "Màu cam đỏ, chữ P", "Màu xanh lá, chữ X", "Hình tròn nhiều màu"], 
+                correct: 1 
+            },
+            { 
+                question: "2. Trang đầu tiên của bài trình chiếu thường là trang gì?", 
+                options: ["Trang nội dung", "Trang kết thúc", "Trang tiêu đề", "Trang trắng"], 
+                correct: 2 
+            },
+            { 
+                question: "3. Để thêm một trang chiếu mới, em chọn lệnh nào?", 
+                options: ["New Slide", "New File", "Open", "Save"], 
+                correct: 0 
+            },
+            { 
+                question: "4. Nút lệnh nào dùng để thay đổi dấu đầu dòng?", 
+                options: ["Bold (B)", "Bullets (Danh sách)", "Font Color (A)", "Italic (I)"], 
+                correct: 1 
+            },
+            { 
+                question: "5. Để thoát khỏi PowerPoint, em có thể nhấn tổ hợp phím nào?", 
+                options: ["Ctrl + C", "Alt + F4", "Ctrl + V", "Shift + F4"], 
+                correct: 1 
+            },
+            { 
+                question: "6. Để lưu bài trình chiếu, em chọn lệnh nào?", 
+                options: ["File > Open", "File > Save", "File > New", "File > Print"], 
+                correct: 1 
+            },
+            { 
+                question: "7. Trang nội dung thường chứa những gì?", 
+                options: ["Chỉ có tiêu đề", "Tiêu đề trang và nội dung chi tiết (văn bản, hình ảnh...)", "Chỉ có tên tác giả", "Trang trắng hoàn toàn"], 
+                correct: 1 
+            },
+            { 
+                question: "8. Em có thể tìm kiếm phần mềm PowerPoint bằng cách gõ từ khóa nào vào thanh Taskbar?", 
+                options: ["Word", "Excel", "PowerPoint", "Paint"], 
+                correct: 2 
+            },
+            { 
+                question: "9. Khi nhập văn bản vào trang chiếu, em cần nháy chuột vào đâu?", 
+                options: ["Vào khung văn bản (Text box)", "Vào bất kỳ chỗ nào", "Vào thanh tiêu đề cửa sổ", "Vào nút Start"], 
+                correct: 0 
+            },
+            { 
+                question: "10. Để bài trình chiếu sinh động hơn, em nên làm gì?", 
+                options: ["Chỉ viết toàn chữ", "Chèn thêm hình ảnh minh họa", "Không viết gì cả", "Dùng màu chữ đen trên nền đen"], 
+                correct: 1 
+            }
+        ];
+
+        // 3. LOGIC TRẮC NGHIỆM
+        let currentQ = 0, score = 0;
+        const modal = document.getElementById('quizModal');
+        const qText = document.getElementById('questionText');
+        const progressText = document.getElementById('progressText');
+        const optContainer = document.getElementById('optionsContainer');
+        const nextBtn = document.getElementById('nextBtn');
+        const scoreSpan = document.getElementById('scoreVal');
+
+        function openQuiz() {
+            modal.style.display = 'flex';
+            currentQ = 0;
+            score = 0;
+            scoreSpan.innerText = 0;
+            loadQuestion();
+        }
+
+        function closeQuiz() {
+            modal.style.display = 'none';
+        }
+
+        function loadQuestion() {
+            progressText.innerText = `Câu ${currentQ + 1} / ${questions.length}`;
+            if(currentQ >= questions.length) {
+                qText.innerText = `Chúc mừng! Em đã hoàn thành bài tập.\nĐiểm số: ${score}/${questions.length}`;
+                progressText.innerText = "Hoàn thành";
+                optContainer.innerHTML = '';
+                nextBtn.innerText = "Làm lại";
+                nextBtn.onclick = openQuiz;
+                return;
+            }
+            const q = questions[currentQ];
+            qText.innerText = q.question;
+            optContainer.innerHTML = '';
+            nextBtn.style.display = 'none';
+
+            q.options.forEach((opt, idx) => {
+                const btn = document.createElement('div');
+                btn.className = 'option-btn';
+                btn.innerText = opt;
+                btn.onclick = () => checkAnswer(btn, idx, q.correct);
+                optContainer.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(btn, idx, correctIdx) {
+            const allOpts = optContainer.children;
+            for(let o of allOpts) o.style.pointerEvents = 'none';
+            if(idx === correctIdx) {
+                btn.classList.add('correct');
+                score++;
+                scoreSpan.innerText = score;
+            } else {
+                btn.classList.add('wrong');
+                allOpts[correctIdx].classList.add('correct');
+            }
+            nextBtn.style.display = 'block';
+            nextBtn.innerText = "Câu tiếp theo";
+            nextBtn.onclick = nextQuestion;
+        }
+        
+        function nextQuestion() {
+            currentQ++;
+            loadQuestion();
+        }
+        
+        window.onclick = function(e) { if(e.target == modal) closeQuiz(); }
+    </script>
+</body>
+</html>

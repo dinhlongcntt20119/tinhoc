@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 4: Tìm kiếm thông tin - Tin học 4</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Source+Code+Pro:wght@600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        /* --- CẤU HÌNH GIAO DIỆN CHUNG --- */
+        :root {
+            --primary-color: #0056b3; 
+            --accent-color: #00a8ff;
+            --bg-color: #f4f7f6;
+            --text-color: #333;
+            --card-bg: #ffffff;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --search-blue: #0288d1; /* Màu xanh dương sáng cho chủ đề Tìm kiếm */
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Roboto', sans-serif; background-color: var(--bg-color); color: var(--text-color); background-image: radial-gradient(#e1f5fe 1px, transparent 1px); background-size: 20px 20px; }
+        
+        /* Header */
+        header { background: linear-gradient(135deg, var(--primary-color), var(--accent-color)); color: white; padding: 15px 40px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .logo-area { font-family: 'Source Code Pro', monospace; font-size: 1.5rem; font-weight: bold; }
+        .teacher-info { font-size: 0.9rem; opacity: 0.9; }
+        
+        /* Container */
+        .container { max-width: 1000px; margin: 30px auto; padding: 0 20px; }
+        .breadcrumb { margin-bottom: 20px; font-size: 0.9rem; color: #666; }
+        .breadcrumb a { text-decoration: none; color: var(--primary-color); font-weight: bold; }
+        .breadcrumb i { margin: 0 10px; font-size: 0.8rem; }
+
+        .lesson-content { background: var(--card-bg); border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); padding: 40px; border-top: 5px solid var(--search-blue); }
+        h1.lesson-title { color: var(--search-blue); margin-bottom: 20px; font-size: 2rem; border-bottom: 2px solid #eee; padding-bottom: 15px; }
+
+        /* --- SLIDER BÀI GIẢNG --- */
+        .digital-lesson-wrapper { 
+            position: relative; width: 100%; padding-top: 56.25%; /* Tỉ lệ 16:9 */
+            background: #fff; border-radius: 10px; overflow: hidden; 
+            box-shadow: 0 0 15px rgba(0,0,0,0.1); border: 1px solid #ddd; margin-bottom: 30px; 
+        }
+        .lesson-slides { position: absolute; top: 0; left: 0; bottom: 0; right: 0; }
+        
+        .slide { 
+            position: absolute; width: 100%; height: 100%; 
+            opacity: 0; transition: opacity 0.4s ease-in-out; 
+            padding: 30px 50px; display: flex; align-items: center; justify-content: center; 
+            background: white; pointer-events: none; z-index: 1;
+        }
+        .slide.active { opacity: 1; pointer-events: auto; z-index: 10; }
+        .slide-content { width: 100%; }
+        
+        /* Style nội dung Slide */
+        .slide h2 { color: var(--accent-color); font-size: 1.2rem; text-transform: uppercase; margin-bottom: 10px; text-align: center; }
+        .slide h1 { color: var(--search-blue); font-size: 2.2rem; margin-bottom: 20px; text-align: center; }
+        .slide h3 { color: var(--search-blue); border-bottom: 2px solid var(--accent-color); display: inline-block; margin-bottom: 20px; font-size: 1.5rem; font-weight: bold; }
+
+        /* Style riêng cho Bài 4 */
+        .search-icon-main { font-size: 4rem; color: var(--search-blue); margin: 20px 0; text-align: center; }
+        
+        /* Máy tìm kiếm */
+        .search-engine-box { display: flex; justify-content: space-around; gap: 20px; margin-top: 20px; }
+        .engine-item { 
+            background: #e3f2fd; padding: 20px; border-radius: 15px; text-align: center; 
+            flex: 1; border: 2px solid #bbdefb; transition: 0.3s;
+        }
+        .engine-item:hover { transform: translateY(-5px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .engine-logo { font-size: 3rem; margin-bottom: 10px; }
+        .google-color { color: #ea4335; }
+        .bing-color { color: #00838f; }
+
+        /* Từ khóa */
+        .keyword-box { background: #fff9c4; padding: 20px; border-radius: 15px; border-left: 5px solid #fbc02d; display: flex; align-items: center; gap: 20px; margin-bottom: 20px; }
+        .keyword-icon { font-size: 3rem; color: #fbc02d; }
+        .keyword-examples { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .example-item { padding: 15px; border-radius: 10px; display: flex; align-items: center; gap: 10px; font-weight: 500; }
+        .good-keyword { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .bad-keyword { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+
+        /* Quy trình tìm kiếm */
+        .search-process { display: flex; justify-content: space-between; align-items: center; margin-top: 20px; text-align: center; }
+        .process-step { position: relative; flex: 1; padding: 10px; }
+        .step-icon { 
+            width: 60px; height: 60px; background: var(--search-blue); color: white; 
+            border-radius: 50%; display: flex; justify-content: center; align-items: center; 
+            font-size: 1.8rem; margin: 0 auto 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        .step-arrow { font-size: 1.5rem; color: var(--accent-color); flex: 0 0 auto; margin: 0 5px; }
+        .step-desc { font-size: 0.9rem; font-weight: bold; color: #555; }
+
+        /* Nút điều khiển Slide */
+        .slider-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.1); border: none; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; z-index: 20; transition: 0.3s; font-size: 1.5rem; color: #333; }
+        .slider-btn:hover { background: var(--primary-color); color: white; }
+        .prev-btn { left: 10px; }
+        .next-btn { right: 10px; }
+
+        /* --- NÚT CHỨC NĂNG --- */
+        .action-buttons { display: flex; gap: 15px; margin-top: 30px; padding-top: 20px; border-top: 1px dashed #ccc; }
+        .btn { padding: 12px 25px; border-radius: 30px; text-decoration: none; font-weight: bold; display: inline-flex; align-items: center; cursor: pointer; border: none; font-size: 1rem; transition: transform 0.2s; }
+        .btn i { margin-right: 8px; }
+        .btn:hover { transform: translateY(-3px); }
+        .btn-download { background-color: var(--success-color); color: white; }
+        .btn-exercise { background-color: var(--warning-color); color: #333; }
+
+        /* --- MODAL BÀI TẬP --- */
+        .quiz-modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); align-items: center; justify-content: center; }
+        .quiz-content { background-color: white; width: 90%; max-width: 600px; padding: 30px; border-radius: 15px; position: relative; animation: slideDown 0.4s ease; }
+        @keyframes slideDown { from {top: -50px; opacity: 0;} to {top: 0; opacity: 1;} }
+        
+        .close-quiz { position: absolute; right: 20px; top: 15px; font-size: 1.5rem; cursor: pointer; color: #aaa; }
+        .quiz-question { font-size: 1.2rem; font-weight: bold; margin-bottom: 20px; color: var(--primary-color); }
+        .quiz-progress { font-size: 0.9rem; color: #666; margin-bottom: 10px; text-align: right; font-style: italic; }
+        
+        .quiz-options { display: flex; flex-direction: column; gap: 10px; }
+        .option-btn { padding: 12px; border: 2px solid #eee; border-radius: 8px; background: white; text-align: left; cursor: pointer; transition: 0.2s; }
+        .option-btn:hover { background: #f0f8ff; border-color: var(--accent-color); }
+        .option-btn.correct { background: #d4edda; border-color: #28a745; color: #155724; }
+        .option-btn.wrong { background: #f8d7da; border-color: #dc3545; color: #721c24; }
+        
+        .quiz-footer { margin-top: 20px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #eee; padding-top: 15px; }
+        .score-display { font-weight: bold; color: var(--primary-color); }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-area"><i class="fas fa-laptop-code"></i> TIN HỌC 4</div>
+        <div class="teacher-info">GV - Nguyễn Đình Bạch Long</div>
+    </header>
+
+    <main class="container">
+        <div class="breadcrumb">
+            <a href="index.html"><i class="fas fa-home"></i> Trang chủ</a> 
+            <i class="fas fa-chevron-right"></i> Chủ đề B <i class="fas fa-chevron-right"></i> Bài 4
+        </div>
+
+        <div class="lesson-content">
+            <h1 class="lesson-title">Bài 4: Tìm kiếm thông tin trên Internet</h1>
+
+            <div class="digital-lesson-wrapper">
+                <div class="lesson-slides" id="slideContainer">
+                   
+                    <div class="slide active">
+                        <div class="slide-content text-center">
+                            <h2 class="slide-title">CHỦ ĐỀ B: MẠNG MÁY TÍNH VÀ INTERNET</h2>
+                            <h1 class="main-topic">BÀI 4: TÌM KIẾM THÔNG TIN</h1>
+                            <div class="search-icon-main"><i class="fas fa-search"></i></div>
+                            <div style="background: #fff; padding: 20px; border-radius: 15px; text-align: left; display: inline-block; box-shadow: 0 4px 8px rgba(0,0,0,0.05);">
+                                <strong style="color: var(--search-blue);"><i class="fas fa-bullseye"></i> Mục tiêu bài học:</strong>
+                                <ul style="margin-left: 20px; margin-top: 10px; list-style-type: none;">
+                                    <li style="margin-bottom: 8px;"><i class="fas fa-check-square" style="color: green;"></i> Biết máy tìm kiếm là gì và kể tên được một số máy tìm kiếm.</li>
+                                    <li style="margin-bottom: 8px;"><i class="fas fa-check-square" style="color: green;"></i> Hiểu khái niệm "Từ khóa" (Keyword).</li>
+                                    <li><i class="fas fa-check-square" style="color: green;"></i> Thực hiện được các bước tìm kiếm thông tin đơn giản.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="slide">
+                        <div class="slide-content">
+                            <h3><i class="fas fa-desktop"></i> 1. Máy tìm kiếm là gì?</h3>
+                            <p style="font-size: 1.1rem;">Là một trang web đặc biệt giúp em tìm kiếm các thông tin (văn bản, hình ảnh, video...) trên Internet.</p>
+                            
+                            <strong style="display:block; margin-top: 25px; text-align: center;"><i class="fas fa-star"></i> Các máy tìm kiếm phổ biến:</strong>
+                            <div class="search-engine-box">
+                                <div class="engine-item">
+                                    <div class="engine-logo google-color"><i class="fab fa-google"></i></div>
+                                    <strong>Google</strong><br>
+                                    <small>(google.com)</small>
+                                </div>
+                                <div class="engine-item">
+                                    <div class="engine-logo bing-color"><i class="fas fa-search"></i></div>
+                                    <strong>Bing</strong><br>
+                                    <small>(bing.com)</small>
+                                </div>
+                                <div class="engine-item">
+                                    <div class="engine-logo" style="color: #7b1fa2;"><i class="fab fa-yahoo"></i></div>
+                                    <strong>Yahoo!</strong><br>
+                                    <small>(yahoo.com)</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="slide">
+                        <div class="slide-content">
+                            <h3><i class="fas fa-key"></i> 2. Từ khóa (Keyword)</h3>
+                            
+                            <div class="keyword-box">
+                                <i class="fas fa-key keyword-icon"></i>
+                                <div>
+                                    <strong>Khái niệm:</strong> Là một hoặc vài từ quan trọng nhất mô tả nội dung thông tin mà em muốn tìm.
+                                </div>
+                            </div>
+
+                            <strong style="display:block; margin-bottom: 15px; text-align: center;"><i class="fas fa-thumbs-up"></i> Chọn từ khóa tốt:</strong>
+                            <div class="keyword-examples">
+                                <div class="example-item good-keyword">
+                                    <i class="fas fa-check-circle"></i> "Hoa sen"
+                                </div>
+                                <div class="example-item bad-keyword">
+                                    <i class="fas fa-times-circle"></i> "Tìm cho tôi hình ảnh bông hoa sen đẹp nhất"
+                                </div>
+                                <div class="example-item good-keyword">
+                                    <i class="fas fa-check-circle"></i> "Văn Miếu Quốc Tử Giám"
+                                </div>
+                                <div class="example-item bad-keyword">
+                                    <i class="fas fa-times-circle"></i> "Địa chỉ của Văn Miếu ở đâu"
+                                </div>
+                            </div>
+                            <p style="text-align: center; margin-top: 15px; font-style: italic; color: #555;">(Từ khóa nên ngắn gọn, tập trung vào nội dung chính)</p>
+                        </div>
+                    </div>
+
+                    <div class="slide">
+                        <div class="slide-content">
+                            <h3><i class="fas fa-list-ol"></i> 3. Quy trình tìm kiếm thông tin</h3>
+                            <p>Để tìm kiếm, em thực hiện theo <strong>5 bước</strong> sau:</p>
+                            
+                            <div class="search-process">
+                                <div class="process-step">
+                                    <div class="step-icon"><i class="fab fa-chrome"></i></div>
+                                    <div class="step-desc">B1. Mở trình duyệt web</div>
+                                </div>
+                                <i class="fas fa-arrow-right step-arrow"></i>
+                                <div class="process-step">
+                                    <div class="step-icon"><i class="fab fa-google"></i></div>
+                                    <div class="step-desc">B2. Truy cập máy tìm kiếm</div>
+                                </div>
+                                <i class="fas fa-arrow-right step-arrow"></i>
+                                <div class="process-step">
+                                    <div class="step-icon"><i class="fas fa-keyboard"></i></div>
+                                    <div class="step-desc">B3. Gõ từ khóa vào ô tìm kiếm</div>
+                                </div>
+                                <i class="fas fa-arrow-right step-arrow"></i>
+                                <div class="process-step">
+                                    <div class="step-icon"><i class="fas fa-level-down-alt fa-rotate-90"></i></div>
+                                    <div class="step-desc">B4. Nhấn phím Enter</div>
+                                </div>
+                                <i class="fas fa-arrow-right step-arrow"></i>
+                                <div class="process-step">
+                                    <div class="step-icon"><i class="fas fa-hand-pointer"></i></div>
+                                    <div class="step-desc">B5. Nháy chuột vào kết quả</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="slide">
+                        <div class="slide-content text-center">
+                            <h3><i class="fas fa-book-reader"></i> GHI NHỚ BÀI HỌC</h3>
+                            
+                            <div style="font-size: 3rem; color: var(--search-blue); margin: 30px 0; display: flex; justify-content: center; align-items: center; gap: 15px;">
+                                <div style="text-align: center;"><i class="fab fa-google"></i><br><small style="font-size: 1rem;">Máy tìm kiếm</small></div>
+                                <i class="fas fa-plus"></i>
+                                <div style="text-align: center;"><i class="fas fa-key"></i><br><small style="font-size: 1rem;">Từ khóa</small></div>
+                                <i class="fas fa-arrow-right"></i>
+                                <div style="text-align: center;"><i class="fas fa-list-ul"></i><br><small style="font-size: 1rem;">Kết quả</small></div>
+                            </div>
+
+                            <div style="background: #e1f5fe; padding: 25px; border-radius: 15px; display: inline-block; text-align: left; box-shadow: 0 5px 15px rgba(0,0,0,0.05);">
+                                <p style="margin-bottom: 15px; font-size: 1.1rem;"><i class="fas fa-star" style="color: gold; margin-right: 10px;"></i> <strong>Máy tìm kiếm:</strong> Website giúp tìm thông tin (Google, Bing...).</p>
+                                <p style="margin-bottom: 15px; font-size: 1.1rem;"><i class="fas fa-star" style="color: gold; margin-right: 10px;"></i> <strong>Từ khóa:</strong> Từ quan trọng nhất mô tả nội dung cần tìm.</p>
+                                <p style="font-size: 1.1rem; font-weight: bold; color: var(--search-blue);"><i class="fas fa-clipboard-check" style="margin-right: 10px;"></i> Thực hiện đủ 5 bước để có kết quả chính xác.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <button class="slider-btn prev-btn" onclick="changeSlide(-1)"><i class="fas fa-chevron-left"></i></button>
+                <button class="slider-btn next-btn" onclick="changeSlide(1)"><i class="fas fa-chevron-right"></i></button>
+            </div>
+
+            <div class="text-content">
+                <p><strong>Hướng dẫn học tập:</strong> Em hãy bấm mũi tên Trái/Phải trên khung hình trên để xem tóm tắt nội dung bài học. Các hình ảnh minh họa sẽ giúp em ghi nhớ quy trình dễ dàng hơn!</p>
+            </div>
+
+            <div class="action-buttons">
+                <a href="Bai4.pdf" download class="btn btn-download" onclick="alert('Đang tải file bài giảng PDF về máy...')">
+                    <i class="fas fa-file-download"></i> Tải bài giảng (PDF)
+                </a>
+                
+                <button class="btn btn-exercise" onclick="openQuiz()">
+                    <i class="fas fa-puzzle-piece"></i> Bài tập
+                </button>
+            </div>
+        </div>
+
+        <div style="margin-top: 20px; text-align: center;">
+            <a href="index.html" style="text-decoration: none; color: #555;"><i class="fas fa-arrow-left"></i> Quay lại danh sách bài học</a>
+        </div>
+    </main>
+
+    <div id="quizModal" class="quiz-modal">
+        <div class="quiz-content">
+            <span class="close-quiz" onclick="closeQuiz()">&times;</span>
+            <div style="text-align: center; margin-bottom: 20px;">
+                <h2 style="color: var(--search-blue);">Bài tập trắc nghiệm</h2>
+                <p style="font-size: 0.9rem; color: #666;">Em hãy chọn đáp án đúng nhất</p>
+            </div>
+            
+            <div id="quizContainer">
+                <div class="quiz-progress" id="progressText">Câu 1 / 10</div>
+                <div class="quiz-question" id="questionText">Câu hỏi...</div>
+                <div class="quiz-options" id="optionsContainer"></div>
+            </div>
+
+            <div class="quiz-footer">
+                <div class="score-display">Điểm: <span id="scoreVal">0</span> / 10</div>
+                <button class="btn btn-exercise" id="nextBtn" style="padding: 8px 20px; font-size: 0.9rem;" onclick="nextQuestion()">Câu tiếp theo</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. XỬ LÝ SLIDE BÀI GIẢNG ---
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+
+        function showSlide(n) {
+            slides.forEach(s => s.classList.remove('active'));
+            currentSlide = (n + slides.length) % slides.length;
+            slides[currentSlide].classList.add('active');
+        }
+        function changeSlide(n) { showSlide(currentSlide + n); }
+
+
+        // --- 2. DỮ LIỆU 10 CÂU HỎI TRẮC NGHIỆM ---
+        const questions = [
+            {
+                question: "1. Máy tìm kiếm (Search Engine) là gì?",
+                options: ["Một loại máy tính đặc biệt", "Một trang web giúp tìm kiếm thông tin trên Internet", "Một phần mềm soạn thảo văn bản", "Một trò chơi trực tuyến"],
+                correct: 1
+            },
+            {
+                question: "2. Đâu là tên của một máy tìm kiếm phổ biến?",
+                options: ["Windows", "Word", "Google", "Paint"],
+                correct: 2
+            },
+            {
+                question: "3. \"Từ khóa\" (Keyword) trong tìm kiếm là gì?",
+                options: ["Mật khẩu để mở máy tính", "Tên của người đang tìm kiếm", "Từ hoặc cụm từ quan trọng mô tả nội dung cần tìm", "Địa chỉ của một trang web"],
+                correct: 2
+            },
+            {
+                question: "4. Để tìm thông tin về \"Hoa sen\", từ khóa nào sau đây là phù hợp nhất?",
+                options: ["Làm ơn tìm cho tôi hình hoa sen", "Hoa sen", "Những bông hoa đẹp nhất Việt Nam", "Tôi muốn xem ảnh"],
+                correct: 1
+            },
+            {
+                question: "5. Bước đầu tiên trong quy trình tìm kiếm thông tin là gì?",
+                options: ["Gõ từ khóa", "Nhấn phím Enter", "Mở trình duyệt web", "Chọn kết quả"],
+                correct: 2
+            },
+            {
+                question: "6. Sau khi gõ từ khóa vào ô tìm kiếm, em cần nhấn phím nào để bắt đầu tìm?",
+                options: ["Phím Cách (Space)", "Phím Shift", "Phím Enter", "Phím Ctrl"],
+                correct: 2
+            },
+            {
+                question: "7. Kết quả tìm kiếm thường được hiển thị dưới dạng nào?",
+                options: ["Một danh sách các liên kết (trang web, hình ảnh...)", "Một đoạn video tự động phát", "Một bài nhạc", "Một trang trắng"],
+                correct: 0
+            },
+            {
+                question: "8. Để xem nội dung chi tiết của một kết quả tìm kiếm, em cần làm gì?",
+                options: ["Nháy chuột vào liên kết đó", "Chỉ cần nhìn vào đó", "Tắt trình duyệt", "Gõ lại từ khóa"],
+                correct: 0
+            },
+            {
+                question: "9. Tại sao cần chọn từ khóa ngắn gọn và chính xác?",
+                options: ["Để gõ cho nhanh", "Để máy tìm kiếm trả về kết quả phù hợp nhất", "Để tiết kiệm điện", "Không có lý do gì"],
+                correct: 1
+            },
+            {
+                question: "10. Địa chỉ trang web của máy tìm kiếm Google là gì?",
+                options: ["google.com", "timkiem.vn", "internet.com", "search.org"],
+                correct: 0
+            }
+        ];
+
+        // --- 3. XỬ LÝ LOGIC TRẮC NGHIỆM ---
+        let currentQ = 0;
+        let score = 0;
+        const modal = document.getElementById('quizModal');
+        const qText = document.getElementById('questionText');
+        const progressText = document.getElementById('progressText');
+        const optContainer = document.getElementById('optionsContainer');
+        const nextBtn = document.getElementById('nextBtn');
+        const scoreSpan = document.getElementById('scoreVal');
+
+        function openQuiz() {
+            modal.style.display = 'flex';
+            currentQ = 0;
+            score = 0;
+            scoreSpan.innerText = 0;
+            loadQuestion();
+        }
+
+        function closeQuiz() {
+            modal.style.display = 'none';
+        }
+
+        function loadQuestion() {
+            progressText.innerText = `Câu ${currentQ + 1} / ${questions.length}`;
+
+            if(currentQ >= questions.length) {
+                qText.innerText = `Chúc mừng! Em đã hoàn thành bài tập.\nĐiểm số: ${score}/${questions.length}`;
+                progressText.innerText = "Hoàn thành";
+                optContainer.innerHTML = '';
+                nextBtn.innerText = "Làm lại";
+                nextBtn.onclick = openQuiz; 
+                nextBtn.style.display = 'inline-block';
+                return;
+            }
+
+            const q = questions[currentQ];
+            qText.innerText = q.question;
+            optContainer.innerHTML = '';
+            nextBtn.style.display = 'none'; 
+
+            q.options.forEach((opt, index) => {
+                const btn = document.createElement('div');
+                btn.className = 'option-btn';
+                btn.innerText = opt;
+                btn.onclick = () => checkAnswer(btn, index, q.correct);
+                optContainer.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(btn, index, correctIndex) {
+            const allOpts = optContainer.children;
+            for(let o of allOpts) o.style.pointerEvents = 'none';
+
+            if(index === correctIndex) {
+                btn.classList.add('correct');
+                score++;
+                scoreSpan.innerText = score;
+            } else {
+                btn.classList.add('wrong');
+                allOpts[correctIndex].classList.add('correct');
+            }
+            
+            nextBtn.style.display = 'block';
+            nextBtn.innerText = "Câu tiếp theo";
+            nextBtn.onclick = nextQuestion;
+        }
+
+        function nextQuestion() {
+            currentQ++;
+            loadQuestion();
+        }
+
+        window.onclick = function(event) {
+            if (event.target == modal) closeQuiz();
+        }
+    </script>
+</body>
+</html>
