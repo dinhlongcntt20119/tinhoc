@@ -83,7 +83,7 @@
     <div id="loadingOverlay">
         <div class="spinner"></div>
         <h3 style="color: var(--primary-color);">Đang nộp bài...</h3>
-        <p>Bé chờ một chút nhé, bài làm đang được gửi đi.</p>
+        <p>Con chờ một chút nhé, bài làm đang được gửi đi.</p>
     </div>
 
     <header id="mainHeader" style="display:none;">
@@ -103,7 +103,7 @@
     </div>
 
     <div style="height: 80px;"></div> 
-    <div class="footer-bar" id="footerBar"><button class="btn btn-submit" onclick="submitAndSend()"><i class="fas fa-paper-plane"></i> Nộp bài cho Thầy Cô</button></div>
+    <div class="footer-bar" id="footerBar"><button class="btn btn-submit" onclick="submitAndSend()"><i class="fas fa-paper-plane"></i> Nộp bài</button></div>
 
     <div id="resultModal" class="modal">
         <div class="modal-content">
@@ -180,7 +180,7 @@
         function startQuiz() {
             const name = document.getElementById('studentName').value.trim();
             const cls = document.getElementById('studentClass').value.trim();
-            if (!name || !cls) { alert("Bé ơi, nhớ nhập Tên và Lớp nhé!"); return; }
+            if (!name || !cls) { alert("Hãy nhập Tên và Lớp nhé!"); return; }
             info.name = name; info.class = cls;
             document.getElementById('loginScreen').style.display = 'none';
             document.getElementById('mainHeader').style.display = 'block';
@@ -210,7 +210,7 @@
                     const card = document.getElementById(`card-${i}`);
                     card.classList.add('unanswered-card');
                     card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    alert(`Bé chưa làm Câu ${i+1} kìa!`);
+                    alert(`Con chưa làm Câu ${i+1} kìa!`);
                     setTimeout(() => card.classList.remove('unanswered-card'), 2000);
                     return false;
                 }
@@ -291,7 +291,7 @@
                 document.getElementById('loadingOverlay').style.display = 'none';
                 document.getElementById('scoreDisplay').innerText = totalScore;
                 
-                let msg = score >= 35 ? "Xuất sắc! Con rất giỏi!" : (score >= 20 ? "Khá lắm! Cố gắng thêm nhé." : "Cần ôn lại bài nhé bé ơi!");
+                let msg = score >= 35 ? "Xuất sắc! Con rất giỏi!" : (score >= 20 ? "Khá lắm! Cố gắng thêm nhé." : "Cần ôn lại bài nhé!");
                 document.getElementById('feedbackText').innerText = msg;
                 document.getElementById('resultModal').style.display = 'flex';
                 pdfHeader.style.display = 'none'; 
@@ -300,4 +300,5 @@
     </script>
 </body>
 </html>
+
 
