@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ôn tập HK1 - Tin học 2</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Source+Code+Pro:wght@600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <style>
+        /* Giao diện màu Cam năng động cho bé Lớp 2 */
+        :root { --primary-color: #ff6f00; --accent-color: #ffca28; --bg-color: #fff8e1; --text-color: #333; --correct: #28a745; --wrong: #dc3545; }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Roboto', sans-serif; background-color: var(--bg-color); color: var(--text-color); }
+        
+        header { background: linear-gradient(135deg, var(--primary-color), #e65100); color: white; padding: 20px 40px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border-bottom: 4px solid var(--accent-color); }
+        .header-content { max-width: 1000px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
+        .logo-area { font-family: 'Source Code Pro', monospace; font-size: 1.8rem; font-weight: bold; }
+        .sub-title { font-size: 1rem; opacity: 0.9; margin-top: 5px; }
+
+        .container { max-width: 900px; margin: 40px auto; padding: 0 20px; display: none; }
+        
+        .quiz-card { 
+            background: white; border-radius: 15px; padding: 25px; margin-bottom: 20px; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-left: 6px solid var(--primary-color); 
+            page-break-inside: avoid; break-inside: avoid;
+        }
+        .q-title { font-weight: bold; font-size: 1.2rem; margin-bottom: 15px; color: var(--primary-color); }
+        .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        
+        .unanswered-card { border: 2px solid red !important; animation: shake 0.5s; }
+        @keyframes shake { 0% { transform: translateX(0); } 25% { transform: translateX(-5px); } 50% { transform: translateX(5px); } 100% { transform: translateX(0); } }
+
+        .option-label { display: block; padding: 12px 15px; border: 2px solid #ffe0b2; border-radius: 10px; cursor: pointer; transition: 0.2s; position: relative; font-size: 1.05rem; }
+        .option-label:hover { background-color: #fff3e0; border-color: var(--primary-color); }
+        .option-label input { margin-right: 10px; transform: scale(1.3); }
+        .disabled-card { pointer-events: none; opacity: 1; }
+        
+        .correct-answer { background-color: #d4edda !important; border-color: var(--correct) !important; color: #155724; font-weight: bold; }
+        .wrong-answer { background-color: #f8d7da !important; border-color: var(--wrong) !important; color: #721c24; opacity: 0.8; }
+        
+        .footer-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: white; padding: 15px; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); display: flex; justify-content: center; gap: 20px; z-index: 100; display: none; }
+        .btn { padding: 12px 35px; border-radius: 30px; border: none; font-weight: bold; cursor: pointer; font-size: 1rem; transition: 0.3s; }
+        .btn-submit { background-color: var(--primary-color); color: white; }
+        .btn-submit:hover { background-color: #e65100; }
+        
+        #loginScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, var(--primary-color), #ef6c00); display: flex; justify-content: center; align-items: center; z-index: 300; }
+        .login-box { background: white; padding: 40px; border-radius: 20px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .input-group { margin-bottom: 15px; text-align: left; }
+        .input-group label { display: block; margin-bottom: 5px; font-weight: bold; color: #555; }
+        .input-group input { width: 100%; padding: 12px; border: 2px solid #ffe0b2; border-radius: 10px; font-size: 1rem; }
+        .btn-start { background-color: var(--accent-color); color: #333; width: 100%; margin-top: 10px; }
+        
+        #loadingOverlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.95); z-index: 400; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+        .spinner { border: 8px solid #f3f3f3; border-top: 8px solid var(--accent-color); border-radius: 50%; width: 60px; height: 60px; animation: spin 1s linear infinite; margin-bottom: 20px;}
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); justify-content: center; align-items: center; z-index: 200; }
+        .modal-content { background: white; padding: 30px; border-radius: 20px; text-align: center; width: 400px; animation: popUp 0.3s ease; }
+        .score-circle { width: 120px; height: 120px; background: var(--primary-color); color: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 2.5rem; font-weight: bold; margin: 20px auto; border: 5px solid #fff3e0; }
+        
+        #pdf-header { display: none; }
+        @media (max-width: 600px) { .options-grid { grid-template-columns: 1fr; } .header-content { flex-direction: column; text-align: center; } }
+    </style>
+</head>
+<body>
+
+    <div id="loginScreen">
+        <div class="login-box">
+            <h2 style="color: var(--primary-color); margin-bottom:20px;"><i class="fas fa-star"></i> Chào bé Lớp 2</h2>
+            <div class="input-group"><label>Tên của con là gì?</label><input type="text" id="studentName" placeholder="Ví dụ: Bé Na"></div>
+            <div class="input-group"><label>Con học lớp mấy?</label><input type="text" id="studentClass" placeholder="Ví dụ: 2A"></div>
+            <button class="btn btn-submit btn-start" onclick="startQuiz()">Bắt đầu làm bài</button>
+        </div>
+    </div>
+
+    <div id="loadingOverlay">
+        <div class="spinner"></div>
+        <h3 style="color: var(--primary-color);">Đang nộp bài...</h3>
+        <p>Hệ thống đang lưu bài làm của con.</p>
+        <p style="color: red; font-weight: bold; font-size: 0.9rem;">Con đợi một chút nhé (10 giây)!</p>
+    </div>
+
+    <header id="mainHeader" style="display:none;">
+        <div class="header-content">
+            <div><div class="logo-area"><i class="fas fa-laptop"></i> TIN HỌC 2</div><div class="sub-title">Học sinh: <span id="displayInfo" style="color: #fff; font-weight: bold;"></span></div></div>
+        </div>
+    </header>
+
+    <div id="pdf-area">
+        <div id="pdf-header" style="text-align: center; padding: 20px; margin-bottom: 20px; border-bottom: 2px solid #333;">
+            <h1 style="color: #ff6f00;">KẾT QUẢ ÔN TẬP TIN HỌC 2</h1>
+            <h3 id="pdf-student-info"></h3>
+            <h2 id="pdf-score" style="color: red; margin: 10px 0;"></h2>
+            <p><i>(Bài làm của bé)</i></p>
+        </div>
+        <main class="container" id="quiz-container"></main>
+    </div>
+
+    <div style="height: 80px;"></div> 
+    <div class="footer-bar" id="footerBar"><button class="btn btn-submit" onclick="submitAndExport()"><i class="fas fa-check-circle"></i> Nộp bài xong</button></div>
+
+    <div id="resultModal" class="modal">
+        <div class="modal-content">
+            <h2 style="color: var(--primary-color);">Giỏi quá!</h2>
+            <div class="score-circle" id="scoreDisplay">0/25</div>
+            <p id="feedbackText" style="margin-bottom: 10px; font-weight: bold;">...</p>
+            <div id="statusMsg" style="font-size: 0.9rem; color: #e65100; margin-top:10px; padding: 10px; background: #fff3e0; border-radius: 10px; font-weight: bold;"></div>
+            <button class="btn btn-submit" onclick="location.reload()" style="margin-top: 15px; background-color: #6c757d;">Làm lại</button>
+        </div>
+    </div>
+
+    <script>
+        // --- !!! CẤU HÌNH LIÊN KẾT GOOGLE SCRIPT (LỚP 2) !!! ---
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwsEpTIO6L8YYHRaag_Pv8iVPcTy3z0DumnkbW_znmcBhRnTzA2S_wXHeaFN7LQm2fw4w/exec";
+
+        let info = { name: "", class: "" };
+        
+        // --- BỘ 25 CÂU HỎI TIN HỌC 2 (Đơn giản, dễ hiểu) ---
+        const questions = [
+            // 1. CÁC THÀNH PHẦN MÁY TÍNH
+            { q: "Câu 1: Bộ phận nào được ví như 'bộ não' điều khiển máy tính?", a: ["Màn hình", "Thân máy", "Chuột", "Bàn phím"], correct: 1 },
+            { q: "Câu 2: Thiết bị nào giúp con nhìn thấy hình ảnh, chữ viết?", a: ["Loa", "Màn hình", "Bàn phím", "Chuột"], correct: 1 },
+            { q: "Câu 3: Thiết bị nào có nhiều phím chữ và số để con gõ?", a: ["Chuột", "Màn hình", "Bàn phím", "Máy in"], correct: 2 },
+            { q: "Câu 4: Thiết bị nào giúp con điều khiển con trỏ trên màn hình?", a: ["Chuột máy tính", "Bàn phím", "Loa", "Thân máy"], correct: 0 },
+            { q: "Câu 5: Máy tính xách tay (Laptop) có đặc điểm gì?", a: ["Rất to và nặng", "Phải cắm điện mới dùng được", "Có thể gấp gọn và mang đi dễ dàng", "Không có bàn phím"], correct: 2 },
+            { q: "Câu 6: Máy tính bảng dùng màn hình gì?", a: ["Màn hình cảm ứng (chạm tay được)", "Màn hình ti vi", "Màn hình đen trắng", "Không có màn hình"], correct: 0 },
+
+            // 2. QUY TẮC TẮT/MỞ VÀ TƯ THẾ NGỒI
+            { q: "Câu 7: Để bật máy tính để bàn, con nhấn nút nguồn ở đâu?", a: ["Trên bàn phím", "Trên thân máy", "Trên con chuột", "Dưới gầm bàn"], correct: 1 },
+            { q: "Câu 8: Khi ngồi máy tính, lưng của con phải như thế nào?", a: ["Cong xuống", "Thẳng lưng", "Nằm ra ghế", "Nghiêng sang một bên"], correct: 1 },
+            { q: "Câu 9: Mắt con nên đặt cách màn hình bao xa?", a: ["Rất gần (10 cm)", "Rất xa (2 mét)", "Khoảng một cánh tay (50-80 cm)", "Sát vào màn hình"], correct: 2 },
+            { q: "Câu 10: Ánh sáng trong phòng khi dùng máy tính cần như thế nào?", a: ["Tắt hết đèn cho tối", "Đủ độ sáng, không chiếu thẳng vào mắt", "Dùng đèn màu đỏ", "Dùng đèn nhấp nháy"], correct: 1 },
+            { q: "Câu 11: Để tắt máy tính đúng cách, con làm gì?", a: ["Rút phích cắm điện ngay", "Bấm nút tắt trên màn hình", "Vào nút Start chọn Shut down", "Để máy tự tắt"], correct: 2 },
+            { q: "Câu 12: Tay ướt có được chạm vào máy tính không?", a: ["Có", "Không, rất nguy hiểm", "Được, nếu tay sạch", "Chỉ chạm nhẹ"], correct: 1 },
+
+            // 3. THAO TÁC VỚI CHUỘT
+            { q: "Câu 13: Con cầm chuột bằng tay nào?", a: ["Tay trái", "Tay phải", "Cả hai tay", "Cầm bằng ngón chân"], correct: 1 },
+            { q: "Câu 14: Ngón trỏ của con đặt lên nút nào của chuột?", a: ["Nút phải", "Nút trái", "Nút cuộn", "Đặt bên hông"], correct: 1 },
+            { q: "Câu 15: Thao tác 'Nháy chuột' là nhấn nút trái mấy lần?", a: ["1 lần", "2 lần", "3 lần", "Giữ nguyên không thả"], correct: 0 },
+            { q: "Câu 16: Thao tác 'Nháy đúp chuột' dùng để làm gì?", a: ["Tắt máy", "Mở một phần mềm hoặc thư mục", "Xóa hình", "Không làm gì cả"], correct: 1 },
+            { q: "Câu 17: Để di chuyển một biểu tượng ra chỗ khác, con dùng thao tác gì?", a: ["Nháy chuột", "Nháy đúp chuột", "Kéo thả chuột", "Lăn nút cuộn"], correct: 2 },
+
+            // 4. PHẦN MỀM VẼ PAINT
+            { q: "Câu 18: Biểu tượng của phần mềm Paint có hình gì?", a: ["Chữ W màu xanh", "Cái bảng màu và cây cọ vẽ", "Hình tròn đỏ", "Hình lá thư"], correct: 1 },
+            { q: "Câu 19: Để vẽ các nét tự do (như vẽ bằng tay), con chọn công cụ nào?", a: ["Bút chì", "Cục tẩy", "Thùng sơn", "Hình vuông"], correct: 0 },
+            { q: "Câu 20: Nếu vẽ sai, con dùng công cụ nào để xóa?", a: ["Bút chì", "Cục tẩy (Gôm)", "Cọ vẽ", "Thùng sơn"], correct: 1 },
+            { q: "Câu 21: Để tô màu vào một hình khép kín, con dùng công cụ gì?", a: ["Bút chì", "Bình phun sương", "Thùng sơn (Tô màu)", "Kính lúp"], correct: 2 },
+            { q: "Câu 22: Muốn vẽ hình Chữ nhật, con chọn công cụ hình gì?", a: ["Hình tròn", "Hình vuông/Chữ nhật", "Hình tam giác", "Hình ngôi sao"], correct: 1 },
+            { q: "Câu 23: Muốn vẽ hình Tròn, con chọn công cụ hình gì?", a: ["Hình bầu dục (Oval)", "Hình vuông", "Hình đường thẳng", "Hình tam giác"], correct: 0 },
+            { q: "Câu 24: Nét vẽ của con đang quá nhỏ, con muốn nét to hơn thì chọn nút nào?", a: ["Color (Màu)", "Size (Kích thước)", "Select (Chọn)", "View (Xem)"], correct: 1 },
+            { q: "Câu 25: Khi vẽ xong, muốn thoát khỏi Paint, con bấm vào nút nào?", a: ["Dấu trừ (-)", "Hình ô vuông", "Dấu nhân (X) màu đỏ ở góc trên", "Bấm vào màn hình"], correct: 2 }
+        ];
+
+        function startQuiz() {
+            const name = document.getElementById('studentName').value.trim();
+            const cls = document.getElementById('studentClass').value.trim();
+            if (!name || !cls) { alert("Bé ơi, nhập tên và lớp nhé!"); return; }
+            info.name = name; info.class = cls;
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('mainHeader').style.display = 'block';
+            document.getElementById('quiz-container').style.display = 'block';
+            document.getElementById('footerBar').style.display = 'flex';
+            document.getElementById('displayInfo').innerText = `${name} - ${cls}`;
+            renderQuiz();
+        }
+
+        function renderQuiz() {
+            const container = document.getElementById('quiz-container');
+            container.innerHTML = '';
+            questions.forEach((q, index) => {
+                let html = `<div class="quiz-card" id="card-${index}"><div class="q-title">${q.q}</div><div class="options-grid">`;
+                q.a.forEach((opt, i) => {
+                    html += `<label class="option-label" id="opt-${index}-${i}"><input type="radio" name="q${index}" value="${i}"> ${opt}</label>`;
+                });
+                html += `</div></div>`;
+                container.innerHTML += html;
+            });
+        }
+
+        function validateFull() {
+            for (let i = 0; i < questions.length; i++) {
+                const checked = document.querySelector(`input[name="q${i}"]:checked`);
+                if (!checked) {
+                    const card = document.getElementById(`card-${i}`);
+                    card.classList.add('unanswered-card');
+                    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    alert(`Bé chưa làm Câu ${i+1} kìa!`);
+                    setTimeout(() => card.classList.remove('unanswered-card'), 2000);
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        async function submitAndExport() {
+            if (!validateFull()) return;
+            if(!confirm("Con nộp bài nhé?")) return;
+
+            document.getElementById('loadingOverlay').style.display = 'flex';
+            document.getElementById('footerBar').style.display = 'none';
+
+            let score = 0;
+            questions.forEach((q, index) => {
+                const card = document.getElementById(`card-${index}`);
+                const selected = document.querySelector(`input[name="q${index}"]:checked`);
+                card.classList.add('disabled-card');
+                const val = parseInt(selected.value);
+                
+                if (val === q.correct) {
+                    score++;
+                    document.getElementById(`opt-${index}-${val}`).classList.add('correct-answer');
+                } else {
+                    document.getElementById(`opt-${index}-${val}`).classList.add('wrong-answer');
+                    document.getElementById(`opt-${index}-${q.correct}`).classList.add('correct-answer');
+                }
+            });
+
+            const totalScore = `${score}/${questions.length}`;
+            const pdfHeader = document.getElementById('pdf-header');
+            document.getElementById('pdf-student-info').innerText = `Họ tên: ${info.name} - Lớp: ${info.class}`;
+            document.getElementById('pdf-score').innerText = `Điểm số: ${totalScore}`;
+            pdfHeader.style.display = 'block'; 
+
+            const elementToPrint = document.getElementById('pdf-area');
+            const fileName = `TinHoc2_${info.name.replace(/\s/g,'_')}_${info.class}.pdf`;
+            
+            const pdfOptions = {
+                margin: 5, filename: fileName, image: { type: 'jpeg', quality: 0.95 },
+                html2canvas: { scale: 1.5, useCORS: true, scrollY: 0 },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+            };
+
+            try {
+                // 1. Tạo PDF Base64
+                const pdfBase64 = await html2pdf().set(pdfOptions).from(elementToPrint).output('datauristring');
+
+                // 2. Gửi lên Google Drive
+                if (GOOGLE_SCRIPT_URL.includes("DÁN_URL")) {
+                    console.warn("Chưa có link Script -> Chỉ tải về máy.");
+                } else {
+                    await fetch(GOOGLE_SCRIPT_URL, {
+                        method: "POST",
+                        body: JSON.stringify({
+                            fileName: fileName,
+                            fileData: pdfBase64,
+                            studentName: info.name,
+                            studentClass: info.class,
+                            score: totalScore
+                        })
+                    });
+                }
+
+                // 3. Tải về máy và Mở xem
+                await html2pdf().set(pdfOptions).from(elementToPrint).toPdf().get('pdf').then(function(pdf) {
+                    window.open(pdf.output('bloburl'), '_blank');
+                }).save();
+
+                document.getElementById('statusMsg').innerHTML = "<span style='color:green; font-weight:bold'><i class='fas fa-check-circle'></i> Giỏi lắm! Bài làm đã được lưu.</span>";
+                
+            } catch (error) {
+                console.error(error);
+                document.getElementById('statusMsg').innerHTML = `<span style='color:red'>Có lỗi nhỏ: ${error.message} (Nhưng bài vẫn được tải về máy).</span>`;
+            } finally {
+                document.getElementById('loadingOverlay').style.display = 'none';
+                document.getElementById('scoreDisplay').innerText = totalScore;
+                
+                let msg = score >= 20 ? "Xuất sắc! Con rất giỏi!" : "Khá lắm! Cố gắng thêm nhé!";
+                document.getElementById('feedbackText').innerText = msg;
+                document.getElementById('resultModal').style.display = 'flex';
+                pdfHeader.style.display = 'none'; 
+            }
+        }
+    </script>
+</body>
+</html>
