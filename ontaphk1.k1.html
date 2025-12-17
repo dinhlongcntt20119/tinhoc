@@ -6,35 +6,90 @@
     <title>Ôn tập Tin học 1 - Cuối kì 1</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&family=Roboto:wght@400;500;700&family=Source+Code+Pro:wght@600&display=swap" rel="stylesheet">
 
     <style>
-        :root { --primary: #009688; --secondary: #ff9800; --bg: #e0f2f1; --text: #333; --correct: #c8e6c9; --wrong: #ffcdd2; }
+        /* --- COPY STYLE TỪ INDEX.HTML --- */
+        :root {
+            --primary-color: #0056b3; 
+            --accent-color: #00a8ff; 
+            --bg-color: #f4f7f6;
+            --text-color: #333;
+            --card-bg: #ffffff;
+            
+            /* Giữ lại biến màu của bài trắc nghiệm cũ để không vỡ giao diện câu hỏi */
+            --primary: #009688; 
+            --secondary: #ff9800; 
+            --bg: #e0f2f1; 
+            --text: #333; 
+            --correct: #c8e6c9; 
+            --wrong: #ffcdd2;
+        }
+
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Roboto', sans-serif; background-color: var(--bg); color: var(--text); padding-bottom: 80px; }
+        body { font-family: 'Roboto', sans-serif; background-color: var(--bg-color); color: var(--text-color); padding-bottom: 80px; }
 
-        /* Header & Login styles giữ nguyên cho đẹp */
-        header { background: linear-gradient(135deg, var(--primary), #004d40); color: white; padding: 15px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100; }
-        .header-title { font-family: 'Fredoka', sans-serif; font-size: 1.5rem; text-transform: uppercase; letter-spacing: 1px; }
-        .student-info { font-size: 1rem; color: #ffeb3b; font-weight: bold; margin-top: 5px; }
+        /* --- HEADER STYLE (GIỐNG INDEX.HTML) --- */
+        header {
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            color: white;
+            padding: 15px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            border-bottom: 5px solid #ffcc00;
+            position: sticky; top: 0; z-index: 100; /* Giữ sticky để tiện theo dõi */
+        }
 
-        #loginScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 150, 136, 0.98); display: flex; justify-content: center; align-items: center; z-index: 2000; }
+        .header-left h1 {
+            font-family: 'Source Code Pro', monospace;
+            font-size: 1.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+
+        .header-left h2 { font-size: 1rem; font-weight: 400; opacity: 0.9; }
+
+        .header-right {
+            text-align: right;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .teacher-name { font-size: 1rem; font-weight: bold; color: #fff; }
+        
+        /* Style riêng cho thông tin học sinh hiển thị trên header */
+        .student-info-display { color: #ffeb3b; font-weight: bold; margin-top: 5px; font-size: 1.1rem; border-top: 1px dashed rgba(255,255,255,0.3); padding-top: 5px; }
+
+        /* --- FOOTER STYLE (GIỐNG INDEX.HTML) --- */
+        footer {
+            text-align: center; padding: 20px; margin-top: 50px;
+            color: #777; font-size: 0.9rem; border-top: 1px solid #ddd;
+            background-color: white;
+        }
+
+        /* --- STYLE CHO PHẦN TRẮC NGHIỆM (GIỮ NGUYÊN) --- */
+        #loginScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 86, 179, 0.98); display: flex; justify-content: center; align-items: center; z-index: 2000; }
         .login-box { background: white; padding: 30px; border-radius: 20px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
         .input-group { margin-bottom: 15px; text-align: left; }
-        .input-group label { font-weight: bold; display: block; margin-bottom: 5px; }
+        .input-group label { font-weight: bold; display: block; margin-bottom: 5px; color: #333; }
         .input-group input { width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 10px; font-size: 1rem; outline: none; }
         .btn-start { background: var(--secondary); color: white; border: none; padding: 12px 40px; border-radius: 30px; font-size: 1.2rem; font-weight: bold; cursor: pointer; width: 100%; }
         
-        .container { max-width: 800px; margin: 20px auto; padding: 0 15px; display: none; }
+        .container { max-width: 800px; margin: 40px auto; padding: 0 15px; display: none; }
         .question-card { background: white; border-radius: 15px; padding: 20px; margin-bottom: 25px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); border-bottom: 5px solid #ccc; page-break-inside: avoid; }
         .q-header { display: flex; align-items: flex-start; margin-bottom: 15px; }
-        .q-number { background: var(--primary); color: white; width: 35px; height: 35px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; margin-right: 15px; flex-shrink: 0; }
+        .q-number { background: var(--primary-color); color: white; width: 35px; height: 35px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; margin-right: 15px; flex-shrink: 0; }
         .q-text { font-size: 1.1rem; font-weight: 600; line-height: 1.4; }
 
         .answers-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
         .answer-opt { display: flex; align-items: center; padding: 12px; border: 2px solid #eee; border-radius: 12px; cursor: pointer; transition: all 0.2s; background: #fafafa; }
-        .answer-opt:hover { border-color: var(--primary); background: #e0f2f1; }
-        .answer-opt input { margin-right: 10px; transform: scale(1.3); accent-color: var(--primary); flex-shrink: 0; }
+        .answer-opt:hover { border-color: var(--primary-color); background: #e0f2f1; }
+        .answer-opt input { margin-right: 10px; transform: scale(1.3); accent-color: var(--primary-color); flex-shrink: 0; }
         .ans-icon { font-size: 1.2rem; margin-right: 8px; color: #555; width: 25px; text-align: center; }
         .ans-text { font-weight: 500; }
 
@@ -44,42 +99,65 @@
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
 
         .footer-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: white; padding: 15px; box-shadow: 0 -5px 20px rgba(0,0,0,0.1); display: flex; justify-content: center; gap: 20px; z-index: 1000; display: none; }
-        .btn-submit { background: var(--primary); color: white; border: none; padding: 12px 30px; border-radius: 30px; font-weight: bold; font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; gap: 10px; }
+        .btn-submit { background: var(--primary-color); color: white; border: none; padding: 12px 30px; border-radius: 30px; font-weight: bold; font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: 0.3s; }
+        .btn-submit:hover { background: #004494; transform: translateY(-3px); }
         
         .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 3000; flex-direction: column; color: white; }
         .spinner { border: 6px solid #f3f3f3; border-top: 6px solid var(--secondary); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin-bottom: 20px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         .result-box { background: white; color: #333; padding: 30px; border-radius: 20px; text-align: center; width: 90%; max-width: 400px; animation: popUp 0.3s ease; }
-        .score-circle { width: 100px; height: 100px; background: var(--primary); color: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 2rem; font-weight: bold; margin: 20px auto; }
+        .score-circle { width: 100px; height: 100px; background: var(--primary-color); color: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 2rem; font-weight: bold; margin: 20px auto; }
         #pdf-header-info { display: none; text-align: center; margin-bottom: 20px; border-bottom: 2px solid #333; padding-bottom: 10px; }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            header { flex-direction: column; text-align: center; gap: 15px; }
+            .header-right { text-align: center; width: 100%; }
+        }
     </style>
 </head>
 <body>
 
     <div id="loginScreen">
         <div class="login-box">
-            <i class="fas fa-robot" style="font-size: 3rem; color: var(--primary); margin-bottom: 15px;"></i>
-            <h2>BÉ VUI HỌC TIN</h2>
-            <div class="input-group"><label>Họ và tên con:</label><input type="text" id="sName" placeholder="Nhập tên..."></div>
-            <div class="input-group"><label>Lớp:</label><input type="text" id="sClass" placeholder="Ví dụ: 1A"></div>
+            <i class="fas fa-robot" style="font-size: 3rem; color: var(--primary-color); margin-bottom: 15px;"></i>
+            <h2 style="color: var(--primary-color); margin-bottom: 20px;">ÔN TẬP HỌC TIN 1</h2>
+            <div class="input-group"><label>Họ và tên:</label><input type="text" id="sName" placeholder="Nhập tên..."></div>
+            <div class="input-group"><label>Lớp:</label><input type="text" id="sClass" placeholder="Ví dụ: 4A"></div>
             <button class="btn-start" onclick="startQuiz()">BẮT ĐẦU</button>
         </div>
     </div>
 
     <header id="mainHeader" style="display: none;">
-        <div class="header-title"><i class="fas fa-laptop-code"></i> TIN HỌC 1</div>
-        <div class="student-info" id="displayInfo"></div>
+        <div class="header-left">
+            <h1><i class="fas fa-laptop-code"></i> TIN HỌC 1</h1>
+            <h2>Bộ sách: Luyện tập Tin học</h2>
+        </div>
+        <div class="header-right">
+            <div class="teacher-name">GV - Nguyễn Đình Bạch Long</div>
+            <div class="student-info-display" id="displayInfo"></div>
+        </div>
     </header>
+
+    <div style="text-align: center; margin-top: 20px; display: none;" id="backButtonArea">
+        <a href="../index.html" style="text-decoration: none; color: #666;"><i class="fas fa-arrow-left"></i> Quay lại trang chủ</a>
+    </div>
 
     <div id="pdf-area">
         <div id="pdf-header-info">
-            <h1 style="color: var(--primary);">KẾT QUẢ ÔN TẬP CUỐI KÌ 1</h1>
+            <h1 style="color: var(--primary-color);">KẾT QUẢ ÔN TẬP CUỐI KÌ 1</h1>
             <h3 id="pdf-name"></h3>
             <h2 id="pdf-score" style="color: red;"></h2>
         </div>
         <div class="container" id="quizContainer"></div>
     </div>
+
+    <footer id="mainFooter" style="display: none;">
+        &copy; 2025 - Website hỗ trợ học tập Tin học 1 | GV Nguyễn Đình Bạch Long
+        <div>Email: dinhlongcntt20119@gmail.com  |  SĐT: 0937438939</div>
+        <div>STK: 0937438939  |  Ngân hàng: Vietinbank</div>
+    </footer>
 
     <div class="footer-bar" id="footerBar">
         <button class="btn-submit" onclick="submitExam()"><i class="fas fa-paper-plane"></i> NỘP BÀI & LƯU DRIVE</button>
@@ -88,16 +166,17 @@
     <div id="loadingOverlay" class="overlay">
         <div class="spinner"></div>
         <h3>Đang nộp bài...</h3>
-        <p>Hệ thống đang lưu gửi bài cho giáo viên"</p>
+        <p>Hệ thống đang lưu gửi bài cho giáo viên</p>
     </div>
 
     <div id="resultModal" class="overlay">
         <div class="result-box">
-            <h2 style="color: var(--primary);">Hoàn thành!</h2>
+            <h2 style="color: var(--primary-color);">Hoàn thành!</h2>
             <div class="score-circle" id="scoreDisplay">0/30</div>
             <p id="msg" style="font-weight: bold; margin-bottom: 10px;"></p>
             <div id="driveMsg" style="background: #eee; padding: 10px; border-radius: 8px; font-size: 0.85rem;"></div>
             <button class="btn-start" style="margin-top: 15px; background: #757575;" onclick="location.reload()">Làm lại</button>
+            <a href="../index.html" class="btn-start" style="margin-top: 10px; background: var(--primary-color); display: inline-block; text-decoration: none; padding: 12px 0;">Về trang chủ</a>
         </div>
     </div>
 
@@ -106,7 +185,7 @@
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyNfaBH5mDRDyUbwXgexVCT52w1laD5BQP7H5nvmePW1tQKzYbrkByBLnWu1rCr9PTK/exec"
         let student = { name: "", class: "" };
 
-        // --- CẤU HÌNH CÂU HỎI ---
+        // --- CẤU HÌNH CÂU HỎI (GIỮ NGUYÊN) ---
         // Lưu ý: Các câu 3,6,7,8,9,10,11,12,14,15,21,24 đã xóa thuộc tính 'i' (icon)
         const questions = [
             // CÂU 1
@@ -310,7 +389,9 @@
             student.name = name; student.class = cls;
             document.getElementById('displayInfo').innerText = `${name} - Lớp ${cls}`;
             document.getElementById('loginScreen').style.display = 'none';
-            document.getElementById('mainHeader').style.display = 'block';
+            document.getElementById('mainHeader').style.display = 'flex'; // Đổi từ block sang flex để hợp với header mới
+            document.getElementById('mainFooter').style.display = 'block';
+            document.getElementById('backButtonArea').style.display = 'block';
             document.getElementById('quizContainer').style.display = 'block';
             document.getElementById('footerBar').style.display = 'flex';
             renderQuiz();
