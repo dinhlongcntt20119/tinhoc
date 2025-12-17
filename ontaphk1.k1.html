@@ -77,7 +77,10 @@
         .login-box { background: white; padding: 30px; border-radius: 20px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
         .input-group { margin-bottom: 15px; text-align: left; }
         .input-group label { font-weight: bold; display: block; margin-bottom: 5px; color: #333; }
-        .input-group input { width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 10px; font-size: 1rem; outline: none; }
+        
+        /* Cập nhật style cho cả input và select */
+        .input-group input, .input-group select { width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 10px; font-size: 1rem; outline: none; background: white; }
+        
         .btn-start { background: var(--secondary); color: white; border: none; padding: 12px 40px; border-radius: 30px; font-size: 1.2rem; font-weight: bold; cursor: pointer; width: 100%; }
         
         .container { max-width: 800px; margin: 40px auto; padding: 0 15px; display: none; }
@@ -121,10 +124,20 @@
 
     <div id="loginScreen">
         <div class="login-box">
-            <i class="fas fa-robot" style="font-size: 3rem; color: var(--primary-color); margin-bottom: 15px;"></i>
-            <h2 style="color: var(--primary-color); margin-bottom: 20px;">ÔN TẬP HỌC TIN 1</h2>
+            <i class="fas fa-laptop-code" style="font-size: 3rem; color: var(--primary-color); margin-bottom: 15px;"></i>
+            <h2 style="color: var(--primary-color); margin-bottom: 20px;">ÔN TẬP TIN HỌC 1</h2>
+            
             <div class="input-group"><label>Họ và tên:</label><input type="text" id="sName" placeholder="Nhập tên..."></div>
-            <div class="input-group"><label>Lớp:</label><input type="text" id="sClass" placeholder="Ví dụ: 4A"></div>
+            
+            <div class="input-group">
+                <label>Lớp:</label>
+                <select id="sClass">
+                    <option value="">-- Chọn lớp --</option>
+                    <option value="2A">2A</option>
+                    <option value="2D">2D</option>
+                </select>
+            </div>
+            
             <button class="btn-start" onclick="startQuiz()">BẮT ĐẦU</button>
         </div>
     </div>
@@ -160,7 +173,7 @@
     </footer>
 
     <div class="footer-bar" id="footerBar">
-        <button class="btn-submit" onclick="submitExam()"><i class="fas fa-paper-plane"></i> NỘP BÀI & LƯU DRIVE</button>
+        <button class="btn-submit" onclick="submitExam()"><i class="fas fa-paper-plane"></i> NỘP BÀI</button>
     </div>
 
     <div id="loadingOverlay" class="overlay">
