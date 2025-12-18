@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ôn tập HK1 - Tin học 3 (Chân trời sáng tạo)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Source+Code+Pro:wght@600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <style>
+        :root {
+            --primary-color: #00a859; 
+            --accent-color: #f1c40f;
+            --bg-color: #f0f9f4;
+            --text-color: #333;
+            --correct: #28a745;
+            --wrong: #dc3545;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Roboto', sans-serif; background-color: var(--bg-color); color: var(--text-color); padding-bottom: 80px; }
+
+        /* HEADER */
+        header {
+            background: linear-gradient(135deg, var(--primary-color), #008f4c);
+            color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100;
+        }
+        .header-left h1 { font-family: 'Source Code Pro', monospace; font-size: 1.5rem; margin-bottom: 5px; }
+        .teacher-name { font-weight: bold; font-size: 0.9rem; opacity: 0.9; text-align: right; }
+        #studentInfoDisplay { font-weight: bold; color: var(--accent-color); margin-top: 5px; text-align: right; }
+
+        /* LOGIN SCREEN */
+        #loginScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 168, 89, 0.95); display: flex; justify-content: center; align-items: center; z-index: 2000; }
+        .login-box { background: white; padding: 40px; border-radius: 15px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .input-group { margin-bottom: 15px; text-align: left; }
+        .input-group label { font-weight: bold; display: block; margin-bottom: 5px; }
+        .input-group input, .input-group select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 1rem; }
+        .btn-start { background: var(--accent-color); color: #333; border: none; padding: 12px 30px; border-radius: 25px; font-weight: bold; font-size: 1.1rem; cursor: pointer; width: 100%; margin-top: 10px; transition: 0.3s; }
+        .btn-start:hover { transform: scale(1.05); background: #e1b700; }
+
+        /* QUIZ CONTAINER */
+        .container { max-width: 800px; margin: 30px auto; padding: 0 15px; display: none; }
+        .question-card { background: white; border-radius: 10px; padding: 20px; margin-bottom: 20px; box-shadow: 0 3px 10px rgba(0,0,0,0.05); border-left: 5px solid var(--primary-color); page-break-inside: avoid; }
+        .q-header { display: flex; gap: 15px; margin-bottom: 15px; }
+        .q-num { background: var(--primary-color); color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; flex-shrink: 0; }
+        .q-text { font-weight: 500; font-size: 1.05rem; line-height: 1.4; display: flex; align-items: center; flex-wrap: wrap; }
+        
+        .options-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+        .option-label { display: flex; align-items: center; padding: 10px; border: 1px solid #eee; border-radius: 8px; cursor: pointer; transition: 0.2s; }
+        .option-label:hover { background: #f9f9f9; border-color: var(--primary-color); }
+        .option-label input { margin-right: 10px; transform: scale(1.2); accent-color: var(--primary-color); flex-shrink: 0; }
+        
+        /* Style cho hình ảnh trong đáp án */
+        .ans-img { height: 50px; width: auto; object-fit: contain; border: 1px solid #ddd; border-radius: 4px; padding: 2px; background: white; margin-right: 10px; vertical-align: middle; }
+        .ans-text { display: flex; align-items: center; }
+
+        .correct { background-color: #d4edda !important; border-color: #c3e6cb !important; color: #155724; }
+        .wrong { background-color: #f8d7da !important; border-color: #f5c6cb !important; color: #721c24; opacity: 0.7; }
+        .unanswered { border: 2px solid var(--wrong); animation: shake 0.5s; }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+
+        /* FOOTER BAR */
+        .footer-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: white; padding: 15px; box-shadow: 0 -5px 15px rgba(0,0,0,0.1); display: none; justify-content: center; z-index: 90; }
+        
+        /* OVERLAY LOADING & RESULT */
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 3000; color: white; flex-direction: column; }
+        .spinner { border: 5px solid #f3f3f3; border-top: 5px solid var(--accent-color); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin-bottom: 15px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        .result-box { background: white; color: #333; padding: 30px; border-radius: 15px; text-align: center; max-width: 400px; width: 90%; }
+        .score-big { font-size: 3rem; font-weight: bold; color: var(--primary-color); margin: 10px 0; }
+
+        /* PDF HEADER (HIDDEN) */
+        #pdf-header { display: none; text-align: center; margin-bottom: 20px; border-bottom: 2px solid #333; padding-bottom: 10px; }
+    </style>
+</head>
+<body>
+
+    <div id="loginScreen">
+        <div class="login-box">
+            <i class="fas fa-shapes" style="font-size: 3rem; color: var(--primary-color); margin-bottom: 15px;"></i>
+            <h2 style="color: var(--primary-color);">ÔN TẬP TIN HỌC 3</h2>
+            <p style="margin-bottom: 20px; color: #666;">Chân Trời Sáng Tạo - HK1</p>
+            
+            <div class="input-group">
+                <label>Họ và tên học sinh:</label>
+                <input type="text" id="studentName" placeholder="Nhập họ tên...">
+            </div>
+            <div class="input-group">
+                <label>Lớp:</label>
+                <select id="studentClass">
+                    <option value="">-- Chọn lớp --</option>
+                    <option value="3A">3A</option>
+                    <option value="3B">3B</option>
+                    <option value="3C">3C</option>
+                    <option value="3D">3D</option>
+                </select>
+            </div>
+            <button class="btn-start" onclick="startApp()">BẮT ĐẦU LÀM BÀI</button>
+        </div>
+    </div>
+
+    <header id="mainHeader" style="display: none;">
+        <div class="header-left">
+            <h1>TIN HỌC 3</h1>
+            <div style="font-size: 0.9rem;">Ôn tập Cuối Học kì 1</div>
+        </div>
+        <div class="header-right">
+            <div class="teacher-name">GV: Nguyễn Đình Bạch Long</div>
+            <div id="studentInfoDisplay"></div>
+        </div>
+    </header>
+
+    <div style="text-align: center; margin-top: 20px; display: none;" id="backButtonArea">
+        <a href="../index.html" style="text-decoration: none; color: #666;"><i class="fas fa-arrow-left"></i> Quay lại trang chủ</a>
+    </div>
+
+    <div id="contentToPrint">
+        <div id="pdf-header">
+            <h2>KẾT QUẢ KIỂM TRA CUỐI HỌC KÌ 1</h2>
+            <p id="pdf-info" style="font-size: 1.2rem; font-weight: bold;"></p>
+            <p id="pdf-score" style="color: red; font-size: 1.5rem; font-weight: bold;"></p>
+        </div>
+        <div class="container" id="quizContainer"></div>
+    </div>
+
+    <div class="footer-bar" id="footerBar">
+        <button class="btn-start" style="width: auto; margin: 0;" onclick="submitQuiz()">
+            <i class="fas fa-paper-plane"></i> NỘP BÀI
+        </button>
+    </div>
+
+    <div id="loadingOverlay" class="overlay">
+        <div class="spinner"></div>
+        <p>Đang chấm bài và tạo file...</p>
+    </div>
+
+    <div id="resultModal" class="overlay">
+        <div class="result-box">
+            <h3>Kết quả của con</h3>
+            <div class="score-big" id="scoreDisplay">0/0</div>
+            <p id="feedbackText"></p>
+            <div id="statusMsg" style="margin-top:10px; font-size:0.9rem;"></div>
+            <button class="btn-start" style="margin-top: 20px; background: #ddd;" onclick="location.reload()">Làm lại</button>
+            <a href="../index.html" class="btn-start" style="display:block; margin-top:10px; text-decoration:none; background: var(--primary-color); color: white;">Về trang chủ</a>
+        </div>
+    </div>
+
+    <script>
+        // CẤU HÌNH BIẾN
+        let info = { name: "", class: "" };
+
+        // --- BỘ CÂU HỎI (30 CÂU - ĐÃ KIỂM TRA KỸ CÚ PHÁP) ---
+        var questions = [
+            // --- 5 CÂU TỪ ĐỀ THI ---
+            {
+                q: "Các phím nào dưới đây thuộc hàng phím cơ sở?",
+                a: [
+                    {t: "W, E, R, T"},
+                    {t: "Y, U, I, O"},
+                    {t: "A, S, D, F"}, // Đúng
+                    {t: "X, C, V, B"}
+                ],
+                c: 2
+            },
+            {
+                q: "Phát biểu nào dưới đây là SAI về Internet?",
+                a: [
+                    {t: "Internet là kho thông tin khổng lồ."},
+                    {t: "Mọi thông tin trên Internet đều phù hợp với em."}, // Đúng (Đây là phát biểu sai)
+                    {t: "Em có thể xem tin tức, giải trí, học tập trên Internet."},
+                    {t: "Khi truy cập Internet, em nên có sự đồng hành, hướng dẫn từ cha mẹ, thầy cô."}
+                ],
+                c: 1
+            },
+            // CÂU 3: CÓ HÌNH ẢNH
+            {
+                q: "Em sử dụng phần mềm nào sau đây để truy cập Internet?",
+                a: [
+                    {t: "<img src='rapid.png' class='ans-img'> Rapid Typing"},
+                    {t: "<img src='paint.png' class='ans-img'> Paint"},
+                    {t: "<img src='explore.png' class='ans-img'> File Explorer"},
+                    {t: "<img src='chrome.png' class='ans-img'> Google Chrome"} // Đúng
+                ],
+                c: 3
+            },
+            {
+                q: "Trong phần mềm Rapid Typing, để luyện gõ hàng phím cơ sở, hàng phím trên và hàng phím dưới, em chọn khóa học nào?",
+                a: [
+                    {t: "Basic – Lesson 1, Lesson 2, Lesson 3."},
+                    {t: "Basic – Lesson 3, Lesson 4, Lesson 5."},
+                    {t: "Introduction – Lesson 1, Lesson 5, Lesson 6."}, // Đúng
+                    {t: "Introduction – Lesson 1, Lesson 6, Lesson 7."}
+                ],
+                c: 2
+            },
+            {
+                q: "Để tắt máy tính đúng cách, em chọn phương án nào dưới đây?",
+                a: [
+                    {t: "Dùng chuột thực hiện lệnh Shut down."}, // Đúng
+                    {t: "Nhấn và giữ nút nguồn trên thân máy."},
+                    {t: "Nhấn nút nguồn trên màn hình."},
+                    {t: "Ngắt nguồn điện của máy tính."}
+                ],
+                c: 0
+            },
+
+            // --- 25 CÂU BỔ SUNG (ĐÃ KIỂM TRA CÚ PHÁP CHẶT CHẼ) ---
+            {
+                q: "Thông tin xung quanh em tồn tại ở những dạng nào?",
+                a: [{t: "Văn bản, Hình ảnh, Âm thanh."}, {t: "Chỉ có Văn bản."}, {t: "Chỉ có Hình ảnh và Âm thanh."}, {t: "Máy tính, Điện thoại, Tivi."}],
+                c: 0
+            },
+            {
+                q: "Tai em nghe thấy tiếng trống trường. Đó là thông tin dạng gì?",
+                a: [{t: "Hình ảnh."}, {t: "Âm thanh."}, {t: "Văn bản."}, {t: "Video."}],
+                c: 1
+            },
+            {
+                q: "Mắt em nhìn thấy đèn tín hiệu giao thông chuyển sang màu đỏ. Đó là thông tin dạng gì?",
+                a: [{t: "Hình ảnh."}, {t: "Âm thanh."}, {t: "Văn bản."}, {t: "Mùi vị."}],
+                c: 0
+            },
+            {
+                q: "Bộ não con người dùng để làm gì trong quá trình xử lý thông tin?",
+                a: [{t: "Thu nhận thông tin."}, {t: "Xử lý thông tin và ra quyết định."}, {t: "Lưu trữ hình ảnh."}, {t: "Phát ra âm thanh."}],
+                c: 1
+            },
+            {
+                q: "Thiết bị nào sau đây là 'bộ não' của máy tính, dùng để xử lý thông tin?",
+                a: [{t: "Chuột."}, {t: "Bàn phím."}, {t: "Thân máy (CPU)."}, {t: "Màn hình."}],
+                c: 2
+            },
+            {
+                q: "Chuột và Bàn phím là thiết bị dùng để làm gì?",
+                a: [{t: "Đưa thông tin vào máy tính (Thiết bị vào)."}, {t: "Đưa thông tin ra ngoài (Thiết bị ra)."}, {t: "Xử lý thông tin."}, {t: "Lưu trữ thông tin."}],
+                c: 0
+            },
+            {
+                q: "Màn hình và Loa là thiết bị dùng để làm gì?",
+                a: [{t: "Đưa thông tin vào máy tính."}, {t: "Đưa thông tin ra ngoài (Thiết bị ra)."}, {t: "Gõ chữ."}, {t: "Điều khiển máy tính."}],
+                c: 1
+            },
+            {
+                q: "Máy tính để bàn thường có mấy bộ phận chính?",
+                a: [{t: "2 bộ phận."}, {t: "3 bộ phận."}, {t: "4 bộ phận (Thân máy, Màn hình, Bàn phím, Chuột)."}, {t: "5 bộ phận."}],
+                c: 2
+            },
+            {
+                q: "Tư thế ngồi máy tính nào là ĐÚNG?",
+                a: [{t: "Lưng cong, mắt sát màn hình."}, {t: "Lưng thẳng, mắt ngang tầm màn hình, khoảng cách 50-80cm."}, {t: "Ngồi vắt chéo chân lên ghế."}, {t: "Nằm ra bàn để sử dụng."}],
+                c: 1
+            },
+            {
+                q: "Khu vực chính của bàn phím có mấy hàng phím?",
+                a: [{t: "3 hàng."}, {t: "4 hàng."}, {t: "5 hàng."}, {t: "6 hàng."}],
+                c: 2
+            },
+            {
+                q: "Hai phím có gai (F và J) nằm trên hàng phím nào?",
+                a: [{t: "Hàng phím số."}, {t: "Hàng phím trên."}, {t: "Hàng phím cơ sở."}, {t: "Hàng phím dưới."}],
+                c: 2
+            },
+            {
+                q: "Phím dài nhất trên bàn phím là phím nào?",
+                a: [{t: "Phím Enter."}, {t: "Phím Shift."}, {t: "Phím Cách (Space)."}, {t: "Phím Caps Lock."}],
+                c: 2
+            },
+            {
+                q: "Để gõ các ký tự trên (ví dụ: @, #, $), em cần nhấn giữ phím nào?",
+                a: [{t: "Ctrl."}, {t: "Alt."}, {t: "Shift."}, {t: "Enter."}],
+                c: 2
+            },
+            {
+                q: "Ngón tay nào phụ trách gõ phím Cách (Space)?",
+                a: [{t: "Ngón trỏ."}, {t: "Ngón út."}, {t: "Ngón cái."}, {t: "Ngón giữa."}],
+                c: 2
+            },
+            {
+                q: "Thông tin trên Internet có đáng tin cậy hoàn toàn không?",
+                a: [{t: "Có, tất cả đều đúng."}, {t: "Không, cần phải kiểm tra và chọn lọc."}, {t: "Chỉ tin thông tin có hình ảnh."}, {t: "Chỉ tin thông tin từ bạn bè."}],
+                c: 1
+            },
+            {
+                q: "Khi thấy thông tin xấu, độc hại trên Internet, em nên làm gì?",
+                a: [{t: "Chia sẻ cho bạn bè xem."}, {t: "Tắt đi và báo cho người lớn (cha mẹ, thầy cô)."}, {t: "Tiếp tục xem vì tò mò."}, {t: "Lưu lại vào máy tính."}],
+                c: 1
+            },
+            {
+                q: "Sắp xếp đồ vật trong gia đình ngăn nắp giúp ích gì?",
+                a: [{t: "Làm nhà cửa chật chội hơn."}, {t: "Dễ tìm kiếm và quản lý đồ vật."}, {t: "Mất nhiều thời gian hơn."}, {t: "Không có tác dụng gì."}],
+                c: 1
+            },
+            {
+                q: "Trong máy tính, thông tin được lưu trữ trong đâu để dễ quản lý?",
+                a: [{t: "Trong Thùng rác."}, {t: "Trong các Thư mục (Folder)."}, {t: "Trên màn hình nền."}, {t: "Trong bàn phím."}],
+                c: 1
+            },
+            {
+                q: "Biểu tượng của Thư mục (Folder) thường có màu gì?",
+                a: [{t: "Màu xanh dương."}, {t: "Màu đỏ."}, {t: "Màu vàng."}, {t: "Màu tím."}],
+                c: 2
+            },
+            {
+                q: "Cây thư mục giúp chúng ta điều gì?",
+                a: [{t: "Trồng cây trên máy tính."}, {t: "Nhìn thấy cấu trúc sắp xếp của các thư mục và tệp."}, {t: "Vẽ tranh đẹp hơn."}, {t: "Nghe nhạc hay hơn."}],
+                c: 1
+            },
+            {
+                q: "Để xóa một thư mục, em chọn thư mục đó rồi nhấn phím nào?",
+                a: [{t: "Enter."}, {t: "Delete."}, {t: "Space."}, {t: "Shift."}],
+                c: 1
+            },
+            {
+                q: "Em không nên làm gì khi sử dụng máy tính công cộng?",
+                a: [{t: "Đăng xuất tài khoản sau khi dùng."}, {t: "Lưu mật khẩu cá nhân vào máy."}, {t: "Xóa lịch sử duyệt web."}, {t: "Tắt máy khi không sử dụng."}],
+                c: 1
+            },
+            {
+                q: "Máy tính giúp em làm gì trong học tập?",
+                a: [{t: "Tính toán nhanh."}, {t: "Soạn thảo văn bản."}, {t: "Tìm kiếm thông tin."}, {t: "Tất cả các ý trên."}],
+                c: 3
+            },
+            {
+                q: "Khi gõ bàn phím, hai bàn tay đặt ở đâu?",
+                a: [{t: "Đặt tùy ý."}, {t: "Đặt lên hàng phím số."}, {t: "Đặt lên hàng phím cơ sở."}, {t: "Đặt lên hàng phím dưới."}],
+                c: 2
+            },
+            {
+                q: "Thiết bị nào sau đây KHÔNG PHẢI là thiết bị máy tính?",
+                a: [{t: "Máy quét (Scanner)."}, {t: "Máy in."}, {t: "Nồi cơm điện."}, {t: "Webcam."}],
+                c: 2
+            }
+        ];
+
+        // --- HÀM TRỘN MẢNG ---
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // --- KHỞI ĐỘNG ỨNG DỤNG ---
+        function startApp() {
+            const name = document.getElementById('studentName').value.trim();
+            const cls = document.getElementById('studentClass').value;
+
+            if(!name) { alert("Con chưa nhập tên kìa!"); return; }
+            if(!cls) { alert("Con chưa chọn lớp kìa!"); return; }
+
+            info.name = name;
+            info.class = cls;
+
+            document.getElementById('studentInfoDisplay').innerText = `${name} - Lớp ${cls}`;
+            
+            // Ẩn login, hiện nội dung
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('mainHeader').style.display = 'flex';
+            document.getElementById('backButtonArea').style.display = 'block';
+            document.getElementById('quizContainer').style.display = 'block';
+            document.getElementById('footerBar').style.display = 'flex';
+
+            // TRỘN VÀ HIỂN THỊ CÂU HỎI
+            shuffleArray(questions);
+            renderQuestions();
+        }
+
+        // --- HIỂN THỊ CÂU HỎI ---
+        function renderQuestions() {
+            const container = document.getElementById('quizContainer');
+            container.innerHTML = "";
+
+            questions.forEach((item, index) => {
+                // Tạo thẻ HTML cho từng câu hỏi
+                let html = `
+                <div class="question-card" id="card-${index}">
+                    <div class="q-header">
+                        <div class="q-num">${index + 1}</div>
+                        <div class="q-text">${item.q}</div>
+                    </div>
+                    <div class="options-grid">
+                        ${item.a.map((opt, i) => `
+                            <label class="option-label" id="lbl-${index}-${i}">
+                                <input type="radio" name="q${index}" value="${i}">
+                                <span class="ans-text">${opt.t}</span>
+                            </label>
+                        `).join('')}
+                    </div>
+                </div>
+                `;
+                container.innerHTML += html;
+            });
+        }
+
+        // --- XỬ LÝ NỘP BÀI ---
+        async function submitQuiz() {
+            // 1. Kiểm tra làm hết chưa
+            let unanswered = [];
+            questions.forEach((_, idx) => {
+                const checked = document.querySelector(`input[name="q${idx}"]:checked`);
+                const card = document.getElementById(`card-${idx}`);
+                card.classList.remove('unanswered'); // Xóa lỗi cũ
+                if (!checked) {
+                    unanswered.push(idx);
+                    card.classList.add('unanswered');
+                }
+            });
+
+            if (unanswered.length > 0) {
+                alert(`Con còn ${unanswered.length} câu chưa làm xong. Hãy kiểm tra các câu bị viền đỏ nhé!`);
+                document.getElementById(`card-${unanswered[0]}`).scrollIntoView({ behavior: "smooth", block: "center" });
+                return;
+            }
+
+            if (!confirm("Con chắc chắn muốn nộp bài chứ?")) return;
+
+            // 2. Chấm điểm và tô màu
+            let score = 0;
+            questions.forEach((q, idx) => {
+                const checked = document.querySelector(`input[name="q${idx}"]:checked`);
+                const val = parseInt(checked.value);
+                
+                // Khóa input
+                const inputs = document.querySelectorAll(`input[name="q${idx}"]`);
+                inputs.forEach(inp => inp.disabled = true);
+
+                if (val === q.c) {
+                    score++;
+                    document.getElementById(`lbl-${idx}-${val}`).classList.add('correct');
+                } else {
+                    document.getElementById(`lbl-${idx}-${val}`).classList.add('wrong');
+                    document.getElementById(`lbl-${idx}-${q.c}`).classList.add('correct');
+                }
+            });
+
+            const totalScore = `${score}/${questions.length}`;
+            
+            // 3. Chuẩn bị xuất PDF
+            document.getElementById('loadingOverlay').style.display = 'flex';
+            document.getElementById('footerBar').style.display = 'none';
+
+            // Hiện thông tin trên header PDF
+            const pdfHeader = document.getElementById('pdf-header');
+            pdfHeader.style.display = 'block';
+            document.getElementById('pdf-info').innerText = `Họ tên: ${info.name} - Lớp: ${info.class}`;
+            document.getElementById('pdf-score').innerText = `Điểm số: ${totalScore}`;
+
+            const elementToPrint = document.getElementById('contentToPrint');
+            const fileName = `BaiLam_${info.class}_${info.name}.pdf`;
+
+            // Cấu hình in PDF
+            const pdfOptions = {
+                margin: 10,
+                filename: fileName,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 1.5, useCORS: true, scrollY: 0 },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            try {
+                // Tải về máy học sinh
+                await html2pdf().set(pdfOptions).from(elementToPrint).save();
+                document.getElementById('statusMsg').innerHTML = "<span style='color:green; font-weight:bold'><i class='fas fa-check-circle'></i> Giỏi quá! Bài làm đã được tải về máy.</span>";
+            } catch (error) {
+                console.error(error);
+                document.getElementById('statusMsg').innerHTML = "<span style='color:orange'>Có lỗi nhỏ khi tạo file, nhưng con đã hoàn thành bài thi!</span>";
+                // Chuyển sang chế độ in trình duyệt nếu lỗi thư viện
+                window.print();
+            } finally {
+                document.getElementById('loadingOverlay').style.display = 'none';
+                document.getElementById('scoreDisplay').innerText = totalScore;
+                
+                let msg = score >= 25 ? "Xuất sắc! Con rất giỏi!" : (score >= 15 ? "Khá lắm! Cố gắng thêm nhé." : "Cần ôn lại bài nhé!");
+                document.getElementById('feedbackText').innerText = msg;
+                document.getElementById('resultModal').style.display = 'flex';
+                pdfHeader.style.display = 'none'; 
+            }
+        }
+    </script>
+</body>
+</html>
