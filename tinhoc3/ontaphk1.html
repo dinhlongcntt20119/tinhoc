@@ -10,7 +10,7 @@
 
     <style>
         :root {
-            --primary-color: #00a859; 
+            --primary-color: #00a859; /* Màu xanh lá đặc trưng của Chân trời sáng tạo */
             --accent-color: #f1c40f;
             --bg-color: #f0f9f4;
             --text-color: #333;
@@ -44,16 +44,15 @@
         .question-card { background: white; border-radius: 10px; padding: 20px; margin-bottom: 20px; box-shadow: 0 3px 10px rgba(0,0,0,0.05); border-left: 5px solid var(--primary-color); page-break-inside: avoid; }
         .q-header { display: flex; gap: 15px; margin-bottom: 15px; }
         .q-num { background: var(--primary-color); color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; flex-shrink: 0; }
-        .q-text { font-weight: 500; font-size: 1.05rem; line-height: 1.4; display: flex; align-items: center; flex-wrap: wrap; }
+        .q-text { font-weight: 500; font-size: 1.05rem; line-height: 1.4; }
         
         .options-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
         .option-label { display: flex; align-items: center; padding: 10px; border: 1px solid #eee; border-radius: 8px; cursor: pointer; transition: 0.2s; }
         .option-label:hover { background: #f9f9f9; border-color: var(--primary-color); }
-        .option-label input { margin-right: 10px; transform: scale(1.2); accent-color: var(--primary-color); flex-shrink: 0; }
+        .option-label input { margin-right: 10px; transform: scale(1.2); accent-color: var(--primary-color); }
         
         /* Style cho hình ảnh trong đáp án */
-        .ans-img { height: 50px; width: auto; object-fit: contain; border: 1px solid #ddd; border-radius: 4px; padding: 2px; background: white; margin-right: 10px; vertical-align: middle; }
-        .ans-text { display: flex; align-items: center; }
+        .ans-img { height: 50px; width: auto; object-fit: contain; border: 1px solid #ddd; border-radius: 4px; padding: 2px; background: white; margin-right: 10px; }
 
         .correct { background-color: #d4edda !important; border-color: #c3e6cb !important; color: #155724; }
         .wrong { background-color: #f8d7da !important; border-color: #f5c6cb !important; color: #721c24; opacity: 0.7; }
@@ -112,10 +111,6 @@
         </div>
     </header>
 
-    <div style="text-align: center; margin-top: 20px; display: none;" id="backButtonArea">
-        <a href="../index.html" style="text-decoration: none; color: #666;"><i class="fas fa-arrow-left"></i> Quay lại trang chủ</a>
-    </div>
-
     <div id="contentToPrint">
         <div id="pdf-header">
             <h2>KẾT QUẢ KIỂM TRA CUỐI HỌC KÌ 1</h2>
@@ -127,13 +122,13 @@
 
     <div class="footer-bar" id="footerBar">
         <button class="btn-start" style="width: auto; margin: 0;" onclick="submitQuiz()">
-            <i class="fas fa-paper-plane"></i> NỘP BÀI
+            <i class="fas fa-paper-plane"></i> NỘP BÀI & LƯU DRIVE
         </button>
     </div>
 
     <div id="loadingOverlay" class="overlay">
         <div class="spinner"></div>
-        <p>Đang chấm bài và tạo file...</p>
+        <p>Đang chấm bài và gửi lên hệ thống...</p>
     </div>
 
     <div id="resultModal" class="overlay">
@@ -148,11 +143,12 @@
     </div>
 
     <script>
-        // CẤU HÌNH BIẾN
+        // CẤU HÌNH SCRIPT
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwUphsbiPahfovMRrHqgfGdItNwCJpy78TNEq_VC4nq-U73b-oqqsIYTkPPioaKdrHi/exec";
         let info = { name: "", class: "" };
 
-        // --- BỘ CÂU HỎI (30 CÂU - ĐÃ KIỂM TRA KỸ CÚ PHÁP) ---
-        var questions = [
+        // --- BỘ CÂU HỎI (30 CÂU) ---
+        let questions = [
             // --- 5 CÂU TỪ ĐỀ THI ---
             {
                 q: "Các phím nào dưới đây thuộc hàng phím cơ sở?",
@@ -174,7 +170,7 @@
                 ],
                 c: 1
             },
-            // CÂU 3: CÓ HÌNH ẢNH
+            // CÂU CÓ HÌNH ẢNH
             {
                 q: "Em sử dụng phần mềm nào sau đây để truy cập Internet?",
                 a: [
@@ -206,130 +202,255 @@
                 c: 0
             },
 
-            // --- 25 CÂU BỔ SUNG (ĐÃ KIỂM TRA CÚ PHÁP CHẶT CHẼ) ---
+            // --- 25 CÂU BỔ SUNG (KIẾN THỨC TIN HỌC 3) ---
             {
                 q: "Thông tin xung quanh em tồn tại ở những dạng nào?",
-                a: [{t: "Văn bản, Hình ảnh, Âm thanh."}, {t: "Chỉ có Văn bản."}, {t: "Chỉ có Hình ảnh và Âm thanh."}, {t: "Máy tính, Điện thoại, Tivi."}],
+                a: [
+                    {t: "Văn bản, Hình ảnh, Âm thanh."}, // Đúng
+                    {t: "Chỉ có Văn bản."},
+                    {t: "Chỉ có Hình ảnh và Âm thanh."},
+                    {t: "Máy tính, Điện thoại, Tivi."}
+                ],
                 c: 0
             },
             {
                 q: "Tai em nghe thấy tiếng trống trường. Đó là thông tin dạng gì?",
-                a: [{t: "Hình ảnh."}, {t: "Âm thanh."}, {t: "Văn bản."}, {t: "Video."}],
+                a: [
+                    {t: "Hình ảnh."},
+                    {t: "Âm thanh."}, // Đúng
+                    {t: "Văn bản."},
+                    {t: "Video."}
+                ],
                 c: 1
             },
             {
                 q: "Mắt em nhìn thấy đèn tín hiệu giao thông chuyển sang màu đỏ. Đó là thông tin dạng gì?",
-                a: [{t: "Hình ảnh."}, {t: "Âm thanh."}, {t: "Văn bản."}, {t: "Mùi vị."}],
+                a: [
+                    {t: "Hình ảnh."}, // Đúng
+                    {t: "Âm thanh."},
+                    {t: "Văn bản."},
+                    {t: "Mùi vị."}
+                ],
                 c: 0
             },
             {
                 q: "Bộ não con người dùng để làm gì trong quá trình xử lý thông tin?",
-                a: [{t: "Thu nhận thông tin."}, {t: "Xử lý thông tin và ra quyết định."}, {t: "Lưu trữ hình ảnh."}, {t: "Phát ra âm thanh."}],
+                a: [
+                    {t: "Thu nhận thông tin."},
+                    {t: "Xử lý thông tin và ra quyết định."}, // Đúng
+                    {t: "Lưu trữ hình ảnh."},
+                    {t: "Phát ra âm thanh."}
+                ],
                 c: 1
             },
             {
                 q: "Thiết bị nào sau đây là 'bộ não' của máy tính, dùng để xử lý thông tin?",
-                a: [{t: "Chuột."}, {t: "Bàn phím."}, {t: "Thân máy (CPU)."}, {t: "Màn hình."}],
+                a: [
+                    {t: "Chuột."},
+                    {t: "Bàn phím."},
+                    {t: "Thân máy (CPU)."}, // Đúng
+                    {t: "Màn hình."}
+                ],
                 c: 2
             },
             {
                 q: "Chuột và Bàn phím là thiết bị dùng để làm gì?",
-                a: [{t: "Đưa thông tin vào máy tính (Thiết bị vào)."}, {t: "Đưa thông tin ra ngoài (Thiết bị ra)."}, {t: "Xử lý thông tin."}, {t: "Lưu trữ thông tin."}],
+                a: [
+                    {t: "Đưa thông tin vào máy tính (Thiết bị vào)."}, // Đúng
+                    {t: "Đưa thông tin ra ngoài (Thiết bị ra)."},
+                    {t: "Xử lý thông tin."},
+                    {t: "Lưu trữ thông tin."}
+                ],
                 c: 0
             },
             {
                 q: "Màn hình và Loa là thiết bị dùng để làm gì?",
-                a: [{t: "Đưa thông tin vào máy tính."}, {t: "Đưa thông tin ra ngoài (Thiết bị ra)."}, {t: "Gõ chữ."}, {t: "Điều khiển máy tính."}],
+                a: [
+                    {t: "Đưa thông tin vào máy tính."},
+                    {t: "Đưa thông tin ra ngoài (Thiết bị ra)."}, // Đúng
+                    {t: "Gõ chữ."},
+                    {t: "Điều khiển máy tính."}
+                ],
                 c: 1
             },
             {
                 q: "Máy tính để bàn thường có mấy bộ phận chính?",
-                a: [{t: "2 bộ phận."}, {t: "3 bộ phận."}, {t: "4 bộ phận (Thân máy, Màn hình, Bàn phím, Chuột)."}, {t: "5 bộ phận."}],
+                a: [
+                    {t: "2 bộ phận."},
+                    {t: "3 bộ phận."},
+                    {t: "4 bộ phận (Thân máy, Màn hình, Bàn phím, Chuột)."}, // Đúng
+                    {t: "5 bộ phận."}
+                ],
                 c: 2
             },
             {
                 q: "Tư thế ngồi máy tính nào là ĐÚNG?",
-                a: [{t: "Lưng cong, mắt sát màn hình."}, {t: "Lưng thẳng, mắt ngang tầm màn hình, khoảng cách 50-80cm."}, {t: "Ngồi vắt chéo chân lên ghế."}, {t: "Nằm ra bàn để sử dụng."}],
+                a: [
+                    {t: "Lưng cong, mắt sát màn hình."},
+                    {t: "Lưng thẳng, mắt ngang tầm màn hình, khoảng cách 50-80cm."}, // Đúng
+                    {t: "Ngồi vắt chéo chân lên ghế."},
+                    {t: "Nằm ra bàn để sử dụng."}
+                ],
                 c: 1
             },
             {
                 q: "Khu vực chính của bàn phím có mấy hàng phím?",
-                a: [{t: "3 hàng."}, {t: "4 hàng."}, {t: "5 hàng."}, {t: "6 hàng."}],
+                a: [
+                    {t: "3 hàng."},
+                    {t: "4 hàng."},
+                    {t: "5 hàng."}, // Đúng
+                    {t: "6 hàng."}
+                ],
                 c: 2
             },
             {
                 q: "Hai phím có gai (F và J) nằm trên hàng phím nào?",
-                a: [{t: "Hàng phím số."}, {t: "Hàng phím trên."}, {t: "Hàng phím cơ sở."}, {t: "Hàng phím dưới."}],
+                a: [
+                    {t: "Hàng phím số."},
+                    {t: "Hàng phím trên."},
+                    {t: "Hàng phím cơ sở."}, // Đúng
+                    {t: "Hàng phím dưới."}
+                ],
                 c: 2
             },
             {
                 q: "Phím dài nhất trên bàn phím là phím nào?",
-                a: [{t: "Phím Enter."}, {t: "Phím Shift."}, {t: "Phím Cách (Space)."}, {t: "Phím Caps Lock."}],
+                a: [
+                    {t: "Phím Enter."},
+                    {t: "Phím Shift."},
+                    {t: "Phím Cách (Space)."}, // Đúng
+                    {t: "Phím Caps Lock."}
+                ],
                 c: 2
             },
             {
                 q: "Để gõ các ký tự trên (ví dụ: @, #, $), em cần nhấn giữ phím nào?",
-                a: [{t: "Ctrl."}, {t: "Alt."}, {t: "Shift."}, {t: "Enter."}],
+                a: [
+                    {t: "Ctrl."},
+                    {t: "Alt."},
+                    {t: "Shift."}, // Đúng
+                    {t: "Enter."}
+                ],
                 c: 2
             },
             {
                 q: "Ngón tay nào phụ trách gõ phím Cách (Space)?",
-                a: [{t: "Ngón trỏ."}, {t: "Ngón út."}, {t: "Ngón cái."}, {t: "Ngón giữa."}],
+                a: [
+                    {t: "Ngón trỏ."},
+                    {t: "Ngón út."},
+                    {t: "Ngón cái."}, // Đúng
+                    {t: "Ngón giữa."}
+                ],
                 c: 2
             },
             {
                 q: "Thông tin trên Internet có đáng tin cậy hoàn toàn không?",
-                a: [{t: "Có, tất cả đều đúng."}, {t: "Không, cần phải kiểm tra và chọn lọc."}, {t: "Chỉ tin thông tin có hình ảnh."}, {t: "Chỉ tin thông tin từ bạn bè."}],
+                a: [
+                    {t: "Có, tất cả đều đúng."},
+                    {t: "Không, cần phải kiểm tra và chọn lọc."}, // Đúng
+                    {t: "Chỉ tin thông tin có hình ảnh."},
+                    {t: "Chỉ tin thông tin từ bạn bè."}
+                ],
                 c: 1
             },
             {
                 q: "Khi thấy thông tin xấu, độc hại trên Internet, em nên làm gì?",
-                a: [{t: "Chia sẻ cho bạn bè xem."}, {t: "Tắt đi và báo cho người lớn (cha mẹ, thầy cô)."}, {t: "Tiếp tục xem vì tò mò."}, {t: "Lưu lại vào máy tính."}],
+                a: [
+                    {t: "Chia sẻ cho bạn bè xem."},
+                    {t: "Tắt đi và báo cho người lớn (cha mẹ, thầy cô)."}, // Đúng
+                    {t: "Tiếp tục xem vì tò mò."},
+                    {t: "Lưu lại vào máy tính."}
+                ],
                 c: 1
             },
             {
                 q: "Sắp xếp đồ vật trong gia đình ngăn nắp giúp ích gì?",
-                a: [{t: "Làm nhà cửa chật chội hơn."}, {t: "Dễ tìm kiếm và quản lý đồ vật."}, {t: "Mất nhiều thời gian hơn."}, {t: "Không có tác dụng gì."}],
+                a: [
+                    {t: "Làm nhà cửa chật chội hơn."},
+                    {t: "Dễ tìm kiếm và quản lý đồ vật."}, // Đúng
+                    {t: "Mất nhiều thời gian hơn."},
+                    {t: "Không có tác dụng gì."}
+                ],
                 c: 1
             },
             {
                 q: "Trong máy tính, thông tin được lưu trữ trong đâu để dễ quản lý?",
-                a: [{t: "Trong Thùng rác."}, {t: "Trong các Thư mục (Folder)."}, {t: "Trên màn hình nền."}, {t: "Trong bàn phím."}],
+                a: [
+                    {t: "Trong Thùng rác."},
+                    {t: "Trong các Thư mục (Folder)."}, // Đúng
+                    {t: "Trên màn hình nền."},
+                    {t: "Trong bàn phím."}
+                ],
                 c: 1
             },
             {
                 q: "Biểu tượng của Thư mục (Folder) thường có màu gì?",
-                a: [{t: "Màu xanh dương."}, {t: "Màu đỏ."}, {t: "Màu vàng."}, {t: "Màu tím."}],
+                a: [
+                    {t: "Màu xanh dương."},
+                    {t: "Màu đỏ."},
+                    {t: "Màu vàng."}, // Đúng
+                    {t: "Màu tím."}
+                ],
                 c: 2
             },
             {
                 q: "Cây thư mục giúp chúng ta điều gì?",
-                a: [{t: "Trồng cây trên máy tính."}, {t: "Nhìn thấy cấu trúc sắp xếp của các thư mục và tệp."}, {t: "Vẽ tranh đẹp hơn."}, {t: "Nghe nhạc hay hơn."}],
+                a: [
+                    {t: "Trồng cây trên máy tính."},
+                    {t: "Nhìn thấy cấu trúc sắp xếp của các thư mục và tệp."}, // Đúng
+                    {t: "Vẽ tranh đẹp hơn."},
+                    {t: "Nghe nhạc hay hơn."}
+                ],
                 c: 1
             },
             {
                 q: "Để xóa một thư mục, em chọn thư mục đó rồi nhấn phím nào?",
-                a: [{t: "Enter."}, {t: "Delete."}, {t: "Space."}, {t: "Shift."}],
+                a: [
+                    {t: "Enter."},
+                    {t: "Delete."}, // Đúng
+                    {t: "Space."},
+                    {t: "Shift."}
+                ],
                 c: 1
             },
             {
                 q: "Em không nên làm gì khi sử dụng máy tính công cộng?",
-                a: [{t: "Đăng xuất tài khoản sau khi dùng."}, {t: "Lưu mật khẩu cá nhân vào máy."}, {t: "Xóa lịch sử duyệt web."}, {t: "Tắt máy khi không sử dụng."}],
+                a: [
+                    {t: "Đăng xuất tài khoản sau khi dùng."},
+                    {t: "Lưu mật khẩu cá nhân vào máy."}, // Đúng (Đây là việc không nên làm)
+                    {t: "Xóa lịch sử duyệt web."},
+                    {t: "Tắt máy khi không sử dụng."}
+                ],
                 c: 1
             },
             {
                 q: "Máy tính giúp em làm gì trong học tập?",
-                a: [{t: "Tính toán nhanh."}, {t: "Soạn thảo văn bản."}, {t: "Tìm kiếm thông tin."}, {t: "Tất cả các ý trên."}],
+                a: [
+                    {t: "Tính toán nhanh."},
+                    {t: "Soạn thảo văn bản."},
+                    {t: "Tìm kiếm thông tin."},
+                    {t: "Tất cả các ý trên."} // Đúng
+                ],
                 c: 3
             },
             {
                 q: "Khi gõ bàn phím, hai bàn tay đặt ở đâu?",
-                a: [{t: "Đặt tùy ý."}, {t: "Đặt lên hàng phím số."}, {t: "Đặt lên hàng phím cơ sở."}, {t: "Đặt lên hàng phím dưới."}],
+                a: [
+                    {t: "Đặt tùy ý."},
+                    {t: "Đặt lên hàng phím số."},
+                    {t: "Đặt lên hàng phím cơ sở."}, // Đúng
+                    {t: "Đặt lên hàng phím dưới."}
+                ],
                 c: 2
             },
             {
                 q: "Thiết bị nào sau đây KHÔNG PHẢI là thiết bị máy tính?",
-                a: [{t: "Máy quét (Scanner)."}, {t: "Máy in."}, {t: "Nồi cơm điện."}, {t: "Webcam."}],
+                a: [
+                    {t: "Máy quét (Scanner)."},
+                    {t: "Máy in."},
+                    {t: "Nồi cơm điện."}, // Đúng
+                    {t: "Webcam."}
+                ],
                 c: 2
             }
         ];
@@ -358,7 +479,6 @@
             // Ẩn login, hiện nội dung
             document.getElementById('loginScreen').style.display = 'none';
             document.getElementById('mainHeader').style.display = 'flex';
-            document.getElementById('backButtonArea').style.display = 'block';
             document.getElementById('quizContainer').style.display = 'block';
             document.getElementById('footerBar').style.display = 'flex';
 
@@ -384,7 +504,7 @@
                         ${item.a.map((opt, i) => `
                             <label class="option-label" id="lbl-${index}-${i}">
                                 <input type="radio" name="q${index}" value="${i}">
-                                <span class="ans-text">${opt.t}</span>
+                                <span style="margin-left: 5px;">${opt.t}</span>
                             </label>
                         `).join('')}
                     </div>
@@ -460,14 +580,34 @@
             };
 
             try {
+                // Tạo file PDF dạng Blob
+                const pdfData = await html2pdf().set(pdfOptions).from(elementToPrint).outputPdf('datauristring');
+                const pdfBase64 = pdfData.split(',')[1];
+
+                // GỬI LÊN GOOGLE DRIVE (Đã uncomment và dùng link mới)
+                await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors', // Dùng no-cors để tránh lỗi trình duyệt chặn
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        fileName: fileName,
+                        fileData: pdfBase64,
+                        studentName: info.name,
+                        studentClass: info.class,
+                        score: totalScore
+                    })
+                });
+
                 // Tải về máy học sinh
                 await html2pdf().set(pdfOptions).from(elementToPrint).save();
-                document.getElementById('statusMsg').innerHTML = "<span style='color:green; font-weight:bold'><i class='fas fa-check-circle'></i> Giỏi quá! Bài làm đã được tải về máy.</span>";
+
+                document.getElementById('statusMsg').innerHTML = "<span style='color:green; font-weight:bold'><i class='fas fa-check-circle'></i> Giỏi quá! Bài làm đã được gửi cho thầy cô.</span>";
+                
             } catch (error) {
                 console.error(error);
-                document.getElementById('statusMsg').innerHTML = "<span style='color:orange'>Có lỗi nhỏ khi tạo file, nhưng con đã hoàn thành bài thi!</span>";
-                // Chuyển sang chế độ in trình duyệt nếu lỗi thư viện
-                window.print();
+                document.getElementById('statusMsg').innerHTML = `<span style='color:red'>Có chút lỗi nhỏ khi gửi bài. (Nhưng bài làm đã được tải về máy của con rồi nhé).</span>`;
+                // Vẫn cho tải về nếu gửi lỗi
+                await html2pdf().set(pdfOptions).from(elementToPrint).save();
             } finally {
                 document.getElementById('loadingOverlay').style.display = 'none';
                 document.getElementById('scoreDisplay').innerText = totalScore;
