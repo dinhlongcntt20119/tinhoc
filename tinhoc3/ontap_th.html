@@ -1,4 +1,662 @@
-/* --- HÀM LƯU DRIVE & PDF (GỌI GAS) --- */
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ôn tập Tin học K3</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Source+Code+Pro:wght@600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <style>
+        /* --- COPY CSS TỪ INDEX.HTML (CHO HEADER & FOOTER) --- */
+        :root {
+            --primary-color: #0056b3; 
+            --accent-color: #00a8ff; 
+            --bg-color: #f4f7f6;
+            --text-color: #333;
+            --card-bg: #ffffff;
+            --review-color: #ff9800;
+        }
+
+        * { box-sizing: border-box; }
+        
+        /* HEADER STYLES */
+        header {
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            color: white;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            border-bottom: 5px solid #ffcc00;
+            font-family: 'Roboto', sans-serif;
+            margin-bottom: 30px; 
+        }
+
+        .header-left h1 {
+            font-family: 'Source Code Pro', monospace;
+            font-size: 2.2rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+            margin-top: 0;
+        }
+
+        .header-left h2 { font-size: 1.1rem; font-weight: 400; opacity: 0.9; margin: 0; }
+
+        .header-right {
+            text-align: right;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.3);
+            font-family: 'Roboto', sans-serif;
+        }
+
+        .teacher-name { font-size: 1.1rem; font-weight: bold; color: #fff; margin-top: 5px; }
+
+        /* FOOTER STYLES */
+        footer {
+            text-align: center; padding: 20px; margin-top: 50px;
+            color: #777; font-size: 0.9rem; border-top: 1px solid #ddd;
+            font-family: 'Roboto', sans-serif;
+            background-color: #fff; 
+        }
+
+        @media (max-width: 768px) {
+            header { flex-direction: column; text-align: center; gap: 15px; padding: 20px; }
+            .header-right { text-align: center; width: 100%; }
+        }
+
+        /* --- CSS CỦA BÀI TẬP --- */
+        body { 
+            font-family: "Segoe UI", Arial, sans-serif; 
+            background-color: #eef2f7; 
+            margin: 0; padding: 0; 
+            color: #333; 
+        }
+        
+        .main-content-wrapper { padding: 20px; }
+
+        .page { 
+            background-color: #fff; max-width: 950px; margin: 0 auto; padding: 40px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-radius: 12px; 
+        }
+        
+        /* THÔNG TIN HỌC SINH */
+        .student-info {
+            background-color: #e3f2fd;
+            border: 2px solid #2196f3;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            justify-content: center;
+        }
+        .student-info label { font-weight: bold; font-size: 1.1rem; }
+        .student-info input { 
+            padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 1rem; width: 200px;
+        }
+        .missing-alert-input { border: 2px solid #e74c3c !important; background-color: #fadbd8; }
+
+        h1.page-title { font-size: 20pt; font-weight: bold; text-transform: uppercase; text-align: center; color: #d35400; margin: 10px 0; font-family: "Segoe UI", Arial, sans-serif; }
+        h3.page-subtitle { font-size: 12pt; text-align: center; color: #7f8c8d; margin-top: 0; text-transform: uppercase; letter-spacing: 1px; font-family: "Segoe UI", Arial, sans-serif; }
+        hr { border: 0; height: 1px; background: #ddd; margin: 20px 0; }
+        
+        .question-block {
+            margin-bottom: 30px; padding: 20px; border-radius: 8px;
+            background-color: #fff; border: 1px solid #eee; transition: 0.3s;
+        }
+
+        .question-title { 
+            font-weight: bold; font-size: 13pt; margin-bottom: 10px; color: #2c3e50; 
+            border-left: 5px solid #2980b9; padding-left: 10px; background-color: #f4f6f7; padding: 10px;
+        }
+
+        .instruction-text {
+            font-size: 12pt; margin-bottom: 15px; font-style: italic; color: #555; text-align: center; font-weight: bold;
+        }
+
+        /* --- HÌNH ẢNH --- */
+        .question-img-container { text-align: center; margin: 15px 0; }
+        .question-img { max-width: 100%; height: auto; border-radius: 5px; margin: 5px; }
+        .img-c1 { width: 75%; height: auto; display: block; margin: 0 auto; box-shadow: 0 4px 8px rgba(0,0,0,0.1); border-radius: 8px; }
+
+        /* --- LAYOUT BÀI 1 --- */
+        .exercise-container { display: block; }
+
+        /* KHO TỪ */
+        .word-bank-wrapper {
+            background: #fffdf5; border: 2px solid #f39c12; border-radius: 10px;
+            padding: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 25px;
+        }
+        .word-bank-wrapper h4 { 
+            margin-top: 0; text-align: center; color: #d35400; 
+            border-bottom: 2px solid #f39c12; padding-bottom: 10px; margin-bottom: 10px;
+        }
+        .bank-section-title {
+            font-size: 11pt; font-weight: bold; color: #795548; margin: 10px 0 5px 0; text-transform: uppercase;
+            border-bottom: 1px dashed #ccc; padding-bottom: 5px; width: 100%;
+        }
+        .drag-source-area { 
+            display: flex; flex-direction: row; flex-wrap: wrap; 
+            gap: 12px; justify-content: center; align-items: flex-start; margin-bottom: 15px;
+        }
+        
+        /* --- TỦ SÁCH GỖ --- */
+        .frame-wrapper { width: 100%; padding: 10px; box-sizing: border-box; }
+        .wood-bookshelf {
+            display: flex; width: 100%; background-color: #8B4513; padding: 15px;
+            border-radius: 10px; box-shadow: 5px 5px 15px rgba(0,0,0,0.4), inset 0 0 20px rgba(0,0,0,0.5);
+            border: 2px solid #5e300d;
+        }
+        .shelf-column {
+            flex: 1; display: flex; flex-direction: column; background-color: #DEB887;
+            margin: 0 5px; box-shadow: inset 2px 2px 5px rgba(0,0,0,0.3); border: 1px solid #c99863;
+        }
+        .shelf-header {
+            height: 50px; background: #a0522d; border-bottom: 4px solid #753a1e;
+            display: flex; align-items: center; justify-content: center; padding: 5px;
+        }
+        .shelf-cell {
+            flex: 1; min-height: 70px; border-bottom: 4px solid #bc8f8f;
+            display: flex; align-items: center; justify-content: center; padding: 8px;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0) 20%);
+        }
+        .shelf-cell:last-child { border-bottom: none; }
+        
+        .drop-slot {
+            width: 95%; height: 90%; 
+            border: 2px dashed rgba(139, 69, 19, 0.5); border-radius: 6px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 10pt; color: #8B4513; font-weight: normal;
+            background-color: rgba(255, 255, 255, 0.3); transition: all 0.2s;
+        }
+        .drag-over .drop-slot { background-color: #fff; border-color: #27ae60; transform: scale(1.02); }
+        .drop-slot:empty::before { content: "........"; opacity: 0.5; }
+        .header-zone:empty::before { content: "Nhãn dán"; opacity: 0.6; font-style: italic; font-size: 10pt; color: #fff; text-shadow: 1px 1px 0 #5e300d; }
+
+        /* --- DRAG ITEMS --- */
+        .word-tile {
+            background-color: #d35400; color: white; padding: 8px 15px; border-radius: 4px;
+            cursor: grab; font-weight: bold; font-size: 11pt; 
+            box-shadow: 0 3px 0 #a04000; border: 1px solid #e67e22;
+            user-select: none; z-index: 10; text-align: center; width: auto; min-width: 100px;
+        }
+        .name-tile { background-color: #2980b9; box-shadow: 0 3px 0 #1c5980; border: 1px solid #3498db; }
+
+        /* --- INPUTS --- */
+        .text-input {
+            width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #bdc3c7; border-radius: 5px;
+            font-size: 11pt; box-sizing: border-box;
+        }
+        .text-input:focus { border-color: #3498db; outline: none; background: #f0f8ff; }
+
+        /* --- STYLE SƠ ĐỒ CÂY --- */
+        .tree-diagram-wrapper {
+            display: flex; flex-direction: column; align-items: center; margin-top: 20px;
+        }
+        
+        .tree-box-input {
+            border: 2px solid #000; padding: 10px 5px; text-align: center;
+            font-size: 12pt; font-weight: bold; width: 180px; outline: none; background: #fff;
+            position: relative; z-index: 5;
+        }
+        .tree-box-input:focus { background-color: #f0f8ff; border-color: #2980b9; }
+
+        /* Gốc */
+        .tree-root-container {
+            display: flex; flex-direction: column; align-items: center;
+        }
+        .tree-line-down {
+            width: 2px; height: 20px; background-color: #000; margin: 0 auto;
+        }
+
+        /* Container các nhánh */
+        .tree-children-container {
+            display: flex; justify-content: center; position: relative;
+        }
+
+        /* Wrapper từng nhánh con */
+        .tree-child-wrapper {
+            display: flex; flex-direction: column; align-items: center;
+            position: relative;
+            margin: 0 20px; /* Khoảng cách giữa các ô */
+            padding-top: 20px; /* Chừa chỗ cho đường kẻ dọc */
+        }
+
+        /* Đường kẻ dọc đi lên từ mỗi ô con */
+        .tree-child-wrapper::before {
+            content: ""; position: absolute; top: 0; left: 50%;
+            width: 2px; height: 20px; background-color: #000;
+        }
+
+        /* Đường kẻ ngang nối các nhánh */
+        .tree-child-wrapper:first-child::after {
+            content: ""; position: absolute; top: 0; right: -20px; /* Kéo dài qua margin */
+            width: calc(50% + 20px); height: 2px; background-color: #000;
+        }
+        .tree-child-wrapper:last-child::after {
+            content: ""; position: absolute; top: 0; left: -20px; /* Kéo dài qua margin */
+            width: calc(50% + 20px); height: 2px; background-color: #000;
+        }
+        .tree-child-wrapper:nth-child(2)::after {
+            content: ""; position: absolute; top: 0; left: -20px; right: -20px;
+            height: 2px; background-color: #000;
+        }
+
+        /* --- STYLE CÂU 5 (GRID 2 HÀNG) --- */
+        .q5-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-top: 10px;
+        }
+        .q5-grid label {
+            cursor: pointer; font-size: 13pt; display: flex; align-items: center;
+            padding: 5px; border: 1px solid transparent; border-radius: 5px;
+        }
+        .q5-grid label:hover { background-color: #f0f8ff; border-color: #bdc3c7; }
+        .q5-grid input { transform: scale(1.3); margin-right: 10px; accent-color: #2980b9; }
+
+        @media (max-width: 768px) {
+            .q4-layout { flex-direction: column; }
+            .q4-img { flex: auto; width: 100%; }
+            .tree-box-input { width: 100px; font-size: 10pt; }
+            .tree-child-wrapper { margin: 0 10px; }
+            .tree-child-wrapper:first-child::after,
+            .tree-child-wrapper:last-child::after { width: calc(50% + 10px); }
+            .tree-child-wrapper:first-child::after { right: -10px; }
+            .tree-child-wrapper:last-child::after { left: -10px; }
+            .tree-child-wrapper:nth-child(2)::after { left: -10px; right: -10px; }
+            .q5-grid { grid-template-columns: repeat(2, 1fr); }
+            .student-info { flex-direction: column; align-items: flex-start; }
+            .student-info input { width: 100%; }
+        }
+
+        .q4-layout { display: flex; gap: 20px; align-items: flex-start; margin-bottom: 20px;}
+        .q4-text { flex: 1; font-size: 12pt; line-height: 1.5; }
+        .q4-img { flex: 0 0 250px; text-align: center; }
+        .q4-img img { width: 100%; height: auto; border-radius: 5px; border: 1px solid #ddd; }
+
+        /* --- TRẠNG THÁI ĐÚNG SAI --- */
+        .correct-bg { background-color: #27ae60 !important; color: white !important; text-shadow: none !important;}
+        .wrong-bg { background-color: #c0392b !important; color: white !important; text-shadow: none !important;}
+        .correct-border { border: 2px solid #27ae60 !important; background-color: #eafaf1 !important; }
+        .wrong-border { border: 2px solid #c0392b !important; background-color: #fdedec !important; }
+        
+        .correct-answer-text {
+            color: #c0392b; font-size: 11pt; font-weight: bold; margin-top: 15px; display: none; 
+            padding: 10px; background: #fff0f0; border-radius: 5px; border: 1px solid #ffcccc;
+        }
+        
+        /* Cảnh báo chưa làm xong */
+        .missing-alert { 
+            border: 2px solid #e74c3c !important; 
+            background-color: #fdedec;
+            box-shadow: 0 0 10px rgba(231, 76, 60, 0.3);
+        }
+
+        /* --- CONTROLS --- */
+        .controls { text-align: center; margin-top: 40px; padding: 20px; background: #fff; border-top: 2px solid #eee; }
+        button {
+            padding: 12px 35px; margin: 0 10px; border: none; border-radius: 30px; cursor: pointer; color: white; font-weight: bold; font-size: 13pt;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2); transition: 0.2s;
+        }
+        .btn-submit { background-color: #0056b3; } /* Màu xanh đậm cho nút chính */
+        .btn-submit:hover { background-color: #004494; }
+        .btn-submit:disabled { background-color: #95a5a6; cursor: not-allowed; }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-left">
+            <h1><i class="fas fa-laptop-code"></i> TIN HỌC 3</h1>
+            <h2>Bộ sách: Chân Trời Sáng Tạo</h2>
+        </div>
+        <div class="header-right">
+            <div class="teacher-name">GV - Nguyễn Đình Bạch Long</div>
+        </div>
+    </header>
+
+    <div class="main-content-wrapper">
+        <div class="page">
+            <h3 class="page-subtitle">ÔN TẬP TH K3</h3>
+            <h1 class="page-title">BÀI TẬP TỔNG HỢP</h1>
+            <hr>
+            
+            <div class="student-info" id="student-info-block">
+                <div>
+                    <label>Họ và tên: </label>
+                    <input type="text" id="student-name" placeholder="Nhập họ tên...">
+                </div>
+                <div>
+                    <label>Lớp: 3D</label>
+                
+                </div>
+            </div>
+
+            <div class="question-block" id="ex1">
+                <div class="question-title">1. Hai anh em Bình và Minh sử dụng chung một tủ sách, được thể hiện ở sơ đồ hình cây bên dưới.</div>
+                <div class="question-img-container"><img src="c1.png" alt="Sơ đồ cây tủ sách" class="img-c1"></div>
+                <div class="instruction-text">Em hãy giúp Bình và Minh sắp xếp sách, vở, đồ dùng học tập của vào tủ sách:</div>
+
+                <div class="exercise-container">
+                    <div class="word-bank-wrapper">
+                        <h4>KHO TỪ</h4>
+                        <div class="bank-section-title">PHẦN 1: NHÃN DÁN</div>
+                        <div class="drag-source-area" id="source_names" ondrop="drop(event)" ondragover="allowDrop(event)">
+                            <div class="word-tile name-tile" draggable="true" ondragstart="drag(event)" id="n_binh" data-val="Binh">Bình</div>
+                            <div class="word-tile name-tile" draggable="true" ondragstart="drag(event)" id="n_minh" data-val="Minh">Minh</div>
+                            <div class="word-tile name-tile" draggable="true" ondragstart="drag(event)" id="n_chung" data-val="DungChung">Dùng chung</div>
+                        </div>
+                        <div class="bank-section-title">PHẦN 2: ĐỒ DÙNG</div>
+                        <div class="drag-source-area" id="source_items" ondrop="drop(event)" ondragover="allowDrop(event)">
+                            <div class="word-tile" draggable="true" ondragstart="drag(event)" id="w1" data-val="SGK" data-type="rieng">Sách giáo khoa</div>
+                            <div class="word-tile" draggable="true" ondragstart="drag(event)" id="w2" data-val="SGK" data-type="rieng">Sách giáo khoa</div>
+                            <div class="word-tile" draggable="true" ondragstart="drag(event)" id="w3" data-val="Vo" data-type="rieng">Vở</div>
+                            <div class="word-tile" draggable="true" ondragstart="drag(event)" id="w4" data-val="Vo" data-type="rieng">Vở</div>
+                            <div class="word-tile" draggable="true" ondragstart="drag(event)" id="w5" data-val="DoDung" data-type="rieng">Đồ dùng học tập</div>
+                            <div class="word-tile" draggable="true" ondragstart="drag(event)" id="w6" data-val="DoDung" data-type="rieng">Đồ dùng học tập</div>
+                            <div class="word-tile" draggable="true" ondragstart="drag(event)" id="w7" data-val="ThamKhao" data-type="chung">Sách tham khảo</div>
+                            <div class="word-tile" draggable="true" ondragstart="drag(event)" id="w8" data-val="Truyen" data-type="chung">Truyện</div>
+                        </div>
+                    </div>
+                    <div class="frame-wrapper">
+                        <div class="wood-bookshelf">
+                            <div class="shelf-column">
+                                <div class="shelf-header"><div class="drop-slot header-zone required-slot" id="h1" data-expect="Binh,Minh" ondrop="drop(event)" ondragover="allowDrop(event)"></div></div>
+                                <div class="shelf-cell"><div class="drop-slot item-zone required-slot" data-group="rieng" ondrop="drop(event)" ondragover="allowDrop(event)"></div></div>
+                                <div class="shelf-cell"><div class="drop-slot item-zone required-slot" data-group="rieng" ondrop="drop(event)" ondragover="allowDrop(event)"></div></div>
+                                <div class="shelf-cell"><div class="drop-slot item-zone required-slot" data-group="rieng" ondrop="drop(event)" ondragover="allowDrop(event)"></div></div>
+                            </div>
+                            <div class="shelf-column">
+                                <div class="shelf-header"><div class="drop-slot header-zone required-slot" id="h2" data-expect="DungChung" ondrop="drop(event)" ondragover="allowDrop(event)"></div></div>
+                                <div class="shelf-cell"><div class="drop-slot item-zone required-slot" data-group="chung" ondrop="drop(event)" ondragover="allowDrop(event)"></div></div>
+                                <div class="shelf-cell"><div class="drop-slot item-zone required-slot" data-group="chung" ondrop="drop(event)" ondragover="allowDrop(event)"></div></div>
+                            </div>
+                            <div class="shelf-column">
+                                <div class="shelf-header"><div class="drop-slot header-zone required-slot" id="h3" data-expect="Binh,Minh" ondrop="drop(event)" ondragover="allowDrop(event)"></div></div>
+                                <div class="shelf-cell"><div class="drop-slot item-zone required-slot" data-group="rieng" ondrop="drop(event)" ondragover="allowDrop(event)"></div></div>
+                                <div class="shelf-cell"><div class="drop-slot item-zone required-slot" data-group="rieng" ondrop="drop(event)" ondragover="allowDrop(event)"></div></div>
+                                <div class="shelf-cell"><div class="drop-slot item-zone required-slot" data-group="rieng" ondrop="drop(event)" ondragover="allowDrop(event)"></div></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="correct-answer-text">Đáp án gợi ý: Cột giữa: Dùng chung (Sách tham khảo, Truyện). Hai cột bên: Bình / Minh (Sách GK, Vở, Đồ dùng).</div>
+            </div>
+
+            <div class="question-block" id="ex2">
+                <div class="question-title">2. Em và bạn cùng chơi cờ vua với nhau. Sau khi bạn đi xong một nước cờ thì thông tin em nhận được và cần xử lí là gì?</div>
+                <div style="margin-bottom: 20px;"><strong>Thông tin thu nhận và cần xử lí:</strong><br><input type="text" class="text-input required-input" data-keywords="nước cờ,bạn đi,bạn vừa đi" placeholder="Nhập câu trả lời..."></div>
+                <div><strong>Kết quả xử lí:</strong><br><input type="text" class="text-input required-input" data-keywords="nước cờ tiếp theo,đi tiếp,của em" placeholder="Nhập câu trả lời..."></div>
+                <div class="correct-answer-text">Đáp án: Thông tin là nước cờ bạn vừa đi; Kết quả là nước đi tiếp theo của em.</div>
+            </div>
+
+            <div class="question-block" id="ex3">
+                <div class="question-title">3. Khi đang chơi với bạn bè trong sân trường, em nghe tiếng trống trường vang lên. Vậy em tiếp nhận được thông tin dạng gì? Sau khi tiếp nhận thông tin, em đưa ra quyết định gì?</div>
+                <div style="margin-bottom: 20px;"><strong>Thông tin thu nhận và cần xử lí:</strong><br><input type="text" class="text-input required-input" data-keywords="tiếng trống,âm thanh" placeholder="Nhập câu trả lời..."></div>
+                <div><strong>Kết quả xử lí:</strong><br><input type="text" class="text-input required-input" data-keywords="xếp hàng,vào lớp" placeholder="Nhập câu trả lời..."></div>
+                <div class="correct-answer-text">Đáp án: Tiếng trống trường (dạng âm thanh); Xếp hàng vào lớp.</div>
+            </div>
+
+            <div class="question-block" id="ex4">
+                <div class="q4-layout">
+                    <div class="q4-text">
+                        <p><strong>4. Cho một giá sách như hình bên gồm có 3 ngăn : ngăn trên, ngăn giữa và ngăn dưới.</strong></p>
+                        <p>Bạn An đã sắp xếp sách vở của mình vào giá sách này theo thứ tự : ngăn trên để sách giáo khoa, ngăn giữa để vở ghi bài và ngăn dưới để vở bài tập.</p>
+                        <p>Em hãy điền vào sơ đồ hình cây biểu diễn cách bạn An đã sắp xếp sách vở vào trong giá sách này (sử dụng số 0 làm gốc)</p>
+                    </div>
+                    <div class="q4-img"><img src="c4.png" alt="Giá sách"></div>
+                </div>
+                
+                <div class="tree-diagram-wrapper">
+                    <div class="tree-root-container">
+                        <input type="text" class="tree-box-input required-input" data-keywords="giá sách,0" placeholder="0.................">
+                        <div class="tree-line-down"></div>
+                    </div>
+                    
+                    <div class="tree-children-container">
+                        <div class="tree-child-wrapper">
+                            <input type="text" class="tree-box-input required-input" data-keywords="sách giáo khoa,1" placeholder="1.................">
+                        </div>
+                        <div class="tree-child-wrapper">
+                            <input type="text" class="tree-box-input required-input" data-keywords="vở ghi bài,vở ghi,2" placeholder="2.................">
+                        </div>
+                        <div class="tree-child-wrapper">
+                            <input type="text" class="tree-box-input required-input" data-keywords="vở bài tập,3" placeholder="3.................">
+                        </div>
+                    </div>
+                </div>
+                <div class="correct-answer-text">Đáp án gợi ý: 0. Giá sách - 1. Sách giáo khoa - 2. Vở ghi bài - 3. Vở bài tập.</div>
+            </div>
+
+            <div class="question-block" id="ex5">
+                <div class="question-title">5. Em hãy chọn các đồ vật dưới đây để ghép thành một chiếc máy tính để bàn?</div>
+                <p><i>(Tích chọn vào ô đúng)</i></p>
+                <div class="question-img-container"><img src="c5.png" alt="Hình minh họa" class="question-img"></div>
+                
+                <div class="q5-grid">
+                    <label><input type="checkbox" class="computer-part" value="false"> 1. Bàn ủi</label>
+                    <label><input type="checkbox" class="computer-part" value="true"> 2. Bàn phím</label>
+                    <label><input type="checkbox" class="computer-part" value="false"> 3. Loa máy tính</label>
+                    <label><input type="checkbox" class="computer-part" value="true"> 4. Chuột máy tính</label>
+                    <label><input type="checkbox" class="computer-part" value="true"> 5. Thùng máy</label>
+                    <label><input type="checkbox" class="computer-part" value="false"> 6. Máy quạt</label>
+                    <label><input type="checkbox" class="computer-part" value="true"> 7. Màn hình</label>
+                    <label><input type="checkbox" class="computer-part" value="false"> 8. Nồi cơm điện</label>
+                </div>
+                <div class="correct-answer-text">Đáp án chính: Bàn phím, Chuột máy tính, Thùng máy, Màn hình.</div>
+            </div>
+
+            <div class="controls">
+                <div id="result-msg" style="font-size: 16pt; margin-bottom: 15px; font-weight: bold; color: #2980b9;"></div>
+                <button class="btn-submit" id="btn-drive" onclick="saveToDrive()"><i class="fab fa-google-drive"></i> Lưu PDF & Nộp Bài</button>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        &copy; 2025 - Website hỗ trợ học tập Tin học 3 | GV Nguyễn Đình Bạch Long
+        <div>Email: dinhlongcntt20119@gmail.com  |  SĐT: 0937438939</div>
+        <div>STK: 0937438939  |  Ngân hàng: Vietinbank</div>
+    </footer>
+
+<script>
+    /* --- LOGIC KÉO THẢ --- */
+    function allowDrop(ev) { ev.preventDefault(); ev.target.closest('.drop-slot, .drag-source-area').classList.add('drag-over'); }
+    document.addEventListener("dragleave", function(event) { 
+        let target = event.target.closest('.drop-slot, .drag-source-area');
+        if (target) target.classList.remove("drag-over");
+    });
+    function drag(ev) { ev.dataTransfer.setData("text", ev.target.id); }
+    function drop(ev) {
+        ev.preventDefault();
+        let target = ev.target.closest('.drop-slot, .drag-source-area');
+        if (target) {
+            target.classList.remove("drag-over");
+            var data = ev.dataTransfer.getData("text");
+            var draggedEl = document.getElementById(data);
+            if (draggedEl) {
+                if (target.classList.contains('drop-slot')) {
+                    if(target.children.length > 0) {
+                        let existingItem = target.children[0];
+                        let originID = existingItem.classList.contains('name-tile') ? 'source_names' : 'source_items';
+                        document.getElementById(originID).appendChild(existingItem);
+                    }
+                    target.appendChild(draggedEl);
+                    draggedEl.style.width = "100%"; draggedEl.style.margin = "0";
+                } else if (target.classList.contains('drag-source-area')) {
+                    let originID = draggedEl.classList.contains('name-tile') ? 'source_names' : 'source_items';
+                    document.getElementById(originID).appendChild(draggedEl);
+                    draggedEl.style.width = "auto"; draggedEl.style.margin = "0";
+                }
+            }
+        }
+    }
+
+    /* --- HÀM KIỂM TRA HOÀN THÀNH (BẮT BUỘC) --- */
+    function checkCompletion() {
+        let isComplete = true;
+        let firstMissing = null;
+
+        // Xóa các cảnh báo cũ
+        document.querySelectorAll('.missing-alert, .missing-alert-input').forEach(el => {
+            el.classList.remove('missing-alert', 'missing-alert-input');
+        });
+
+        // 1. Kiểm tra Tên và Lớp
+        const sName = document.getElementById('student-name');
+        const sClass = document.getElementById('student-class');
+        if(!sName.value.trim()) {
+            sName.classList.add('missing-alert-input');
+            isComplete = false;
+            if(!firstMissing) firstMissing = sName;
+        }
+        if(!sClass.value.trim()) {
+            sClass.classList.add('missing-alert-input');
+            isComplete = false;
+            if(!firstMissing) firstMissing = sClass;
+        }
+
+        // 2. Kiểm tra các ô Kéo thả (Required Slot)
+        document.querySelectorAll('.required-slot').forEach(slot => {
+            if(slot.children.length === 0) {
+                slot.classList.add('missing-alert');
+                isComplete = false;
+                if(!firstMissing) firstMissing = slot;
+            }
+        });
+
+        // 3. Kiểm tra các ô Nhập liệu (Required Input)
+        document.querySelectorAll('.required-input').forEach(inp => {
+            if(!inp.value.trim()) {
+                inp.classList.add('missing-alert-input');
+                isComplete = false;
+                if(!firstMissing) firstMissing = inp;
+            }
+        });
+
+        // 4. Kiểm tra Checkbox (Ít nhất 1 cái được chọn) - Bài 5
+        let checkedCount = document.querySelectorAll('.computer-part:checked').length;
+        if(checkedCount === 0) {
+            let q5Block = document.getElementById('ex5');
+            q5Block.classList.add('missing-alert');
+            isComplete = false;
+            if(!firstMissing) firstMissing = q5Block;
+        }
+
+        if(!isComplete) {
+            alert("Bạn chưa hoàn thành bài tập! Vui lòng điền họ tên, lớp và làm hết các câu hỏi (các ô màu đỏ).");
+            if(firstMissing) firstMissing.scrollIntoView({behavior: "smooth", block: "center"});
+            return false;
+        }
+        return true;
+    }
+
+    /* --- HÀM CHẤM ĐIỂM (CHỈ CHẠY KHI ĐÃ HOÀN THÀNH) --- */
+    function chamDiem(showResult = true) {
+        let score = 0;
+        let total = 0;
+        let allCorrect = true;
+
+        // Reset Styles
+        if(showResult) {
+            document.querySelectorAll('.correct-answer-text').forEach(e => e.style.display = 'none');
+            document.querySelectorAll('.correct-border, .wrong-border, .correct-bg, .wrong-bg').forEach(e => {
+                e.classList.remove('correct-border', 'wrong-border', 'correct-bg', 'wrong-bg');
+            });
+        }
+
+        // 1. KÉO THẢ
+        let ex1Correct = true;
+        document.querySelectorAll('.header-zone').forEach(h => {
+            total++;
+            let expected = h.getAttribute('data-expect').split(',');
+            if(h.children.length > 0 && expected.includes(h.children[0].getAttribute('data-val'))) {
+                if(showResult) h.parentElement.classList.add('correct-bg'); 
+                score++;
+            } else {
+                if(showResult) h.parentElement.classList.add('wrong-bg'); 
+                ex1Correct = false;
+            }
+        });
+        document.querySelectorAll('.shelf-column').forEach(col => {
+            let hZone = col.querySelector('.header-zone');
+            let itemZones = col.querySelectorAll('.item-zone');
+            let headerType = null;
+            if(hZone.children.length > 0) {
+                let hVal = hZone.children[0].getAttribute('data-val');
+                headerType = (hVal === 'DungChung') ? 'chung' : 'rieng';
+            }
+            itemZones.forEach(zone => {
+                total++;
+                if(zone.children.length > 0) {
+                    let itemType = zone.children[0].getAttribute('data-type');
+                    if(headerType && itemType === headerType) {
+                        if(showResult) zone.classList.add('correct-border'); 
+                        score++;
+                    } else {
+                        if(showResult) zone.classList.add('wrong-border'); 
+                        ex1Correct = false;
+                    }
+                } else {
+                     if(showResult) zone.classList.add('wrong-border'); 
+                     ex1Correct = false;
+                }
+            });
+        });
+        if(showResult && !ex1Correct) document.querySelector('#ex1 .correct-answer-text').style.display = 'block';
+
+        // 2,3,4. NHẬP LIỆU
+        document.querySelectorAll('.required-input').forEach(inp => {
+            total++;
+            let userVal = inp.value.toLowerCase().trim();
+            let keys = inp.getAttribute('data-keywords').split(',');
+            let isCorrect = false;
+            keys.forEach(k => { if(userVal.includes(k.toLowerCase())) isCorrect = true; });
+            if (userVal !== "" && isCorrect) {
+                if(showResult) inp.classList.add('correct-border', 'correct-bg'); 
+                score++;
+            } else {
+                if(showResult) inp.classList.add('wrong-border', 'wrong-bg');
+                let parentBlock = inp.closest('.question-block');
+                if(showResult && parentBlock) parentBlock.querySelector('.correct-answer-text').style.display = 'block';
+            }
+        });
+
+        // 5. CHECKBOX
+        total++;
+        let ex5Correct = true;
+        let hasChecked = false;
+        document.querySelectorAll('.computer-part').forEach(cb => {
+            if(cb.checked) hasChecked = true;
+            if((cb.value === "true" && !cb.checked) || (cb.value === "false" && cb.checked)) ex5Correct = false;
+        });
+        if (hasChecked && ex5Correct) {
+            if(showResult) document.querySelector('#ex5').classList.add('correct-border'); 
+            score++;
+        } else {
+            if(showResult) document.querySelector('#ex5').classList.add('wrong-border');
+            if(showResult) document.querySelector('#ex5 .correct-answer-text').style.display = 'block';
+        }
+
+        if(showResult) {
+            let msg = document.getElementById('result-msg');
+            msg.innerText = `Kết quả: ${score}/${total} ý đúng.`;
+            msg.scrollIntoView({behavior: "smooth"});
+        }
+        return {score, total};
+    }
+
+    /* --- HÀM LƯU DRIVE & PDF (GỌI GAS) --- */
     function saveToDrive() {
         // Bắt buộc hoàn thành mới được nộp
         if(!checkCompletion()) return;
@@ -39,7 +697,7 @@
         formData.append('html', fullHtml);
         formData.append('filename', `${name}_${className}_TinHoc3_${Date.now()}`);
 
-        // Gửi POST request tới đường dẫn Google Script mới của bạn
+        // Gửi POST request (no-cors để tránh lỗi chặn trình duyệt, nhưng server vẫn nhận được)
         fetch("https://script.google.com/macros/s/AKfycbyzQaM_mGvgWtBwT-c7YM3g_g-PNZR_g5sRL4Z69rL4Cupgm10Udz-xXLPWW6ugOEU/exec", {
             method: "POST",
             body: formData,
@@ -55,3 +713,7 @@
             btn.disabled = false;
         });
     }
+</script>
+
+</body>
+</html>
