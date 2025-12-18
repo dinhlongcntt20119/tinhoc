@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ôn tập HK1 - Tin học 5 (Chân trời sáng tạo)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Source+Code+Pro:wght@600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <style>
+        /* --- COPY MÀU SẮC TỪ FILE INDEX --- */
+        :root {
+            --primary-color: #0056b3; 
+            --accent-color: #00a8ff; 
+            --bg-color: #f4f7f6;
+            --text-color: #333;
+            --card-bg: #ffffff;
+            --correct: #28a745; 
+            --wrong: #dc3545;
+        }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            font-family: 'Roboto', sans-serif; 
+            background-color: var(--bg-color); 
+            color: var(--text-color);
+            background-image: radial-gradient(#dbe9f4 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        
+        /* --- HEADER (GIỐNG FILE INDEX) --- */
+        header {
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            color: white;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            border-bottom: 5px solid #ffcc00;
+        }
+
+        .header-left h1 {
+            font-family: 'Source Code Pro', monospace;
+            font-size: 2.2rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+
+        .header-left h2 { font-size: 1.1rem; font-weight: 400; opacity: 0.9; }
+
+        .header-right {
+            text-align: right;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .teacher-name { font-size: 1.1rem; font-weight: bold; color: #fff; margin-top: 5px; }
+
+        /* --- FOOTER (GIỐNG FILE INDEX) --- */
+        footer {
+            text-align: center; padding: 20px; margin-top: 50px; margin-bottom: 80px; /* Chừa chỗ cho thanh nút bấm */
+            color: #777; font-size: 0.9rem; border-top: 1px solid #ddd;
+            background-color: #fff;
+        }
+
+        /* --- PHẦN NỘI DUNG CÂU HỎI --- */
+        .container { max-width: 900px; margin: 40px auto; padding: 0 20px; display: none; }
+        
+        .quiz-card { 
+            background: white; border-radius: 12px; padding: 25px; margin-bottom: 20px; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05); border-left: 5px solid var(--accent-color); 
+            page-break-inside: avoid; break-inside: avoid;
+        }
+        .q-title { font-weight: bold; font-size: 1.1rem; margin-bottom: 15px; color: var(--primary-color); }
+        .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        
+        .unanswered-card { border: 2px solid red !important; box-shadow: 0 0 10px rgba(255,0,0,0.2); animation: shake 0.5s; }
+        @keyframes shake { 0% { transform: translateX(0); } 25% { transform: translateX(-5px); } 50% { transform: translateX(5px); } 100% { transform: translateX(0); } }
+
+        .option-label { display: block; padding: 10px 15px; border: 1px solid #ddd; border-radius: 6px; cursor: pointer; transition: 0.2s; position: relative; }
+        .option-label:hover { background-color: #e3f2fd; border-color: var(--accent-color); }
+        .option-label input { margin-right: 10px; }
+        .disabled-card { pointer-events: none; opacity: 1; }
+        
+        .correct-answer { background-color: #d4edda !important; border-color: var(--correct) !important; color: #155724; font-weight: bold; }
+        .wrong-answer { background-color: #f8d7da !important; border-color: var(--wrong) !important; color: #721c24; opacity: 0.8; }
+        
+        .footer-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: white; padding: 15px; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); display: flex; justify-content: center; gap: 20px; z-index: 100; display: none; }
+        .btn { padding: 12px 30px; border-radius: 30px; border: none; font-weight: bold; cursor: pointer; font-size: 1rem; transition: 0.3s; }
+        .btn-submit { background-color: var(--primary-color); color: white; }
+        .btn-submit:hover { background-color: #003d82; }
+        
+        /* --- MÀN HÌNH ĐĂNG NHẬP --- */
+        #loginScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, var(--primary-color), var(--accent-color)); display: flex; justify-content: center; align-items: center; z-index: 300; }
+        .login-box { background: white; padding: 40px; border-radius: 15px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .input-group { margin-bottom: 15px; text-align: left; }
+        .input-group label { display: block; margin-bottom: 5px; font-weight: bold; color: #555; }
+        .input-group input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; }
+        .input-locked { background-color: #e9ecef; cursor: not-allowed; color: #495057; font-weight: bold; } /* Style cho ô bị khóa */
+        
+        .btn-start { background-color: #ffcc00; color: #333; width: 100%; margin-top: 10px; font-weight: bold;}
+        .btn-start:hover { background-color: #ffdb4d; }
+        
+        #loadingOverlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.95); z-index: 400; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+        .spinner { border: 8px solid #f3f3f3; border-top: 8px solid var(--accent-color); border-radius: 50%; width: 60px; height: 60px; animation: spin 1s linear infinite; margin-bottom: 20px;}
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 200; }
+        .modal-content { background: white; padding: 30px; border-radius: 15px; text-align: center; width: 400px; animation: popUp 0.3s ease; }
+        .score-circle { width: 120px; height: 120px; background: var(--primary-color); color: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 2.5rem; font-weight: bold; margin: 20px auto; }
+        
+        #pdf-header { display: none; }
+        @media (max-width: 600px) { .options-grid { grid-template-columns: 1fr; } .header-content { flex-direction: column; text-align: center; } header { flex-direction: column; text-align: center; gap: 15px; } .header-right { text-align: center; width: 100%; } }
+    </style>
+</head>
+<body>
+
+    <div id="loginScreen">
+        <div class="login-box">
+            <h2 style="color: var(--primary-color); margin-bottom:20px;"><i class="fas fa-graduation-cap"></i> Học sinh Lớp 5</h2>
+            <div class="input-group">
+                <label>Họ và tên:</label>
+                <input type="text" id="studentName" placeholder="Ví dụ: Nguyễn Văn An">
+            </div>
+            <div class="input-group">
+                <label>Lớp:</label>
+                <input type="text" id="studentClass" value="5D" readonly class="input-locked">
+            </div>
+            <button class="btn btn-submit btn-start" onclick="startQuiz()">Vào làm bài</button>
+        </div>
+    </div>
+
+    <div id="loadingOverlay">
+        <div class="spinner"></div>
+        <h3 style="color: var(--primary-color);">Đang nộp bài...</h3>
+        <p>Hệ thống đang lưu file PDF lên Google Drive của thầy cô.</p>
+        <p style="color: red; font-weight: bold; font-size: 0.9rem;">Vui lòng đợi 10-15 giây!</p>
+    </div>
+
+    <header id="mainHeader" style="display:none;">
+        <div class="header-left">
+            <h1><i class="fas fa-desktop"></i> TIN HỌC 5</h1>
+            <h2>Bộ sách: Chân Trời Sáng Tạo</h2>
+        </div>
+        <div class="header-right">
+            <div class="teacher-name">GV - Nguyễn Đình Bạch Long</div>
+            <div style="font-size: 0.9rem; color: #eee; margin-top:5px;">Học sinh: <span id="displayInfo" style="color: #ffcc00; font-weight: bold;"></span></div>
+        </div>
+    </header>
+
+    <div id="pdf-area">
+        <div id="pdf-header" style="text-align: center; padding: 20px; margin-bottom: 20px; border-bottom: 2px solid #333;">
+            <h1 style="color: #0056b3;">KẾT QUẢ ÔN TẬP TIN HỌC 5</h1>
+            <h3 id="pdf-student-info"></h3>
+            <h2 id="pdf-score" style="color: red; margin: 10px 0;"></h2>
+            <p><i>(Chân trời sáng tạo - Học kì 1)</i></p>
+        </div>
+        <main class="container" id="quiz-container"></main>
+    </div>
+
+    <footer id="pageFooter" style="display:none;">
+        &copy; 2025 - Website hỗ trợ học tập Tin học 5 | GV Nguyễn Đình Bạch Long
+        <div>Email: dinhlongcntt20119@gmail.com  |  SĐT: 0937438939</div>
+        <div>STK: 0937438939  |  Ngân hàng: Vietinbank</div>
+    </footer>
+
+    <div class="footer-bar" id="footerBar">
+        <button class="btn btn-submit" onclick="submitAndExport()"><i class="fas fa-paper-plane"></i> Nộp Bài</button>
+    </div>
+
+    <div id="resultModal" class="modal">
+        <div class="modal-content">
+            <h2 style="color: var(--primary-color);">Hoàn thành!</h2>
+            <div class="score-circle" id="scoreDisplay">0/30</div>
+            <p id="feedbackText" style="margin-bottom: 10px; font-weight: bold;">...</p>
+            <div id="statusMsg" style="font-size: 0.9rem; color: #0056b3; margin-top:10px; padding: 10px; background: #e0f2f1; border-radius: 5px;"></div>
+            <button class="btn btn-submit" onclick="location.reload()" style="margin-top: 15px; background-color: #6c757d;">Làm lại</button>
+        </div>
+    </div>
+
+    <script>
+        // --- !!! CẤU HÌNH LIÊN KẾT GOOGLE SCRIPT !!! ---
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwYWxXEzJ8l_EtETxHmmDhN6cf2qRztjyjj6jk_HQHkmoRugU70rhrE6jwKuft8cHRP/exec";
+
+        let info = { name: "", class: "" };
+        
+        // --- BỘ 30 CÂU HỎI (27 câu cũ + 3 câu mới từ hình ảnh) ---
+        const questions = [
+            // CHỦ ĐỀ 1: MÁY TÍNH VÀ EM
+            { q: "Câu 1: Trong các thành phần sau, đâu là 'Phần mềm' của máy tính?", a: ["Bàn phím", "Màn hình", "Hệ điều hành Windows", "Chuột"], correct: 2 },
+            { q: "Câu 2: Hệ điều hành có chức năng chính là gì?", a: ["Để vẽ hình", "Quản lý phần cứng và phần mềm máy tính", "Để soạn thảo văn bản", "Để nghe nhạc"], correct: 1 },
+            { q: "Câu 3: Thiết bị nào sau đây là thiết bị Phần cứng?", a: ["Phần mềm PowerPoint", "Trò chơi điện tử", "Máy in", "Hệ điều hành"], correct: 2 },
+            { q: "Câu 4: Khi khởi động máy tính, phần mềm nào sẽ chạy đầu tiên?", a: ["Word", "Hệ điều hành", "Google Chrome", "Unikey"], correct: 1 },
+            { q: "Câu 5: Để tắt máy tính đúng cách, em chọn lệnh nào trong bảng chọn Start?", a: ["Sleep", "Restart", "Shut down", "Sign out"], correct: 2 },
+            { q: "Câu 6: Thanh công việc (Taskbar) thường nằm ở đâu trên màn hình?", a: ["Trên cùng", "Dưới cùng", "Góc phải", "Giữa màn hình"], correct: 1 },
+            
+            // CHỦ ĐỀ 2: TỔ CHỨC LƯU TRỮ
+            { q: "Câu 7: Cây thư mục giúp chúng ta làm gì?", a: ["Trồng cây", "Làm đẹp màn hình", "Tổ chức và tìm kiếm tệp tin dễ dàng hơn", "Tăng tốc độ chuột"], correct: 2 },
+            { q: "Câu 8: Tệp tin (File) trình chiếu PowerPoint thường có đuôi mở rộng là gì?", a: [".docx", ".pptx", ".xlsx", ".mp3"], correct: 1 },
+            { q: "Câu 9: Tệp tin hình ảnh thường có đuôi là gì?", a: [".jpg hoặc .png", ".txt", ".exe", ".pdf"], correct: 0 },
+            { q: "Câu 10: Thư mục có thể chứa những gì?", a: ["Chỉ chứa tệp tin", "Chỉ chứa thư mục con", "Chứa cả tệp tin và thư mục con", "Không chứa gì"], correct: 2 },
+            { q: "Câu 11: Để đổi tên một thư mục, em nháy chuột phải vào nó rồi chọn lệnh gì?", a: ["Delete", "Copy", "Rename", "Cut"], correct: 2 },
+
+            // CHỦ ĐỀ 3: MẠNG MÁY TÍNH VÀ INTERNET
+            { q: "Câu 12: Mạng máy tính là gì?", a: ["Hai hay nhiều máy tính được kết nối với nhau", "Một cái máy tính rất lớn", "Dây điện nối các máy tính", "Các máy tính xếp chồng lên nhau"], correct: 0 },
+            { q: "Câu 13: Lợi ích của Internet là gì?", a: ["Tra cứu thông tin, học tập, giải trí", "Liên lạc với bạn bè ở xa", "Gửi thư điện tử", "Tất cả các ý trên"], correct: 3 },
+            { q: "Câu 14: Để truy cập Internet, máy tính cần có thiết bị gì?", a: ["Máy in", "Loa", "Modem hoặc Router (Bộ phát wifi)", "Webcam"], correct: 2 },
+            { q: "Câu 15: Phần mềm nào dùng để duyệt web?", a: ["Word", "Excel", "Google Chrome", "Paint"], correct: 2 },
+            { q: "Câu 16: Mạng không dây được gọi là gì?", a: ["Dây cáp", "Wi-Fi", "USB", "Bluetooth"], correct: 1 },
+
+            // CHỦ ĐỀ 4: THƯ ĐIỆN TỬ (EMAIL)
+            { q: "Câu 17: Địa chỉ thư điện tử (Email) bắt buộc phải có kí tự nào?", a: ["#", "@", "$", "&"], correct: 1 },
+            { q: "Câu 18: Cấu trúc của một địa chỉ email là gì?", a: ["Tên người dùng @ Tên nhà cung cấp dịch vụ", "Tên người dùng . Tên nhà cung cấp", "Tên nhà cung cấp @ Tên người dùng", "Chỉ cần tên người dùng"], correct: 0 },
+            { q: "Câu 19: Để gửi thư cho người khác, em nhấn vào nút nào?", a: ["Hộp thư đến (Inbox)", "Soạn thư (Compose)", "Thùng rác (Trash)", "Spam"], correct: 1 },
+            { q: "Câu 20: Khi muốn gửi kèm một tệp tin (hình ảnh, văn bản) trong email, em chọn biểu tượng nào?", a: ["Hình cái bút", "Hình cái kẹp giấy", "Hình thùng rác", "Hình mặt cười"], correct: 1 },
+            { q: "Câu 21: Mật khẩu email cần được giữ như thế nào?", a: ["Chia sẻ cho tất cả bạn bè", "Viết lên bảng", "Giữ bí mật, không cho người lạ biết", "Đặt mật khẩu là 123456 cho dễ nhớ"], correct: 2 },
+            { q: "Câu 22: Khi nhận được email từ người lạ có đính kèm tệp lạ, em nên làm gì?", a: ["Mở ra xem ngay", "Tải về máy", "Không mở và xóa ngay hoặc hỏi ý kiến người lớn", "Chuyển tiếp cho bạn bè"], correct: 2 },
+
+            // CHỦ ĐỀ 5: ĐẠO ĐỨC, PHÁP LUẬT
+            { q: "Câu 23: Thông tin cá nhân nào KHÔNG nên chia sẻ công khai trên mạng?", a: ["Sở thích đọc sách", "Món ăn yêu thích", "Địa chỉ nhà, số điện thoại, mật khẩu", "Tên trường đang học"], correct: 2 },
+            { q: "Câu 24: Bản quyền nội dung số là gì?", a: ["Quyền sở hữu của tác giả đối với sản phẩm số họ tạo ra", "Quyền được dùng miễn phí mọi thứ", "Quyền được sao chép thoải mái", "Quyền được bán lại"], correct: 0 },
+            { q: "Câu 25: Hành động nào là tôn trọng bản quyền?", a: ["Tự ý lấy tranh của người khác nhận là mình vẽ", "Ghi rõ nguồn hoặc tên tác giả khi sử dụng tranh ảnh", "Sao chép bài văn trên mạng nộp cho cô giáo", "Bán lại phần mềm lậu"], correct: 1 },
+            { q: "Câu 26: Nếu bị bắt nạt qua mạng (Cyberbullying), em nên làm gì?", a: ["Im lặng chịu đựng", "Nhắn tin chửi lại", "Chặn người đó và báo ngay cho bố mẹ, thầy cô", "Xóa tài khoản"], correct: 2 },
+            { q: "Câu 27: Phần mềm PowerPoint dùng để làm gì?", a: ["Soạn thảo văn bản", "Tính toán", "Tạo bài trình chiếu thuyết trình", "Vẽ tranh"], correct: 2 },
+
+            // --- 3 CÂU HỎI MỚI TỪ HÌNH ẢNH ---
+            { 
+                q: "Câu 28: Sắp xếp các việc dưới đây theo thứ tự đúng để tìm đọc truyện “Sự tích cây khế” trên website truyencotich.vn?<br>(1). Gõ phím Enter<br>(2). Nháy chuột vào tên truyện trong danh sách kết quả tìm kiếm<br>(3). Gõ từ khóa “Sự tích cây khế” vào ô tìm kiếm", 
+                a: ["(1) → (2) → (3)", "(3) → (1) → (2)", "(2) → (3) → (1)", "(3) → (2) → (1)"], 
+                correct: 1 // Đáp án B
+            },
+            { 
+                q: "Câu 29: Hãy cho biết tác dụng của lệnh “Open file location” khi tìm kiếm file trong phần mềm File Explorer?", 
+                a: ["Đổi tên File", "Xem thông tin chi tiết của File", "Mở thư mục chứa File", "Sao chép File"], 
+                correct: 2 // Đáp án C
+            },
+            { 
+                q: "Câu 30: Phát biểu nào dưới đây là SAI về quyền của tác giả?", 
+                a: ["Tự ý sao chép tác phẩm là vi phạm quyền sao chép.", "Tự ý chính sửa tác phẩm là vi phạm quyền bảo vệ toàn vẹn nội dung.", "Tự ý chia sẻ tác phẩm là vi phạm quyền phổ biến, truyền đạt đến công chúng.", "Tự ý sửa tên tác phẩm là vi phạm quyền đứng tên của tác giả."], 
+                correct: 3 // Đáp án D
+            }
+        ];
+
+        // Thuật toán đảo câu hỏi
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function startQuiz() {
+            const name = document.getElementById('studentName').value.trim();
+            const cls = document.getElementById('studentClass').value.trim(); // Lấy giá trị từ ô đã bị khóa
+            
+            if (!name) { alert("Em hãy nhập Họ tên nhé!"); return; }
+            
+            info.name = name; info.class = cls;
+            
+            // Đảo câu hỏi trước khi bắt đầu
+            shuffleArray(questions);
+
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('mainHeader').style.display = 'flex'; // Dùng flex để căn chỉnh giống file index
+            document.getElementById('pageFooter').style.display = 'block';
+            document.getElementById('quiz-container').style.display = 'block';
+            document.getElementById('footerBar').style.display = 'flex';
+            document.getElementById('displayInfo').innerText = `${name} - ${cls}`;
+            renderQuiz();
+        }
+
+        function renderQuiz() {
+            const container = document.getElementById('quiz-container');
+            container.innerHTML = '';
+            // Đánh số lại thứ tự hiển thị
+            questions.forEach((q, index) => {
+                let contentText = q.q;
+                if(contentText.includes(":")) {
+                    contentText = contentText.split(":")[1].trim(); 
+                } else if(contentText.includes("?")) {
+                   // Giữ nguyên
+                }
+                
+                let displayTitle = `Câu ${index + 1}: ${contentText}`;
+
+                let html = `<div class="quiz-card" id="card-${index}"><div class="q-title">${displayTitle}</div><div class="options-grid">`;
+                q.a.forEach((opt, i) => {
+                    html += `<label class="option-label" id="opt-${index}-${i}"><input type="radio" name="q${index}" value="${i}"> ${opt}</label>`;
+                });
+                html += `</div></div>`;
+                container.innerHTML += html;
+            });
+        }
+
+        function validateFull() {
+            for (let i = 0; i < questions.length; i++) {
+                const checked = document.querySelector(`input[name="q${i}"]:checked`);
+                if (!checked) {
+                    const card = document.getElementById(`card-${i}`);
+                    card.classList.add('unanswered-card');
+                    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    alert(`Em chưa làm Câu ${i+1}. Hãy hoàn thành hết trước khi nộp nhé!`);
+                    setTimeout(() => card.classList.remove('unanswered-card'), 2000);
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        async function submitAndExport() {
+            if (!validateFull()) return;
+            if(!confirm("Em có chắc chắn muốn nộp bài không?")) return;
+
+            document.getElementById('loadingOverlay').style.display = 'flex';
+            document.getElementById('footerBar').style.display = 'none';
+
+            let score = 0;
+            questions.forEach((q, index) => {
+                const card = document.getElementById(`card-${index}`);
+                const selected = document.querySelector(`input[name="q${index}"]:checked`);
+                card.classList.add('disabled-card');
+                const val = parseInt(selected.value);
+                
+                if (val === q.correct) {
+                    score++;
+                    document.getElementById(`opt-${index}-${val}`).classList.add('correct-answer');
+                } else {
+                    document.getElementById(`opt-${index}-${val}`).classList.add('wrong-answer');
+                    document.getElementById(`opt-${index}-${q.correct}`).classList.add('correct-answer');
+                }
+            });
+
+            const totalScore = `${score}/${questions.length}`;
+            const pdfHeader = document.getElementById('pdf-header');
+            document.getElementById('pdf-student-info').innerText = `Họ tên: ${info.name} - Lớp: ${info.class}`;
+            document.getElementById('pdf-score').innerText = `Điểm số: ${totalScore}`;
+            pdfHeader.style.display = 'block'; 
+
+            const elementToPrint = document.getElementById('pdf-area');
+            const fileName = `TinHoc5_${info.name.replace(/\s/g,'_')}_${info.class}.pdf`;
+            
+            const pdfOptions = {
+                margin: 5, filename: fileName, image: { type: 'jpeg', quality: 0.95 },
+                html2canvas: { scale: 1.5, useCORS: true, scrollY: 0 },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+            };
+
+            try {
+                const pdfBase64 = await html2pdf().set(pdfOptions).from(elementToPrint).output('datauristring');
+
+                if (GOOGLE_SCRIPT_URL.includes("DÁN_URL")) {
+                    console.warn("Chưa cấu hình Google Script URL.");
+                } else {
+                    await fetch(GOOGLE_SCRIPT_URL, {
+                        method: "POST",
+                        body: JSON.stringify({
+                            fileName: fileName,
+                            fileData: pdfBase64,
+                            studentName: info.name,
+                            studentClass: info.class,
+                            score: totalScore
+                        })
+                    });
+                }
+
+                await html2pdf().set(pdfOptions).from(elementToPrint).toPdf().get('pdf').then(function(pdf) {
+                    window.open(pdf.output('bloburl'), '_blank');
+                }).save();
+
+                document.getElementById('statusMsg').innerHTML = "<span style='color:green; font-weight:bold'><i class='fas fa-check-circle'></i> Bài làm đã được lưu thành công!</span>";
+                
+            } catch (error) {
+                console.error(error);
+                document.getElementById('statusMsg').innerHTML = `<span style='color:red'>Lỗi kết nối Drive: ${error.message} (Nhưng PDF đã được tải về máy).</span>`;
+            } finally {
+                document.getElementById('loadingOverlay').style.display = 'none';
+                document.getElementById('scoreDisplay').innerText = totalScore;
+                
+                let msg = "";
+                if (score >= 27) msg = "Xuất sắc!";
+                else if (score >= 20) msg = "Khá tốt!";
+                else msg = "Cố gắng hơn nhé!";
+                
+                document.getElementById('feedbackText').innerText = msg;
+                document.getElementById('resultModal').style.display = 'flex';
+                pdfHeader.style.display = 'none'; 
+            }
+        }
+    </script>
+</body>
+</html>
