@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KIỂM TRA TIN HỌC CUỐI KÌ 1</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&family=Roboto:wght@400;500;700&family=Source+Code+Pro:wght@600&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-color: #0056b3; 
+            --accent-color: #00a8ff; 
+            --bg-color: #f4f7f6;
+            --text-color: #333;
+            --card-bg: #ffffff;
+            --primary: #009688; --secondary: #ff9800; --bg: #e0f2f1; --text: #333; --correct: #c8e6c9; --wrong: #ffcdd2;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Roboto', sans-serif; background-color: var(--bg-color); color: var(--text-color); padding-bottom: 80px; }
+
+        /* HEADER */
+        header {
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            color: white; padding: 15px 40px; display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1); border-bottom: 5px solid #ffcc00; position: sticky; top: 0; z-index: 100;
+        }
+        .header-left h1 { font-family: 'Source Code Pro', monospace; font-size: 1.5rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
+        .header-left h2 { font-size: 0.9rem; font-weight: 400; opacity: 0.9; }
+        
+        /* TIMER STYLE */
+        #timerBox {
+            background: #fff; color: #d32f2f; font-weight: bold; font-size: 1.5rem;
+            padding: 5px 15px; border-radius: 8px; border: 2px solid #d32f2f;
+            display: flex; align-items: center; gap: 10px;
+        }
+
+        .header-right { text-align: right; background: rgba(255, 255, 255, 0.1); padding: 10px 20px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.3); }
+        .teacher-name { font-size: 1rem; font-weight: bold; color: #fff; }
+        .student-info-display { color: #ffeb3b; font-weight: bold; margin-top: 5px; font-size: 1.1rem; border-top: 1px dashed rgba(255,255,255,0.3); padding-top: 5px; }
+
+        /* LOGIN SCREEN */
+        #loginScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 86, 179, 0.98); display: flex; justify-content: center; align-items: center; z-index: 2000; }
+        .login-box { background: white; padding: 30px; border-radius: 20px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        .input-group { margin-bottom: 15px; text-align: left; }
+        .input-group label { font-weight: bold; display: block; margin-bottom: 5px; color: #333; }
+        .input-group input, .input-group select { width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 10px; font-size: 1rem; outline: none; background-color: #fff; }
+        .btn-start { background: var(--secondary); color: white; border: none; padding: 12px 40px; border-radius: 30px; font-size: 1.2rem; font-weight: bold; cursor: pointer; width: 100%; transition: 0.3s; }
+        .btn-start:hover { transform: scale(1.05); }
+
+        /* QUIZ CONTAINER */
+        .container { max-width: 800px; margin: 40px auto; padding: 0 15px; display: none; }
+        
+        /* HEADER THONG TIN TRUONG TRONG DE THI */
+        .exam-header-info {
+            text-align: center;
+            margin-bottom: 30px;
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            border-top: 4px solid var(--primary-color);
+        }
+        .exam-header-info h3 { margin: 0; color: #555; font-size: 1.1rem; text-transform: uppercase; }
+        .exam-header-info h1 { margin: 10px 0; color: var(--primary-color); font-size: 1.6rem; text-transform: uppercase; }
+        .exam-header-info p { font-style: italic; color: #777; font-weight: bold; }
+
+        .question-card { background: white; border-radius: 15px; padding: 20px; margin-bottom: 25px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); border-bottom: 5px solid #ccc; page-break-inside: avoid; }
+        .q-header { display: flex; align-items: flex-start; margin-bottom: 15px; }
+        .q-number { background: var(--primary-color); color: white; width: 35px; height: 35px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; margin-right: 15px; flex-shrink: 0; }
+        .q-text { font-size: 1.1rem; font-weight: 600; line-height: 1.4; display: flex; align-items: center; flex-wrap: wrap; }
+
+        .answers-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+        .answer-opt { display: flex; align-items: center; padding: 12px; border: 2px solid #eee; border-radius: 12px; cursor: pointer; transition: all 0.2s; background: #fafafa; }
+        .answer-opt:hover { border-color: var(--primary-color); background: #e0f2f1; }
+        .answer-opt input { margin-right: 10px; transform: scale(1.3); accent-color: var(--primary-color); flex-shrink: 0; }
+        .ans-text { font-weight: 500; display: flex; align-items: center; }
+        .ans-img { height: 60px; width: auto; object-fit: contain; border-radius: 4px; border: 1px solid #ddd; background: white; padding: 2px; }
+        .inline-img { height: 30px; width: auto; margin: 0 5px; vertical-align: middle; }
+
+        .correct { background-color: var(--correct) !important; border-color: #4caf50 !important; color: #1b5e20; }
+        .wrong { background-color: var(--wrong) !important; border-color: #f44336 !important; color: #b71c1c; opacity: 0.8; }
+        .unanswered { border: 2px solid red; animation: shake 0.4s; }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+
+        /* PDF AREA STYLE */
+        #pdf-area { background: white; padding: 20px; } 
+        #pdf-header-info { display: none; text-align: center; margin-bottom: 20px; border-bottom: 2px solid #333; padding-bottom: 20px; }
+        #pdf-header-info h1 { color: var(--primary-color); margin: 0 0 10px 0; }
+        #pdf-header-info p { font-size: 1.2rem; margin: 5px 0; font-weight: bold; }
+
+        /* FOOTER & OVERLAY */
+        .footer-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: white; padding: 15px; box-shadow: 0 -5px 20px rgba(0,0,0,0.1); display: flex; justify-content: center; gap: 20px; z-index: 1000; display: none; }
+        .btn-submit { background: var(--primary-color); color: white; border: none; padding: 12px 30px; border-radius: 30px; font-weight: bold; font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: 0.3s; }
+        .btn-submit:hover { background: #004494; transform: translateY(-3px); }
+        
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 3000; flex-direction: column; color: white; }
+        .spinner { border: 6px solid #f3f3f3; border-top: 6px solid var(--secondary); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin-bottom: 20px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .result-box { background: white; color: #333; padding: 30px; border-radius: 20px; text-align: center; width: 90%; max-width: 400px; animation: popUp 0.3s ease; }
+        .score-circle { width: 100px; height: 100px; background: var(--primary-color); color: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 2rem; font-weight: bold; margin: 20px auto; }
+        
+        footer { text-align: center; padding: 20px; margin-top: 50px; color: #777; font-size: 0.9rem; border-top: 1px solid #ddd; background-color: white; }
+        @media (max-width: 768px) { header { flex-direction: column; text-align: center; gap: 15px; } .header-right { text-align: center; width: 100%; } }
+    </style>
+</head>
+<body>
+
+    <div id="loginScreen">
+        <div class="login-box">
+            <i class="fas fa-desktop" style="font-size: 3rem; color: var(--primary-color); margin-bottom: 15px;"></i>
+            <h2 style="color: var(--primary-color); margin-bottom: 20px;">KIỂM TRA TIN HỌC CUỐI KÌ 1</h2>
+            <div class="input-group">
+                <label>Họ và tên:</label>
+                <input type="text" id="sName" placeholder="Nhập tên...">
+            </div>
+            <div class="input-group">
+                <label>Lớp:</label>
+                <select id="sClass">
+                    <option value="">-- Chọn lớp --</option>
+                    <option value="2A">2A</option>
+                    <option value="2D">2D</option>
+                </select>
+            </div>
+            <button class="btn-start" onclick="startQuiz()">BẮT ĐẦU LÀM BÀI</button>
+        </div>
+    </div>
+
+    <header id="mainHeader" style="display: none;">
+        <div class="header-left">
+            <h1><i class="fas fa-laptop-code"></i> TIN HỌC 2</h1>
+            <h2>Trường Tiểu học Nhị Tân</h2>
+        </div>
+        
+        <div id="timerBox">
+            <i class="fas fa-clock"></i> <span id="timeDisplay">35:00</span>
+        </div>
+
+        <div class="header-right">
+            <div class="teacher-name">GV - Nguyễn Đình Bạch Long</div>
+            <div class="student-info-display" id="displayInfo"></div>
+        </div>
+    </header>
+
+    <div style="text-align: center; margin-top: 20px; display: none;" id="backButtonArea">
+        <a href="../index.html" style="text-decoration: none; color: #666;"><i class="fas fa-arrow-left"></i> Quay lại trang chủ</a>
+    </div>
+
+    <div id="pdf-area">
+        <div id="pdf-header-info">
+            <h1>KẾT QUẢ KIỂM TRA CUỐI KÌ 1</h1>
+            <p id="pdf-name"></p>
+            <p id="pdf-score" style="color: red; font-size: 1.5rem;"></p>
+        </div>
+        <div class="container" id="quizContainer"></div>
+    </div>
+
+    <footer id="mainFooter" style="display: none;">
+        &copy; 2025 - Website hỗ trợ học tập Tin học 2 | GV Nguyễn Đình Bạch Long
+        <div>Email: dinhlongcntt20119@gmail.com  |  SĐT: 0937438939</div>
+        <div>STK: 0937438939  |  Ngân hàng: Vietinbank</div>
+    </footer>
+
+    <div class="footer-bar" id="footerBar">
+        <button class="btn-submit" onclick="submitExam(false)"><i class="fas fa-cloud-upload-alt"></i> Nộp bài</button>
+    </div>
+
+    <div id="loadingOverlay" class="overlay">
+        <div class="spinner"></div>
+        <h3>Đang xử lý...</h3>
+        <p>Đang gửi bài lên hệ thống...</p>
+    </div>
+
+    <div id="resultModal" class="overlay">
+        <div class="result-box">
+            <h2 style="color: var(--primary-color);">Hoàn thành!</h2>
+            <div class="score-circle" id="scoreDisplay">0/0</div>
+            <p id="msg" style="font-weight: bold; margin-bottom: 10px;"></p>
+            <div id="driveMsg" style="background: #e8f5e9; color: #1b5e20; padding: 10px; border-radius: 8px; font-size: 0.9rem;">
+                </div>
+            <a href="../index.html" class="btn-start" style="margin-top: 10px; background: var(--primary-color); display: inline-block; text-decoration: none; padding: 12px 0;">Về trang chủ</a>
+        </div>
+    </div>
+
+    <script>
+        // SCRIPT GOOGLE MỚI CẬP NHẬT
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyhfg41MS_LlhJ6etB3WY2UXiYCB_0njJYmRuDshgoXPRhFB3ii5VUSK6QY-yeN0Gyyuw/exec";
+        
+        let student = { name: "", class: "" };
+        let timerInterval;
+        let timeLimit = 35 * 60; // 35 phút tính bằng giây
+
+        // --- DỮ LIỆU CÂU HỎI ---
+        let questions = [
+            // CÂU 1
+            { 
+                q: "Em hãy chỉ ra biểu tượng của phần mềm Paint (Vẽ)?", 
+                a: [
+                    {t: "<img src='circus.png' class='ans-img'>"}, 
+                    {t: "<img src='paint.jpg' class='ans-img'>"}, 
+                    {t: "<img src='calculator.png' class='ans-img'>"}
+                ], 
+                c: 1 
+            },
+            // CÂU 2
+            { 
+                q: "Công cụ Text <img src='text.png' class='inline-img'> trong Paint giúp em làm gì?", 
+                a: [
+                    {t: "Vẽ đường cong"}, 
+                    {t: "Tô màu hình vẽ"}, 
+                    {t: "Gõ chữ vào khung vẽ"}
+                ], 
+                c: 2 
+            },
+            { 
+                q: "Để vẽ được hình vuông hoặc hình tròn chuẩn xác, em cần nhấn giữ phím nào?", 
+                a: [
+                    {t: "Phím Shift"}, 
+                    {t: "Phím Ctrl"}, 
+                    {t: "Phím Alt"}
+                ], 
+                c: 0 
+            },
+            { 
+                q: "Để sao chép một mẫu vẽ đã chọn trong Paint, em thực hiện thao tác nào?", 
+                a: [
+                    {t: "Giữ phím Shift + Kéo chuột"}, 
+                    {t: "Giữ phím Ctrl + Kéo chuột"}, 
+                    {t: "Giữ phím Alt + Kéo chuột"}
+                ], 
+                c: 1 
+            },
+            // CÂU 5
+            { 
+                q: "Để đóng tiện ích đồng hồ (Clock) đang mở trên màn hình Desktop, em nhấp chuột vào biểu tượng nào?", 
+                a: [
+                    {t: "<img src='tick.png' class='ans-img'>"}, 
+                    {t: "<img src='setting.png' class='ans-img'>"}, 
+                    {t: "<img src='close.png' class='ans-img'>"}
+                ], 
+                c: 2 
+            },
+        ];
+
+        // ĐÃ BỎ HÀM SHUFFLE ĐỂ GIỮ NGUYÊN THỨ TỰ CÂU HỎI
+
+        function startQuiz() {
+            const name = document.getElementById('sName').value.trim();
+            const cls = document.getElementById('sClass').value;
+            
+            if(!name) { alert("Con nhớ điền tên nhé!"); return; }
+            if(!cls) { alert("Con nhớ chọn lớp nhé!"); return; }
+            
+            student.name = name; student.class = cls;
+            document.getElementById('displayInfo').innerText = `${name} - Lớp ${cls}`;
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('mainHeader').style.display = 'flex'; 
+            document.getElementById('mainFooter').style.display = 'block';
+            document.getElementById('backButtonArea').style.display = 'block';
+            document.getElementById('quizContainer').style.display = 'block';
+            document.getElementById('footerBar').style.display = 'flex';
+            
+            // Không trộn câu hỏi nữa
+            // shuffleArray(questions);
+            
+            renderQuiz();
+            startTimer();
+        }
+
+        function startTimer() {
+            const display = document.getElementById('timeDisplay');
+            timerInterval = setInterval(() => {
+                let minutes = Math.floor(timeLimit / 60);
+                let seconds = timeLimit % 60;
+
+                minutes = minutes < 10 ? "0" + minutes : minutes;
+                seconds = seconds < 10 ? "0" + seconds : seconds;
+
+                display.textContent = minutes + ":" + seconds;
+
+                if (--timeLimit < 0) {
+                    clearInterval(timerInterval);
+                    alert("Đã hết thời gian làm bài! Hệ thống sẽ tự động nộp bài.");
+                    submitExam(true); // Tham số true để báo là tự động nộp
+                }
+            }, 1000);
+        }
+
+        function renderQuiz() {
+            const container = document.getElementById('quizContainer');
+            container.innerHTML = "";
+
+            // THÊM TIÊU ĐỀ BÀI THI VÀO ĐẦU DANH SÁCH
+            const examHeader = `
+                <div class="exam-header-info">
+                    <h3>TRƯỜNG TIỂU HỌC NHỊ TÂN</h3>
+                    <h1>KIỂM TRA TIN HỌC CUỐI KÌ 1</h1>
+                    <p>Thời gian làm bài: 35 phút</p>
+                </div>
+            `;
+            container.innerHTML += examHeader;
+
+            questions.forEach((q, idx) => {
+                let html = `
+                <div class="question-card" id="card-${idx}">
+                    <div class="q-header">
+                        <div class="q-number">${idx + 1}</div>
+                        <div class="q-text">${q.q}</div>
+                    </div>
+                    <div class="answers-grid">
+                        ${q.a.map((opt, optIdx) => `
+                            <label class="answer-opt" id="lbl-${idx}-${optIdx}">
+                                <input type="radio" name="q${idx}" value="${optIdx}">
+                                <span class="ans-text">${opt.t}</span>
+                            </label>
+                        `).join('')}
+                    </div>
+                </div>`;
+                container.innerHTML += html;
+            });
+        }
+
+        async function submitExam(isAutoSubmit) {
+            clearInterval(timerInterval); // Dừng đồng hồ
+
+            let unanswered = [];
+            questions.forEach((_, idx) => {
+                const checked = document.querySelector(`input[name="q${idx}"]:checked`);
+                const card = document.getElementById(`card-${idx}`);
+                card.classList.remove('unanswered');
+                if(!checked) { unanswered.push(idx); card.classList.add('unanswered'); }
+            });
+
+            // Nếu không phải tự nộp thì mới kiểm tra câu chưa làm
+            if(!isAutoSubmit) {
+                if(unanswered.length > 0) {
+                    alert(`Con ơi, còn ${unanswered.length} câu chưa làm xong. Con kiểm tra các khung màu đỏ nhé!`);
+                    document.getElementById(`card-${unanswered[0]}`).scrollIntoView({behavior: "smooth", block: "center"});
+                    startTimer(); // Chạy lại đồng hồ nếu chưa nộp
+                    return;
+                }
+
+                if(!confirm("Con đã chắc chắn nộp bài chưa?")) {
+                    startTimer(); // Chạy lại đồng hồ nếu hủy
+                    return;
+                }
+            }
+
+            let score = 0;
+            questions.forEach((q, idx) => {
+                const checked = document.querySelector(`input[name="q${idx}"]:checked`);
+                // Nếu tự nộp mà chưa chọn thì coi như sai
+                let val = -1;
+                if(checked) {
+                    val = parseInt(checked.value);
+                }
+
+                document.querySelectorAll(`input[name="q${idx}"]`).forEach(inp => inp.disabled = true);
+                
+                if(val === q.c) {
+                    score++;
+                    document.getElementById(`lbl-${idx}-${val}`).classList.add('correct');
+                } else {
+                    if(val !== -1) document.getElementById(`lbl-${idx}-${val}`).classList.add('wrong');
+                    document.getElementById(`lbl-${idx}-${q.c}`).classList.add('correct');
+                }
+            });
+
+            document.getElementById('loadingOverlay').style.display = 'flex';
+            document.getElementById('footerBar').style.display = 'none';
+            // Ẩn đồng hồ khi in
+            document.getElementById('timerBox').style.display = 'none';
+            
+            const scoreText = `${score}/${questions.length}`;
+            const pdfHeader = document.getElementById('pdf-header-info');
+            pdfHeader.style.display = 'block';
+            document.getElementById('pdf-name').innerText = `Họ tên: ${student.name} - Lớp: ${student.class}`;
+            document.getElementById('pdf-score').innerText = `Điểm số: ${scoreText}`;
+
+            const element = document.getElementById('pdf-area');
+            const fileName = `BaiThi_${student.class}_${student.name}.pdf`;
+            const opt = { 
+                margin: 5, 
+                filename: fileName, 
+                image: { type: 'jpeg', quality: 0.98 }, 
+                html2canvas: { scale: 1.5, useCORS: true, scrollY: 0 }, 
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } 
+            };
+
+            let driveStatus = "";
+
+            try {
+                // 1. TẠO PDF DẠNG BASE64 ĐỂ GỬI ĐI
+                const pdfData = await html2pdf().set(opt).from(element).outputPdf('datauristring');
+                const base64Content = pdfData.split(',')[1];
+
+                // 2. GỬI LÊN GOOGLE SCRIPT
+                await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors', 
+                    headers: { 'Content-Type': 'text/plain' },
+                    body: JSON.stringify({
+                        fileName: fileName,
+                        fileData: base64Content
+                    })
+                });
+                
+                driveStatus = "<span style='color:green'>✔ Đã lưu bài lên hệ thống giáo viên.</span>";
+
+                // 3. TẢI FILE VỀ MÁY HỌC SINH LUÔN
+                await html2pdf().set(opt).from(element).save();
+
+            } catch (err) {
+                console.error(err);
+                await html2pdf().set(opt).from(element).save();
+                driveStatus = "<span style='color:orange'>⚠ Lỗi kết nối mạng, bài đã tải về máy con.</span>";
+            }
+
+            document.getElementById('loadingOverlay').style.display = 'none';
+            pdfHeader.style.display = 'none';
+            document.getElementById('scoreDisplay').innerText = scoreText;
+            document.getElementById('msg').innerText = score >= 4 ? "Con làm bài rất xuất sắc!" : "Con cố gắng hơn lần sau nhé!";
+            document.getElementById('driveMsg').innerHTML = driveStatus;
+            document.getElementById('resultModal').style.display = 'flex';
+        }
+    </script>
+</body>
+</html>
