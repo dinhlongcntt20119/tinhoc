@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ôn tập Tin học 1 - Cuối kì 1</title>
+    <title>Kiểm tra Tin học 1 - Cuối kì 1</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&family=Roboto:wght@400;500;700&family=Source+Code+Pro:wght@600&display=swap" rel="stylesheet">
@@ -111,18 +111,52 @@
         .score-circle { width: 100px; height: 100px; background: var(--primary-color); color: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 2rem; font-weight: bold; margin: 20px auto; }
         #pdf-header-info { display: none; text-align: center; margin-bottom: 20px; border-bottom: 2px solid #333; padding-bottom: 10px; }
         
+        /* HEADER BÀI KIỂM TRA */
+        .exam-info-header {
+            text-align: center;
+            margin-bottom: 30px;
+            font-weight: bold;
+            line-height: 1.6;
+            color: var(--primary-color);
+            border-bottom: 2px dashed #ccc;
+            padding-bottom: 15px;
+        }
+
+        /* TIMER STYLE */
+        #timerBox {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            background: #fff;
+            border: 2px solid #ff9800;
+            padding: 10px 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            font-weight: bold;
+            color: #d32f2f;
+            z-index: 99;
+            display: none;
+            text-align: center;
+        }
+        #timerBox i { margin-right: 5px; }
+
         @media (max-width: 768px) {
             header { flex-direction: column; text-align: center; gap: 15px; }
             .header-right { text-align: center; width: 100%; }
+            #timerBox { top: auto; bottom: 80px; right: 10px; font-size: 0.9rem; padding: 5px 10px; opacity: 0.9; }
         }
     </style>
 </head>
 <body>
 
+    <div id="timerBox">
+        <i class="fas fa-clock"></i> <span id="timerText">35:00</span>
+    </div>
+
     <div id="loginScreen">
         <div class="login-box">
             <i class="fas fa-laptop-code" style="font-size: 3rem; color: var(--primary-color); margin-bottom: 15px;"></i>
-            <h2 style="color: var(--primary-color); margin-bottom: 20px;">ÔN TẬP TIN HỌC 1</h2>
+            <h2 style="color: var(--primary-color); margin-bottom: 20px;">KIỂM TRA TIN HỌC CUỐI KÌ 1</h2>
             
             <div class="input-group"><label>Họ và tên:</label><input type="text" id="sName" placeholder="Nhập tên..."></div>
             <div class="input-group">
@@ -155,11 +189,13 @@
 
     <div id="pdf-area">
         <div id="pdf-header-info">
-            <h1 style="color: var(--primary-color);">KẾT QUẢ ÔN TẬP CUỐI KÌ 1</h1>
+            <h1 style="color: var(--primary-color);">KẾT QUẢ KIỂM TRA CUỐI KÌ 1</h1>
             <h3 id="pdf-name"></h3>
             <h2 id="pdf-score" style="color: red;"></h2>
         </div>
-        <div class="container" id="quizContainer"></div>
+        
+        <div class="container" id="quizContainer">
+            </div>
     </div>
 
     <footer id="mainFooter" style="display: none;">
@@ -169,7 +205,7 @@
     </footer>
 
     <div class="footer-bar" id="footerBar">
-        <button class="btn-submit" onclick="submitExam()"><i class="fas fa-paper-plane"></i> NỘP BÀI</button>
+        <button class="btn-submit" onclick="submitExam(false)"><i class="fas fa-paper-plane"></i> NỘP BÀI</button>
     </div>
 
     <div id="loadingOverlay" class="overlay">
@@ -185,101 +221,23 @@
             <p id="msg" style="font-weight: bold; margin-bottom: 10px;"></p>
             <div id="driveMsg" style="background: #eee; padding: 10px; border-radius: 8px; font-size: 0.85rem;"></div>
             
-            <button class="btn-start" style="margin-top: 15px; background: #757575;" onclick="location.reload()">Làm lại</button>
+            <button id="btnRetry" class="btn-start" style="margin-top: 15px; background: #757575; display: none;" onclick="location.reload()">Làm lại</button>
             <button class="btn-start" style="margin-top: 10px; background: #d32f2f; color: white;" onclick="closeWindow()">Thoát</button>
         </div>
     </div>
 
     <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyNfaBH5mDRDyUbwXgexVCT52w1laD5BQP7H5nvmePW1tQKzYbrkByBLnWu1rCr9PTK/exec"
+        // --- URL SCRIPT ĐÃ CẬP NHẬT ---
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzisiokZERSTNPE2FViSyKQdkgTxwe2YdHkWgA8WosI-IbvJOfE-n7rjKQFL5DQo-g/exec"
         let student = { name: "", class: "" };
+        
+        // Cấu hình thời gian: 35 phút
+        let timeLimit = 35 * 60; 
+        let timerInterval;
 
         // --- CẤU HÌNH CÂU HỎI ---
         const questions = [
-            // --- NHÓM 1: CÁC CÂU HỎI TỪ FILE HTML CŨ (16 câu) ---
-            {
-                q: "Thiết bị nào giúp em gõ chữ cái và số vào máy tính?",
-                a: [{ t: "Chuột", i: "fa-mouse" }, { t: "Bàn phím", i: "fa-keyboard" }, { t: "Loa", i: "fa-volume-up" }],
-                c: 1
-            },
-            {
-                q: "Để nghe nhạc từ máy tính mà không làm phiền người khác, em dùng gì?",
-                a: [{ t: "Tai nghe", i: "fa-headphones" }, { t: "Loa ngoài", i: "fa-volume-up" }, { t: "Máy in", i: "fa-print" }],
-                c: 0
-            },
-            {
-                q: "Máy tính xách tay (Laptop) có bộ phận nào thay thế chuột?",
-                a: [{ t: "Vùng cảm ứng (Touchpad)", i: "fa-hand-pointer" }, { t: "Bàn phím", i: "fa-keyboard" }, { t: "Màn hình", i: "fa-desktop" }],
-                c: 0
-            },
-            {
-                q: "Tư thế ngồi máy tính nào là đúng?",
-                a: [{ t: "Ngồi cong lưng, cúi sát" }, { t: "Ngồi thẳng lưng, mắt ngang tầm màn hình" }, { t: "Nằm ra bàn" }],
-                c: 1
-            },
-            {
-                q: "Khoảng cách từ mắt đến màn hình nên là bao nhiêu?",
-                a: [{ t: "Rất gần (10cm)" }, { t: "Vừa phải (50-80cm)" }, { t: "Rất xa (2 mét)" }],
-                c: 1
-            },
-            {
-                q: "Ánh sáng trong phòng khi dùng máy tính cần thế nào?",
-                a: [{ t: "Tối om" }, { t: "Đủ sáng, không chói" }, { t: "Chiếu thẳng vào mắt" }],
-                c: 1
-            },
-            {
-                q: "Thao tác 'Nhấp đúp chuột' là nhấn nút trái mấy lần?",
-                a: [{ t: "1 lần" }, { t: "2 lần liên tiếp nhanh" }, { t: "3 lần" }],
-                c: 1
-            },
-            {
-                q: "Phím dài nhất trên bàn phím tên là gì?",
-                a: [{ t: "Phím Enter" }, { t: "Phím Cách (Space)" }, { t: "Phím Shift" }],
-                c: 1
-            },
-            {
-                q: "Biểu tượng dấu X góc trên cửa sổ dùng để làm gì?",
-                a: [{ t: "Phóng to", i: "fa-window-maximize" }, { t: "Thu nhỏ", i: "fa-window-minimize" }, { t: "Đóng (Thoát)", i: "fa-window-close" }],
-                c: 2
-            },
-            {
-                q: "Khi vẽ sai, em dùng công cụ gì để sửa?",
-                a: [{ t: "Bút chì", i: "fa-pencil-alt" }, { t: "Cục tẩy (Gôm)", i: "fa-eraser" }, { t: "Thùng sơn", i: "fa-fill-drip" }],
-                c: 1
-            },
-            {
-                q: "Biểu tượng trình duyệt web (Google Chrome) dùng để làm gì?",
-                a: [{ t: "Vào mạng Internet", i: "fa-globe" }, { t: "Vẽ tranh", i: "fa-palette" }, { t: "Tắt máy", i: "fa-power-off" }],
-                c: 0
-            },
-            {
-                q: "Em có nên vừa ăn bánh vừa gõ bàn phím không?",
-                a: [{ t: "Có" }, { t: "Không (Dễ bẩn, hỏng máy)" }, { t: "Thỉnh thoảng" }],
-                c: 1
-            },
-            {
-                q: "Khi tay ướt, em có được chạm vào ổ cắm điện máy tính không?",
-                a: [{ t: "Tuyệt đối không", i: "fa-exclamation-triangle" }, { t: "Được", i: "fa-check" }, { t: "Chạm nhẹ thôi", i: "fa-hand-sparkles" }],
-                c: 0
-            },
-            {
-                q: "Để máy tính bền đẹp, khi dùng xong em nên làm gì?",
-                a: [{ t: "Rút dây điện ngay", i: "fa-plug" }, { t: "Tắt máy đúng cách (Shut down)", i: "fa-power-off" }, { t: "Để nguyên đó", i: "fa-clock" }],
-                c: 1
-            },
-            {
-                q: "Thiết bị nào dùng để thu âm giọng nói của em?",
-                a: [{ t: "Loa", i: "fa-volume-up" }, { t: "Micro", i: "fa-microphone" }, { t: "Màn hình", i: "fa-desktop" }],
-                c: 1
-            },
-            {
-                q: "Nếu máy tính bị hỏng hoặc có khói, em nên làm gì?",
-                a: [{ t: "Tự sửa", i: "fa-tools" }, { t: "Báo ngay cho người lớn", i: "fa-user-shield" }, { t: "Đổ nước vào", i: "fa-tint" }],
-                c: 1
-            },
-
-            // --- NHÓM 2: CÁC CÂU HỎI TỪ FILE DOCX (14 câu) ---
-            { // Câu 1 Docx
+           { // Câu 1 Docx
                 q: "Bộ phận nào của máy tính được ví như 'bộ não' của máy tính?",
                 a: [
                     { t: "<img src='c1a.png' style='height:120px; width:auto; display:block; margin:auto;'>" }, 
@@ -288,17 +246,17 @@
                 ],
                 c: 1 // c1b.png (Thùng CPU)
             },
-            { // Câu 3 Docx
+            { // Câu 2 Docx
                 q: "Hoạt động nào sau đây không phải là công dụng của máy tính cá nhân?",
                 a: [{ t: "Gửi thư (email)" }, { t: "Tính toán" }, { t: "Tự động dọn dẹp nhà cửa" }],
                 c: 2
             },
-            { // Câu 5 Docx
+            { // Câu 3 Docx
                 q: "Chuột máy tính thông thường có mấy nút bấm chính?",
                 a: [{ t: "1 nút" }, { t: "2 nút (nút trái, nút phải)" }, { t: "5 nút" }],
                 c: 1
             },
-            { // Câu 7 Docx - CẬP NHẬT ẢNH C4
+            { // Câu 4 Docx - CẬP NHẬT ẢNH C4
                 q: "Để thoát khỏi một website đang mở, ta thường nhấp chuột vào biểu tượng nào?",
                 a: [
                     { t: "<img src='c4a.png' style='height:50px; width:auto; display:block; margin:auto;'>" }, 
@@ -307,7 +265,7 @@
                 ],
                 c: 1 // c4b.png
             },
-            { // Câu 9 Docx - CẬP NHẬT ẢNH C5
+            { // Câu 5 Docx - CẬP NHẬT ẢNH C5
                 q: "Em hãy cho biết đâu là máy tính xách tay?",
                 a: [
                     { t: "<img src='c5a.png' style='height:100px; width:auto; display:block; margin:auto;'>" }, 
@@ -316,17 +274,17 @@
                 ],
                 c: 1 // c5b.png
             },
-            { // Câu 11 Docx
+            { // Câu 6 Docx
                 q: "Khi cầm chuột máy tính bằng tay phải, ngón tay nào được đặt lên phím chuột trái?",
                 a: [{ t: "Ngón tay trỏ" }, { t: "Ngón tay cái" }, { t: "Ngón tay giữa" }],
                 c: 0
             },
-            { // Câu 13 Docx
+            { // Câu 7 Docx
                 q: "Trong trò chơi rèn luyện Clickomania, thao tác cơ bản để lấy bóng đi là gì?",
                 a: [{ t: "Kéo thả bóng" }, { t: "Nhấp chuột vào nhóm bóng cùng màu nằm cạnh nhau" }, { t: "Nhấp đôi chuột trái" }],
                 c: 1
             },
-            { // Câu 17 Docx - CẬP NHẬT ẢNH C8
+            { // Câu 8 Docx - CẬP NHẬT ẢNH C8
                 q: "Khi di chuyển chuột, biểu tượng nào trên màn hình máy tính sẽ di chuyển?",
                 a: [
                     { t: "<img src='c8a.png' style='height:80px; width:auto; display:block; margin:auto;'>" }, 
@@ -335,16 +293,16 @@
                 ],
                 c: 0 // c8a.png
             },
-            { // Câu 19 Docx - CẬP NHẬT ẢNH C9
+            { // Câu 9 Docx - CẬP NHẬT ẢNH C9
                 q: "Đâu là tư thế cầm chuột đúng cách?",
                 a: [
                     { t: "<img src='c9a.png' style='height:100px; width:auto; display:block; margin:auto;'>" }, 
                     { t: "<img src='c9b.png' style='height:100px; width:auto; display:block; margin:auto;'>" }, 
                     { t: "<img src='c9c.png' style='height:100px; width:auto; display:block; margin:auto;'>" }
                 ],
-                c: 0 // c9a.png
+                c: 1 // c9b.png
             },
-            { // Câu 21 Docx - CẬP NHẬT ẢNH C10
+            { // Câu 10 Docx - CẬP NHẬT ẢNH C10
                 q: "Để vẽ hình trong phần mềm tô màu Art, em nhấp chuột vào nút lệnh nào?",
                 a: [
                     { t: "<img src='c10a.png' style='height:100px; width:auto; display:block; margin:auto;'>" }, 
@@ -353,34 +311,16 @@
                 ],
                 c: 1 // c10b.png
             },
-            { // Câu 23 Docx
-                q: "Bộ phận Màn hình (Monitor) của máy tính dùng để làm gì?",
-                a: [{ t: "Giúp điều khiển máy tính" }, { t: "Dùng để quan sát công việc chúng ta làm" }, { t: "Giúp nhập chữ và số" }],
-                c: 1
-            },
-            { // Câu 27 Docx
-                q: "Để khởi động một chương trình ứng dụng như Computer trên màn hình, em cần thực hiện thao tác chuột nào?",
-                a: [{ t: "Nhấp trái chuột một lần" }, { t: "Nhấp chuột trái 2 lần liên tục" }, { t: "Nhấp phải chuột một lần" }],
-                c: 1
-            },
-            { // Câu 31 Docx
-                q: "Thao tác 'Kéo thả chuột' (Drag-and-drop) dùng để làm gì?",
-                a: [{ t: "Di chuyển con trỏ chuột" }, { t: "Di chuyển biểu tượng từ vị trí này sang vị trí khác" }, { t: "Mở một thư mục" }],
-                c: 1
-            },
-            { // Câu 35 Docx
-                q: "Mục tiêu của Bài 13- Vẽ hình cùng ART là giúp em làm được việc gì?",
-                a: [{ t: "Lắp ghép các mẫu tô màu" }, { t: "Chỉ tô màu tranh có sẵn" }, { t: "Sử dụng các hình có sẵn để vẽ và tô màu" }],
-                c: 2
-            }
         ];
 
-        // --- Hàm trộn mảng (Shuffle) ---
+        // --- Hàm trộn mảng (Shuffle) - ĐÃ TẮT ---
         function shuffleArray(array) {
-            for (let i = array.length - 1; i > 0; i--) {
+            // Đã tắt theo yêu cầu để giữ nguyên thứ tự câu hỏi
+            /* for (let i = array.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [array[i], array[j]] = [array[j], array[i]];
             }
+            */
         }
 
         function startQuiz() {
@@ -395,15 +335,55 @@
             document.getElementById('backButtonArea').style.display = 'block';
             document.getElementById('quizContainer').style.display = 'block';
             document.getElementById('footerBar').style.display = 'flex';
+            document.getElementById('timerBox').style.display = 'block';
             
-            // Đảo câu hỏi trước khi hiển thị
-            shuffleArray(questions);
+            // Không trộn câu hỏi nữa
+            // shuffleArray(questions);
+            
             renderQuiz();
+            startTimer(); // Bắt đầu đếm giờ
+        }
+
+        // --- Hàm đếm ngược thời gian ---
+        function startTimer() {
+            updateTimerDisplay(); // Hiện ngay lập tức
+            timerInterval = setInterval(() => {
+                timeLimit--;
+                updateTimerDisplay();
+
+                if (timeLimit <= 0) {
+                    clearInterval(timerInterval);
+                    alert("Hết giờ làm bài! Hệ thống sẽ tự động nộp bài.");
+                    submitExam(true); // Tự động nộp
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeLimit / 60);
+            const seconds = timeLimit % 60;
+            document.getElementById('timerText').innerText = 
+                `${minutes < 10 ? '0' : ''}${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+            
+            // Đổi màu đỏ khi còn dưới 2 phút
+            if (timeLimit < 120) {
+                document.getElementById('timerText').style.color = 'red';
+            }
         }
 
         function renderQuiz() {
             const container = document.getElementById('quizContainer');
             container.innerHTML = "";
+
+            // --- THÊM TIÊU ĐỀ TRƯỜNG VÀ BÀI THI ---
+            const headerHtml = `
+            <div class="exam-info-header">
+                <p>TRƯỜNG TIỂU HỌC NHỊ TÂN</p>
+                <p style="font-size: 1.2rem; margin: 5px 0;">KIỂM TRA TIN HỌC CUỐI KÌ 1</p>
+                <p style="font-weight: normal; font-style: italic;">Thời gian làm bài: 35 phút</p>
+            </div>`;
+            container.innerHTML += headerHtml;
+
             questions.forEach((q, idx) => {
                 let html = `
                 <div class="question-card" id="card-${idx}">
@@ -425,7 +405,12 @@
             });
         }
 
-        async function submitExam() {
+        // --- Hàm Nộp Bài (Có tham số forceSubmit) ---
+        async function submitExam(forceSubmit = false) {
+            // Dừng đồng hồ
+            clearInterval(timerInterval);
+            document.getElementById('timerBox').style.display = 'none';
+
             let unanswered = [];
             questions.forEach((_, idx) => {
                 const checked = document.querySelector(`input[name="q${idx}"]:checked`);
@@ -434,24 +419,34 @@
                 if(!checked) { unanswered.push(idx); card.classList.add('unanswered'); }
             });
 
-            if(unanswered.length > 0) {
-                alert(`Con ơi, còn ${unanswered.length} câu chưa làm xong. Con kiểm tra các khung màu đỏ nhé!`);
-                document.getElementById(`card-${unanswered[0]}`).scrollIntoView({behavior: "smooth", block: "center"});
-                return;
-            }
+            // Nếu không phải bắt buộc nộp (do hết giờ) thì kiểm tra câu chưa làm
+            if (!forceSubmit) {
+                if(unanswered.length > 0) {
+                    alert(`Con ơi, còn ${unanswered.length} câu chưa làm xong. Con kiểm tra các khung màu đỏ nhé!`);
+                    document.getElementById(`card-${unanswered[0]}`).scrollIntoView({behavior: "smooth", block: "center"});
+                    startTimer(); // Chạy lại đồng hồ nếu chưa nộp
+                    return;
+                }
 
-            if(!confirm("Con đã chắc chắn nộp bài chưa?")) return;
+                if(!confirm("Con đã chắc chắn nộp bài chưa?")) {
+                    startTimer(); // Chạy lại đồng hồ nếu hủy nộp
+                    return;
+                }
+            }
 
             let score = 0;
             questions.forEach((q, idx) => {
                 const checked = document.querySelector(`input[name="q${idx}"]:checked`);
-                const val = parseInt(checked.value);
+                // Nếu hết giờ mà câu đó chưa chọn, checked sẽ là null
+                const val = checked ? parseInt(checked.value) : -1; 
+                
                 document.querySelectorAll(`input[name="q${idx}"]`).forEach(inp => inp.disabled = true);
+                
                 if(val === q.c) {
                     score++;
                     document.getElementById(`lbl-${idx}-${val}`).classList.add('correct');
                 } else {
-                    document.getElementById(`lbl-${idx}-${val}`).classList.add('wrong');
+                    if(val !== -1) document.getElementById(`lbl-${idx}-${val}`).classList.add('wrong');
                     document.getElementById(`lbl-${idx}-${q.c}`).classList.add('correct');
                 }
             });
@@ -468,7 +463,7 @@
             const element = document.getElementById('pdf-area');
             const fileName = `BaiThi_${student.class}_${student.name}.pdf`;
             
-            // --- CẤU HÌNH PDF QUAN TRỌNG ĐỂ SỬA LỖI TRẮNG TRANG ---
+            // --- CẤU HÌNH PDF ---
             const opt = { 
                 margin: 5, 
                 filename: fileName, 
@@ -476,11 +471,10 @@
                 html2canvas: { 
                     scale: 2, 
                     useCORS: true, 
-                    scrollY: 0, // QUAN TRỌNG: Sửa lỗi trắng trang khi cuộn
+                    scrollY: 0, 
                     logging: false 
                 }, 
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-                // Ngắt trang thông minh, tránh cắt đôi câu hỏi
                 pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
             };
 
@@ -505,7 +499,6 @@
                 document.getElementById('driveMsg').innerHTML = "<span style='color:green'>✔ Đã lưu gửi bài cho giáo viên thành công.</span>";
             } catch (err) {
                 console.error(err);
-                // Nếu lỗi thì vẫn thử lưu về máy
                 await html2pdf().set(opt).from(element).save();
                 document.getElementById('driveMsg').innerHTML = "<span style='color:orange'>⚠ Đã tải về máy (Lỗi kết nối mạng).</span>";
             }
@@ -514,6 +507,10 @@
             pdfHeader.style.display = 'none';
             document.getElementById('scoreDisplay').innerText = scoreText;
             document.getElementById('msg').innerText = score >= 25 ? "Con làm bài rất xuất sắc!" : "Con làm tốt lắm!";
+            
+            // Ẩn nút làm lại
+            document.getElementById('btnRetry').style.display = 'none';
+            
             document.getElementById('resultModal').style.display = 'flex';
         }
 
