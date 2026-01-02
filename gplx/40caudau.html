@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ÔN TẬP THI GPLX HẠNG A1 - ĐẦY ĐỦ 40 CÂU</title>
+    <style>
+        :root {
+            --primary-color: #007bff;
+            --success-color: #28a745;
+            --error-color: #dc3545;
+            --bg-color: #f4f6f9;
+            --text-color: #333;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 30px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        .score-board {
+            text-align: center;
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #e9ecef;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .question-card {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .question-title {
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+
+        .question-image {
+            display: block;
+            margin: 15px auto;
+            max-width: 100%;
+            height: auto;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border: 1px solid #ddd;
+        }
+
+        .options-list {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .option-item {
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #eee;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+        }
+
+        .option-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .option-item input[type="radio"] {
+            margin-right: 15px;
+            transform: scale(1.2);
+        }
+
+        .option-item.correct {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+            font-weight: bold;
+        }
+
+        .option-item.wrong {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+            opacity: 0.8;
+        }
+
+        .explanation {
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #e2e3e5;
+            border-left: 5px solid var(--primary-color);
+            border-radius: 4px;
+            display: none;
+            font-size: 0.95em;
+        }
+
+        .controls {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        button {
+            padding: 12px 30px;
+            font-size: 1em;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+            margin: 0 10px;
+        }
+
+        #submit-btn {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        #submit-btn:hover {
+            background-color: #0056b3;
+        }
+
+        #retry-btn {
+            background-color: #6c757d;
+            color: white;
+            display: none;
+        }
+
+        #retry-btn:hover {
+            background-color: #545b62;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>ÔN TẬP THI GPLX HẠNG A1 (40 CÂU)</h1>
+    
+    <div id="score-board" class="score-board"></div>
+
+    <div id="quiz-container">
+        </div>
+
+    <div class="controls">
+        <button id="submit-btn" onclick="submitQuiz()">Nộp Bài</button>
+        <button id="retry-btn" onclick="location.reload()">Làm Lại Đề Mới</button>
+    </div>
+</div>
+
+<script>
+    const questionData = [
+    {
+        "id": 1,
+        "question": "Khi điều khiển phương tiện tham gia giao thông, những hành vi nào dưới đây bị nghiêm cấm?",
+        "img": "",
+        "options": {
+            "A": "Thay đổi tốc độ của xe nhiều lần.",
+            "B": "Điều khiển phương tiện sau 23 giờ trong ngày.",
+            "C": "Lạng lách, đánh võng, rú ga liên tục.",
+            "D": "Sử dụng còi trong khu dân cư từ 22 giờ đến 5 giờ sáng."
+        },
+        "correct": "C",
+        "explain": "Hành vi lạng lách, đánh võng, rú ga liên tục gây nguy hiểm cho bản thân và người khác nên bị nghiêm cấm."
+    },
+    {
+        "id": 2,
+        "question": "Hệ thống biển báo hiệu đường bộ Việt Nam gồm bao nhiêu nhóm chính?",
+        "img": "",
+        "options": {
+            "A": "Ba nhóm.",
+            "B": "Bốn nhóm.",
+            "C": "Năm nhóm: Biển báo cấm, biển báo nguy hiểm, biển hiệu lệnh, biển chỉ dẫn, biển phụ.",
+            "D": "Sáu nhóm."
+        },
+        "correct": "C",
+        "explain": "Biển báo hiệu đường bộ được chia thành 5 nhóm chính để người tham gia giao thông dễ dàng nhận biết và chấp hành."
+    },
+    {
+        "id": 3,
+        "question": "Tại nơi có vạch kẻ đường cho người đi bộ, người điều khiển phương tiện phải thực hiện như thế nào?",
+        "img": "",
+        "options": {
+            "A": "Giảm tốc độ và nhường đường cho người đi bộ, xe lăn của người khuyết tật đang qua đường.",
+            "B": "Quan sát, giảm tốc độ hoặc dừng lại để bảo đảm an toàn cho người đi bộ, xe lăn của người khuyết tật đang qua đường.",
+            "C": "Quan sát, tăng tốc độ và điều khiển phương tiện nhanh chóng đi qua.",
+            "D": "Chỉ giảm tốc độ khi thấy có người đi bộ đã đi xuống lòng đường."
+        },
+        "correct": "B",
+        "explain": "Người lái xe phải chủ động quan sát và sẵn sàng dừng lại để nhường đường an toàn cho người đi bộ tại khu vực ưu tiên."
+    },
+    {
+        "id": 4,
+        "question": "Người điều khiển xe mô tô phải quan sát, giảm tốc độ hoặc dừng lại để bảo đảm an toàn trong trường hợp nào dưới đây?",
+        "img": "",
+        "options": {
+            "A": "Đường hẹp, đường vòng, đường quanh co, đèo dốc.",
+            "B": "Nơi cầu, cống hẹp, đập tràn, đường ngầm, hầm chui.",
+            "C": "Trời mưa, gió, sương mù, mặt đường trơn trượt, có nhiều đất đá rơi vãi.",
+            "D": "Tất cả các ý trên đều đúng."
+        },
+        "correct": "D",
+        "explain": "Trong mọi điều kiện đường xá hoặc thời tiết không thuận lợi, việc giảm tốc độ là bắt buộc để duy trì kiểm soát và an toàn."
+    },
+    {
+        "id": 5,
+        "question": "Khi gặp hiệu lệnh điều khiển của Cảnh sát giao thông (tay giơ thẳng đứng) như hình ảnh, người tham gia giao thông phải đi như thế nào?",
+        "img": "Picture1.jpg",
+        "options": {
+            "A": "Người tham gia giao thông ở các hướng phải dừng lại, trừ các xe đã ở trong khu vực giao nhau.",
+            "B": "Người tham gia giao thông được đi theo chiều gậy chỉ của Cảnh sát giao thông.",
+            "C": "Người ở phía trước và phía sau dừng lại, phía bên phải và bên trái được đi.",
+            "D": "Người tham gia giao thông được rẽ phải theo hướng gậy chỉ."
+        },
+        "correct": "A",
+        "explain": "Hiệu lệnh tay giơ thẳng đứng yêu cầu tất cả các hướng dừng lại để chuẩn bị thay đổi luồng giao thông."
+    },
+    {
+        "id": 6,
+        "question": "Khi gặp hiệu lệnh điều khiển của Cảnh sát giao thông (hai tay dang ngang) như hình ảnh, người tham gia giao thông phải đi như thế nào?",
+        "img": "Picture2.jpg",
+        "options": {
+            "A": "Người tham gia giao thông ở tất cả các hướng phải dừng lại.",
+            "B": "Người tham gia giao thông ở phía trước và phía sau dừng lại; người ở phía bên phải và bên trái được đi tất cả các hướng.",
+            "C": "Người tham gia giao thông được rẽ phải theo chiều mũi tên.",
+            "D": "Người tham gia giao thông ở phía trước dừng lại, các hướng khác được đi."
+        },
+        "correct": "B",
+        "explain": "Khi Cảnh sát giao thông dang ngang tay, luồng giao thông ở hai bên sườn được phép di chuyển, phía trước và sau phải dừng lại."
+    },
+    {
+        "id": 7,
+        "question": "Khi hiệu lệnh của người điều khiển giao thông trái với tín hiệu đèn hoặc biển báo, người tham gia giao thông phải chấp hành theo báo hiệu nào?",
+        "img": "",
+        "options": {
+            "A": "Theo hiệu lệnh của người điều khiển giao thông.",
+            "B": "Theo tín hiệu đèn giao thông.",
+            "C": "Theo biển báo hiệu đường bộ.",
+            "D": "Theo thói quen của người tham gia giao thông."
+        },
+        "correct": "A",
+        "explain": "Hiệu lệnh của người điều khiển giao thông (Cảnh sát giao thông) có thứ tự ưu tiên cao nhất."
+    },
+    {
+        "id": 8,
+        "question": "Khi ở một vị trí vừa có biển báo hiệu cố định vừa có biển báo hiệu tạm thời mà ý nghĩa khác nhau, người tham gia giao thông phải chấp hành biển nào?",
+        "img": "",
+        "options": {
+            "A": "Biển báo hiệu đặt cố định.",
+            "B": "Biển báo hiệu tạm thời.",
+            "C": "Chấp hành biển báo nào thuận tiện hơn.",
+            "D": "Dừng lại hỏi ý kiến người điều khiển giao thông."
+        },
+        "correct": "B",
+        "explain": "Biển báo tạm thời thường dùng trong các tình huống khẩn cấp hoặc sửa chữa đường nên được ưu tiên chấp hành."
+    },
+    {
+        "id": 9,
+        "question": "Tại nơi đường giao nhau, khi đèn điều khiển giao thông có tín hiệu màu vàng, người điều khiển phương tiện phải chấp hành như thế nào?",
+        "img": "",
+        "options": {
+            "A": "Dừng lại trước vạch dừng; nếu đã đi quá vạch dừng thì được đi tiếp.",
+            "B": "Tăng tốc độ nhanh chóng vượt qua nút giao.",
+            "C": "Quan sát, giảm tốc độ và từ từ vượt qua nút giao.",
+            "D": "Dừng lại ngay lập tức giữa nút giao."
+        },
+        "correct": "A",
+        "explain": "Tín hiệu vàng báo hiệu sự thay đổi sang đèn đỏ, người lái xe phải dừng lại trừ khi đã vượt quá vạch dừng."
+    },
+    {
+        "id": 10,
+        "question": "Người lái xe trên đường cần chấp hành quy định về tốc độ tối đa như thế nào?",
+        "img": "",
+        "options": {
+            "A": "Chỉ lớn hơn tốc độ tối đa cho phép khi đường vắng.",
+            "B": "Chỉ lớn hơn tốc độ tối đa cho phép khi vào ban đêm.",
+            "C": "Không vượt quá tốc độ tối đa cho phép.",
+            "D": "Có thể vượt quá 5km/h so với quy định nếu xe còn tốt."
+        },
+        "correct": "C",
+        "explain": "Tuân thủ tốc độ tối đa cho phép là quy định bắt buộc để đảm bảo an toàn giao thông đường bộ."
+    },
+    {
+        "id": 11,
+        "question": "Phương tiện tham gia giao thông đường bộ di chuyển với tốc độ thấp hơn phải đi như thế nào?",
+        "img": "",
+        "options": {
+            "A": "Đi về bên trái theo chiều đi của mình.",
+            "B": "Đi về bên phải theo chiều đi của mình.",
+            "C": "Đi ở giữa đường để các xe khác dễ quan sát.",
+            "D": "Đi vào làn đường dành cho xe thô sơ."
+        },
+        "correct": "B",
+        "explain": "Các phương tiện đi chậm hơn phải đi về phía bên phải để nhường đường cho các phương tiện đi nhanh hơn ở phía bên trái."
+    },
+    {
+        "id": 12,
+        "question": "Phần của đường bộ được sử dụng cho phương tiện giao thông đường bộ đi lại là gì?",
+        "img": "",
+        "options": {
+            "A": "Phần mặt đường và lề đường.",
+            "B": "Phần đường xe chạy.",
+            "C": "Phần đường xe cơ giới.",
+            "D": "Phần đường dành cho người đi bộ."
+        },
+        "correct": "B",
+        "explain": "Phần đường xe chạy là phần của đường bộ được sử dụng cho phương tiện giao thông qua lại."
+    },
+    {
+        "id": 13,
+        "question": "Làn đường là gì?",
+        "img": "",
+        "options": {
+            "A": "Là một phần của phần đường xe chạy được chia theo chiều dọc của đường, sử dụng cho xe chạy.",
+            "B": "Là một phần của phần đường xe chạy được chia theo chiều dọc của đường, có đủ chiều rộng cho xe chạy an toàn.",
+            "C": "Là đường cho xe ô tô chạy, dừng, đỗ an toàn.",
+            "D": "Là phần đường dành riêng cho xe thô sơ."
+        },
+        "correct": "B",
+        "explain": "Làn đường phải có đủ chiều rộng cho xe chạy an toàn và được chia theo chiều dọc của đường."
+    },
+    {
+        "id": 14,
+        "question": "Khổ giới hạn của đường bộ được hiểu như thế nào là đúng?",
+        "img": "",
+        "options": {
+            "A": "Là khoảng trống có kích thước giới hạn về chiều rộng, chiều cao của đường bộ để các xe đi qua được an toàn.",
+            "B": "Là khoảng trống có kích thước giới hạn về chiều rộng của đường, cầu, bến phà, hầm trên đường bộ.",
+            "C": "Là khoảng trống có kích thước giới hạn về chiều cao của cầu, bến phà, hầm trên đường bộ.",
+            "D": "Là giới hạn trọng tải của phương tiện khi đi trên đường."
+        },
+        "correct": "A",
+        "explain": "Khổ giới hạn bao gồm cả giới hạn về chiều rộng và chiều cao để đảm bảo an toàn cho phương tiện và hàng hóa."
+    },
+    {
+        "id": 15,
+        "question": "Dải phân cách được lắp đặt để làm gì?",
+        "img": "",
+        "options": {
+            "A": "Để phân chia các làn đường dành cho xe cơ giới và xe thô sơ trên đường cao tốc.",
+            "B": "Để phân chia phần đường xe chạy thành hai chiều riêng biệt hoặc phân chia phần đường cho xe cơ giới và xe thô sơ.",
+            "C": "Để phân tách phần đường xe chạy và hành lang an toàn giao thông.",
+            "D": "Để làm nơi dừng đỗ xe khẩn cấp trên đường quốc lộ."
+        },
+        "correct": "B",
+        "explain": "Dải phân cách dùng để chia đường thành hai chiều hoặc chia làn xe cơ giới và xe thô sơ."
+    },
+    {
+        "id": 16,
+        "question": "Vạch kẻ đường là gì?",
+        "img": "",
+        "options": {
+            "A": "Là báo hiệu đường bộ để hỗ trợ cảnh báo nguy hiểm cho người tham gia giao thông.",
+            "B": "Là vạch chỉ sự phân chia làn đường, vị trí hoặc hướng đi, vị trí dừng lại.",
+            "C": "Là báo hiệu cho người tham gia giao thông về các thông tin của đường bộ.",
+            "D": "Tất cả các ý nêu trên."
+        },
+        "correct": "B",
+        "explain": "Vạch kẻ đường là một dạng báo hiệu để hướng dẫn phân chia làn, vị trí dừng hoặc hướng đi."
+    },
+    {
+        "id": 17,
+        "question": "Người điều khiển phương tiện tham gia giao thông đường bộ được hiểu như thế nào là đúng?",
+        "img": "",
+        "options": {
+            "A": "Là người điều khiển xe cơ giới, người điều khiển xe thô sơ, người điều khiển xe máy chuyên dùng.",
+            "B": "Là người được giao nhiệm vụ hướng dẫn giao thông trên đường bộ.",
+            "C": "Là người đi bộ và người dẫn dắt súc vật trên đường.",
+            "D": "Cả hai ý 1 và 2 đều đúng."
+        },
+        "correct": "A",
+        "explain": "Người điều khiển phương tiện bao gồm người lái xe cơ giới, xe thô sơ và xe máy chuyên dùng."
+    },
+    {
+        "id": 18,
+        "question": "Người lái xe được hiểu như thế nào là đúng?",
+        "img": "",
+        "options": {
+            "A": "Là người điều khiển xe cơ giới.",
+            "B": "Là người điều khiển xe thô sơ.",
+            "C": "Là người điều khiển xe máy chuyên dùng.",
+            "D": "Là người điều khiển tất cả các loại phương tiện giao thông."
+        },
+        "correct": "A",
+        "explain": "Theo quy định, khái niệm 'người lái xe' chỉ dùng để chỉ người điều khiển xe cơ giới."
+    },
+    {
+        "id": 19,
+        "question": "Trong nhóm các phương tiện giao thông đường bộ dưới đây, nhóm phương tiện nào là xe cơ giới?",
+        "img": "",
+        "options": {
+            "A": "Xe ô tô; máy kéo; xe mô tô hai bánh; xe đạp, xe đạp máy, xe đạp điện.",
+            "B": "Xe ô tô; rơ moóc hoặc sơ mi rơ moóc được kéo; xe mô tô, xe gắn máy và các loại xe tương tự.",
+            "C": "Xe đạp, xe xích lô, xe lăn dùng cho người khuyết tật, xe súc vật kéo.",
+            "D": "Xe máy chuyên dùng và các loại xe thô sơ khác."
+        },
+        "correct": "B",
+        "explain": "Xe cơ giới bao gồm ô tô, mô tô, xe gắn máy và các loại rơ moóc được kéo bởi xe ô tô, máy kéo."
+    },
+    {
+        "id": 20,
+        "question": "Trong nhóm các phương tiện giao thông đường bộ dưới đây, nhóm phương tiện nào là xe thô sơ?",
+        "img": "",
+        "options": {
+            "A": "Xe đạp (kể cả xe đạp máy, xe đạp điện); xe xích lô; xe lăn dùng cho người khuyết tật; xe súc vật kéo.",
+            "B": "Xe đạp, xe gắn máy, xe cơ giới dùng cho người khuyết tật và xe máy chuyên dùng.",
+            "C": "Xe ô tô, máy kéo, rơ moóc hoặc sơ mi rơ moóc được kéo bởi xe ô tô, máy kéo.",
+            "D": "Xe mô tô hai bánh, xe mô tô ba bánh và các loại xe tương tự."
+        },
+        "correct": "A",
+        "explain": "Xe thô sơ bao gồm xe đạp, xích lô, xe lăn và xe do súc vật kéo."
+    },
+    {
+        "id": 21,
+        "question": "Phương tiện giao thông đường bộ gồm những loại nào?",
+        "img": "",
+        "options": {
+            "A": "Phương tiện giao thông cơ giới đường bộ.",
+            "B": "Phương tiện giao thông thô sơ đường bộ, xe máy chuyên dùng và các loại xe tương tự.",
+            "C": "Cả hai ý nêu trên.",
+            "D": "Chỉ bao gồm xe ô tô và xe mô tô."
+        },
+        "correct": "C",
+        "explain": "Phương tiện giao thông đường bộ bao gồm cả nhóm xe cơ giới và xe thô sơ."
+    },
+    {
+        "id": 22,
+        "question": "Người tham gia giao thông đường bộ gồm những đối tượng nào?",
+        "img": "",
+        "options": {
+            "A": "Người điều khiển, người được chở trên phương tiện tham gia giao thông đường bộ.",
+            "B": "Người điều khiển, dẫn dắt vật nuôi trên đường bộ; người đi bộ trên đường bộ.",
+            "C": "Cả hai ý nêu trên.",
+            "D": "Chỉ bao gồm người lái xe ô tô và xe máy."
+        },
+        "correct": "C",
+        "explain": "Người tham gia giao thông bao gồm tất cả những người sử dụng đường bộ để đi lại hoặc làm việc."
+    },
+    {
+        "id": 23,
+        "question": "Người điều khiển phương tiện tham gia giao thông đường bộ gồm những đối tượng nào dưới đây?",
+        "img": "",
+        "options": {
+            "A": "Người điều khiển xe cơ giới, người điều khiển xe thô sơ.",
+            "B": "Người điều khiển xe máy chuyên dùng.",
+            "C": "Cả hai ý nêu trên.",
+            "D": "Chỉ bao gồm người lái xe ô tô."
+        },
+        "correct": "C",
+        "explain": "Bao gồm tất cả những người trực tiếp điều khiển các loại phương tiện trên đường."
+    },
+    {
+        "id": 24,
+        "question": "Người điều khiển giao thông đường bộ được hiểu như thế nào là đúng?",
+        "img": "",
+        "options": {
+            "A": "Là người điều khiển phương tiện tham gia giao thông đường bộ.",
+            "B": "Là Cảnh sát giao thông và người được giao nhiệm vụ hướng dẫn giao thông trên đường bộ.",
+            "C": "Là người tham gia giao thông đường bộ.",
+            "D": "Là người đi bộ trên đường."
+        },
+        "correct": "B",
+        "explain": "Người điều khiển giao thông là người có thẩm quyền hoặc được giao nhiệm vụ điều tiết giao thông."
+    },
+    {
+        "id": 25,
+        "question": "Hành vi nào dưới đây bị nghiêm cấm?",
+        "img": "",
+        "options": {
+            "A": "Sử dụng xe đạp đi trên các tuyến quốc lộ.",
+            "B": "Rải vật sắc nhọn, đổ chất gây trơn trượt trên đường bộ.",
+            "C": "Sử dụng còi trong khu dân cư vào ban ngày.",
+            "D": "Cả hai ý 1 và 2."
+        },
+        "correct": "B",
+        "explain": "Hành vi rải vật sắc nhọn hoặc chất gây trơn trượt gây nguy hiểm trực tiếp cho người tham gia giao thông nên bị cấm."
+    },
+    {
+        "id": 26,
+        "question": "Hành vi đưa xe cơ giới, xe máy chuyên dùng tham gia giao thông đường bộ nào dưới đây bị cấm?",
+        "img": "",
+        "options": {
+            "A": "Không có chứng nhận kiểm định an toàn kỹ thuật và bảo vệ môi trường.",
+            "B": "Hết niên hạn sử dụng.",
+            "C": "Cả hai ý nêu trên.",
+            "D": "Xe không có bảo hiểm trách nhiệm dân sự."
+        },
+        "correct": "C",
+        "explain": "Xe không đủ tiêu chuẩn an toàn kỹ thuật hoặc đã hết niên hạn đều bị cấm lưu thông."
+    },
+    {
+        "id": 27,
+        "question": "Tổ chức đua xe được phép thực hiện khi nào?",
+        "img": "",
+        "options": {
+            "A": "Trên đường phố không có người qua lại.",
+            "B": "Được người dân ủng hộ.",
+            "C": "Được cơ quan có thẩm quyền cấp phép.",
+            "D": "Thực hiện vào ban đêm để tránh ùn tắc."
+        },
+        "correct": "C",
+        "explain": "Mọi hoạt động đua xe phải được cơ quan chức năng cấp phép theo quy định pháp luật."
+    },
+    {
+        "id": 28,
+        "question": "Hành vi đua xe trái phép bị xử lý như thế nào?",
+        "img": "",
+        "options": {
+            "A": "Chỉ bị nhắc nhở.",
+            "B": "Tùy theo mức độ vi phạm có thể bị xử lý hành chính hoặc xử lý hình sự.",
+            "C": "Chỉ bị phạt tiền và tịch thu phương tiện.",
+            "D": "Bị tước giấy phép lái xe vĩnh viễn."
+        },
+        "correct": "B",
+        "explain": "Đua xe trái phép là hành vi nguy hiểm, có thể bị truy cứu trách nhiệm hình sự tùy mức độ."
+    },
+    {
+        "id": 29,
+        "question": "Người điều khiển phương tiện tham gia giao thông đường bộ mà trong máu hoặc hơi thở có nồng độ cồn có bị nghiêm cấm không?",
+        "img": "",
+        "options": {
+            "A": "Bị nghiêm cấm.",
+            "B": "Không bị nghiêm cấm.",
+            "C": "Không bị nghiêm cấm, nếu nồng độ cồn ở mức nhẹ.",
+            "D": "Chỉ bị cấm đối với người lái xe ô tô."
+        },
+        "correct": "A",
+        "explain": "Hiện nay pháp luật nghiêm cấm tuyệt đối việc có nồng độ cồn khi điều khiển phương tiện giao thông."
+    },
+    {
+        "id": 30,
+        "question": "Theo Luật Phòng chống tác hại của rượu, bia, đối tượng nào dưới đây bị cấm sử dụng rượu, bia khi tham gia giao thông?",
+        "img": "",
+        "options": {
+            "A": "Người điều khiển xe ô tô, xe mô tô, xe đạp, xe gắn máy.",
+            "B": "Người được chở trên xe cơ giới.",
+            "C": "Người đi bộ trên đường bộ.",
+            "D": "Cả ba ý nêu trên."
+        },
+        "correct": "A",
+        "explain": "Lệnh cấm áp dụng cho tất cả những người trực tiếp điều khiển phương tiện giao thông."
+    },
+    {
+        "id": 31,
+        "question": "Hành vi giao xe ô tô, mô tô cho người nào sau đây tham gia giao thông đường bộ bị nghiêm cấm?",
+        "img": "",
+        "options": {
+            "A": "Người chưa đủ tuổi theo quy định.",
+            "B": "Người không có giấy phép lái xe.",
+            "C": "Người có giấy phép lái xe nhưng đã bị trừ hết 12 điểm.",
+            "D": "Cả ba ý nêu trên."
+        },
+        "correct": "D",
+        "explain": "Giao xe cho người không đủ điều kiện điều khiển là hành vi vi phạm pháp luật."
+    },
+    {
+        "id": 32,
+        "question": "Hành vi nào sau đây bị nghiêm cấm?",
+        "img": "",
+        "options": {
+            "A": "Điều khiển xe cơ giới lạng lách, đánh võng, rú ga liên tục.",
+            "B": "Xúc phạm, đe dọa, cản trở, chống đối người thi hành công vụ.",
+            "C": "Cả hai ý nêu trên.",
+            "D": "Vượt xe tại nơi được phép vượt."
+        },
+        "correct": "C",
+        "explain": "Cả hành vi gây mất an toàn giao thông và chống đối người thi hành công vụ đều bị nghiêm cấm."
+    },
+    {
+        "id": 33,
+        "question": "Các hành vi nào sau đây bị cấm đối với phương tiện tham gia giao thông đường bộ?",
+        "img": "",
+        "options": {
+            "A": "Cải tạo xe ô tô loại khác thành xe ô tô chở người phục vụ mục đích quốc phòng, an ninh.",
+            "B": "Cải tạo trái phép; cố ý can thiệp làm sai lệch chỉ số đồng hồ quãng đường; tẩy xóa số khung số máy.",
+            "C": "Thay đổi màu sơn xe theo sở thích cá nhân.",
+            "D": "Lắp thêm các thiết bị tiện ích bên trong xe."
+        },
+        "correct": "B",
+        "explain": "Việc tự ý thay đổi các thông số kỹ thuật và nhận dạng cơ bản của xe là trái pháp luật."
+    },
+    {
+        "id": 34,
+        "question": "Hành vi nào sau đây bị cấm?",
+        "img": "",
+        "options": {
+            "A": "Lắp đặt, sử dụng thiết bị âm thanh, ánh sáng gây mất trật tự, an toàn giao thông.",
+            "B": "Cản trở người, phương tiện; ném gạch, đất, đá hoặc vật thể khác vào người và phương tiện.",
+            "C": "Cả hai ý nêu trên.",
+            "D": "Sử dụng đèn chiếu xa khi đi trên đường quốc lộ vắng người."
+        },
+        "correct": "C",
+        "explain": "Các hành vi gây mất an toàn và nguy hiểm cho người khác trên đường đều bị cấm."
+    },
+    {
+        "id": 35,
+        "question": "Việc sản xuất, sử dụng, mua, bán trái phép biển số xe có bị nghiêm cấm hay không?",
+        "img": "",
+        "options": {
+            "A": "Không bị nghiêm cấm.",
+            "B": "Bị nghiêm cấm.",
+            "C": "Bị nghiêm cấm tuỳ trường hợp.",
+            "D": "Chỉ cấm việc sản xuất trái phép."
+        },
+        "correct": "B",
+        "explain": "Biển số xe là do cơ quan nhà nước cấp, mọi hành vi mua bán, sản xuất trái phép đều bị cấm."
+    },
+    {
+        "id": 36,
+        "question": "Hành vi giao xe ô tô, mô tô cho người nào sau đây tham gia giao thông đường bộ bị nghiêm cấm?",
+        "img": "",
+        "options": {
+            "A": "Người chưa đủ tuổi theo quy định.",
+            "B": "Người không có giấy phép lái xe.",
+            "C": "Người có giấy phép lái xe nhưng đã bị trừ hết 12 điểm.",
+            "D": "Cả ba ý nêu trên."
+        },
+        "correct": "D",
+        "explain": "Giao xe cho người không đủ điều kiện điều khiển là hành vi vi phạm pháp luật."
+    },
+    {
+        "id": 37,
+        "question": "Hành vi nào sau đây bị nghiêm cấm?",
+        "img": "",
+        "options": {
+            "A": "Điều khiển xe cơ giới lạng lách, đánh võng, rú ga liên tục.",
+            "B": "Xúc phạm, đe dọa, cản trở, chống đối người thi hành công vụ.",
+            "C": "Cả hai ý nêu trên.",
+            "D": "Vượt xe tại nơi được phép vượt."
+        },
+        "correct": "C",
+        "explain": "Cả hành vi gây mất an toàn giao thông và chống đối người thi hành công vụ đều bị nghiêm cấm."
+    },
+    {
+        "id": 38,
+        "question": "Các hành vi nào sau đây bị cấm đối với phương tiện tham gia giao thông đường bộ?",
+        "img": "",
+        "options": {
+            "A": "Cải tạo xe ô tô loại khác thành xe ô tô chở người phục vụ mục đích quốc phòng, an ninh.",
+            "B": "Cải tạo trái phép; cố ý can thiệp làm sai lệch chỉ số đồng hồ quãng đường; tẩy xóa số khung số máy.",
+            "C": "Thay đổi màu sơn xe theo sở thích cá nhân.",
+            "D": "Lắp thêm các thiết bị tiện ích bên trong xe."
+        },
+        "correct": "B",
+        "explain": "Việc tự ý thay đổi các thông số kỹ thuật và nhận dạng cơ bản của xe là trái pháp luật."
+    },
+    {
+        "id": 39,
+        "question": "Hành vi nào sau đây bị cấm?",
+        "img": "",
+        "options": {
+            "A": "Lắp đặt, sử dụng thiết bị âm thanh, ánh sáng gây mất trật tự, an toàn giao thông.",
+            "B": "Cản trở người, phương tiện; ném gạch, đất, đá hoặc vật thể khác vào người và phương tiện.",
+            "C": "Cả hai ý nêu trên.",
+            "D": "Sử dụng đèn chiếu xa khi đi trên đường quốc lộ vắng người."
+        },
+        "correct": "C",
+        "explain": "Các hành vi gây mất an toàn và nguy hiểm cho người khác trên đường đều bị cấm."
+    },
+    {
+        "id": 40,
+        "question": "Việc sản xuất, sử dụng, mua, bán trái phép biển số xe có bị nghiêm cấm hay không?",
+        "img": "",
+        "options": {
+            "A": "Không bị nghiêm cấm.",
+            "B": "Bị nghiêm cấm.",
+            "C": "Bị nghiêm cấm tuỳ trường hợp.",
+            "D": "Chỉ cấm việc sản xuất trái phép."
+        },
+        "correct": "B",
+        "explain": "Biển số xe là do cơ quan nhà nước cấp, mọi hành vi mua bán, sản xuất trái phép đều bị cấm."
+    }
+];
+
+    let currentQuestions = [];
+
+    function shuffle(array) {
+        let currentIndex = array.length, randomIndex;
+        while (currentIndex != 0) {
+            randomIndex = Math.floor(Math.random() * currentIndex);
+            currentIndex--;
+            [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+        }
+        return array;
+    }
+
+    function initQuiz() {
+        const container = document.getElementById('quiz-container');
+        container.innerHTML = '';
+        document.getElementById('score-board').style.display = 'none';
+        document.getElementById('submit-btn').style.display = 'inline-block';
+        document.getElementById('retry-btn').style.display = 'none';
+
+        currentQuestions = JSON.parse(JSON.stringify(questionData));
+        shuffle(currentQuestions);
+
+        currentQuestions.forEach((q, index) => {
+            const card = document.createElement('div');
+            card.className = 'question-card';
+            card.id = `question-${index}`;
+
+            let imgHTML = '';
+            if (q.img && q.img.trim() !== "") {
+                imgHTML = `<img src="${q.img}" class="question-image" alt="Hình ảnh câu hỏi">`;
+            }
+
+            let optionsHTML = '';
+            const optionKeys = Object.keys(q.options);
+            
+            optionKeys.forEach(key => {
+                optionsHTML += `
+                    <li class="option-item" id="opt-${index}-${key}">
+                        <label style="width: 100%; cursor: pointer; display: flex; align-items: center;">
+                            <input type="radio" name="q${index}" value="${key}">
+                            <span><b>${key}.</b> ${q.options[key]}</span>
+                        </label>
+                    </li>
+                `;
+            });
+
+            card.innerHTML = `
+                <div class="question-title">Câu ${index + 1}: ${q.question}</div>
+                ${imgHTML}
+                <ul class="options-list">
+                    ${optionsHTML}
+                </ul>
+                <div class="explanation" id="exp-${index}">
+                    <strong>Giải thích:</strong> ${q.explain}
+                </div>
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    function submitQuiz() {
+        let score = 0;
+        let total = currentQuestions.length;
+
+        currentQuestions.forEach((q, index) => {
+            const selected = document.querySelector(`input[name="q${index}"]:checked`);
+            const explanation = document.getElementById(`exp-${index}`);
+            explanation.style.display = 'block';
+
+            const correctKey = q.correct;
+            const correctOptionElement = document.getElementById(`opt-${index}-${correctKey}`);
+            
+            if(correctOptionElement) correctOptionElement.classList.add('correct');
+
+            if (selected) {
+                if (selected.value === correctKey) {
+                    score++;
+                } else {
+                    const wrongOptionElement = document.getElementById(`opt-${index}-${selected.value}`);
+                    if(wrongOptionElement) wrongOptionElement.classList.add('wrong');
+                }
+            }
+            
+            const radios = document.querySelectorAll(`input[name="q${index}"]`);
+            radios.forEach(r => r.disabled = true);
+        });
+
+        const scoreBoard = document.getElementById('score-board');
+        scoreBoard.innerHTML = `Kết quả: <span style="color: ${score >= 21 ? 'green' : 'red'}">${score}/${total}</span>`;
+        if(score >= 21) {
+            scoreBoard.innerHTML += "<br><small style='color:green'>Chúc mừng! Bạn đã đạt yêu cầu (A1 >= 21/25).</small>";
+        } else {
+            scoreBoard.innerHTML += "<br><small style='color:red'>Bạn chưa đạt. Hãy ôn tập thêm nhé.</small>";
+        }
+        scoreBoard.style.display = 'block';
+        
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+
+        document.getElementById('submit-btn').style.display = 'none';
+        document.getElementById('retry-btn').style.display = 'inline-block';
+    }
+
+    document.addEventListener('DOMContentLoaded', initQuiz);
+
+</script>
+
+</body>
+</html>
