@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thông Báo Gửi Vợ Yêu ❤️</title>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-pink: #ff6b81;
+            --light-pink: #ffeff3;
+            --deep-red: #d63031;
+            --text-color: #2d3436;
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
+            background-color: #ffdde1; 
+            background-image: linear-gradient(to top, #ff9a9e 0%, #fecfef 99%, #fecfef 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center; /* Căn giữa dọc */
+            margin: 0;
+            padding: 50px 20px; /* Thêm padding trên dưới để không bị sát lề khi cuộn */
+            text-align: center;
+            /* QUAN TRỌNG: Cho phép cuộn dọc, ẩn cuộn ngang */
+            overflow-y: auto; 
+            overflow-x: hidden;
+            box-sizing: border-box;
+        }
+
+        /* Hiệu ứng trăng sao (Dùng fixed để đứng yên khi cuộn trang) */
+        .moon {
+            position: fixed; /* Cố định vị trí */
+            top: 50px;
+            right: 50px;
+            width: 80px;
+            height: 80px;
+            background: #f1c40f;
+            border-radius: 50%;
+            box-shadow: 0 0 20px #f1c40f, 0 0 50px #f1c40f;
+            animation: glow 2s infinite alternate;
+            z-index: 0;
+        }
+
+        .star {
+            position: fixed; /* Cố định vị trí */
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 1s infinite alternate;
+            z-index: 0;
+        }
+
+        @keyframes glow {
+            from { box-shadow: 0 0 10px #f1c40f, 0 0 30px #f1c40f; }
+            to { box-shadow: 0 0 20px #f1c40f, 0 0 50px #f1c40f; }
+        }
+
+        @keyframes twinkle {
+            from { opacity: 0.3; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1.2); }
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 25px;
+            box-shadow: 0 10px 30px rgba(255, 107, 129, 0.4);
+            max-width: 600px;
+            width: 100%;
+            border: 4px solid #fff;
+            position: relative;
+            z-index: 10;
+            margin: auto; /* Đảm bảo căn giữa */
+        }
+
+        h1 {
+            font-family: 'Dancing Script', cursive;
+            color: var(--deep-red);
+            font-size: 2.8rem;
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+
+        p {
+            font-size: 1.2rem;
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+
+        .highlight {
+            color: var(--primary-pink);
+            font-weight: bold;
+            font-size: 1.3rem;
+        }
+
+        .funny-note {
+            background-color: #fff0f6;
+            border-left: 5px solid var(--primary-pink);
+            padding: 15px;
+            border-radius: 5px;
+            font-style: italic;
+            margin-top: 20px;
+            color: #444;
+        }
+
+        .signature {
+            font-family: 'Dancing Script', cursive;
+            margin-top: 30px;
+            font-size: 1.5rem;
+            color: var(--deep-red);
+        }
+
+        .sleepy-icon {
+            font-size: 4rem;
+            display: block;
+            margin: 0 auto 20px;
+            animation: sleep 2s infinite;
+        }
+
+        @keyframes sleep {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        /* Style cho nút Home */
+        .home-btn {
+            display: inline-block;
+            margin-top: 30px;
+            padding: 12px 30px;
+            background-color: var(--primary-pink);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            box-shadow: 0 4px 15px rgba(255, 107, 129, 0.4);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .home-btn:hover {
+            background-color: var(--deep-red);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(214, 48, 49, 0.5);
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="moon"></div>
+    
+    <script>
+        for(let i=0; i<50; i++) {
+            let star = document.createElement('div');
+            star.className = 'star';
+            star.style.width = Math.random() * 3 + 'px';
+            star.style.height = star.style.width;
+            // Random vị trí trên toàn màn hình
+            star.style.top = Math.random() * 100 + 'vh';
+            star.style.left = Math.random() * 100 + 'vw';
+            star.style.animationDelay = Math.random() + 's';
+            document.body.appendChild(star);
+        }
+    </script>
+
+    <div class="container">
+        <div class="sleepy-icon">😴 💤</div>
+        <h1>Gửi Vợ Yêu Dấu! ❤️</h1>
+        
+        <p>
+            Vợ ơi, bây giờ đã là <span class="highlight">12 giờ khuya</span> rồi. <br>
+            Anh đã làm xong được phần <span class="highlight">80 câu đầu</span> cho vợ ôn tập rồi đó.
+        </p>
+
+        <p>
+            Mấy phần còn lại (từ câu 81 trở đi), anh xin phép <span class="highlight">nợ lại đến khi rảnh</span> sẽ làm tiếp nha.
+        </p>
+
+        <div class="funny-note">
+            ⚠️ <strong>Lý do tạm ngưng:</strong> <br>
+            Mắt anh đã díp lại, đầu hơi quay quay rồi. Nếu thức nữa là "Tiền Đình" nó ghé thăm thì khổ lắm! 😵‍💫
+        </div>
+
+        <p>
+            Vợ cứ ôn kỹ mấy phần anh đã làm xong trước đi nhé. Mai mốt anh khỏe, anh lại cày tiếp phục vụ vợ thi đậu 100 điểm!
+        </p>
+
+        <div class="signature">
+            Chúc vợ ngủ ngon! Yêu vợ nhiều! 💖<br>
+            - Chồng Đình Long -
+        </div>
+        
+        <br>
+        <a href="home.html" class="home-btn">🏡 Về Trang Chủ</a>
+    </div>
+
+</body>
+</html>

@@ -3,67 +3,92 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ÔN TẬP THI GPLX HẠNG A1 - ĐẦY ĐỦ 40 CÂU</title>
+    <title>Ôn Tập 40 Câu Đầu - Vợ Yêu Cố Lên</title>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+    
     <style>
         :root {
-            --primary-color: #007bff;
-            --success-color: #28a745;
-            --error-color: #dc3545;
-            --bg-color: #f4f6f9;
-            --text-color: #333;
+            --primary-pink: #ff6b81;
+            --light-pink: #ffeff3;
+            --deep-red: #d63031;
+            --text-color: #2d3436;
+            --success-color: #27ae60;
+            --error-color: #c0392b;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            line-height: 1.6;
+            font-family: 'Nunito', sans-serif;
+            background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
+            background-color: #ffdde1; 
+            background-image: linear-gradient(to top, #ff9a9e 0%, #fecfef 99%, #fecfef 100%);
+            min-height: 100vh;
             margin: 0;
             padding: 20px;
+            color: var(--text-color);
+            position: relative;
+        }
+
+        /* Hiệu ứng tim bay nền */
+        .bg-heart {
+            position: absolute;
+            color: rgba(255, 255, 255, 0.6);
+            animation: floatUp 10s linear infinite;
+            z-index: 0;
+            user-select: none;
+            pointer-events: none;
+        }
+
+        @keyframes floatUp {
+            0% { transform: translateY(100vh) scale(0.5); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translateY(-100px) scale(1.5); opacity: 0; }
         }
 
         .container {
             max-width: 800px;
             margin: 0 auto;
-            background: #fff;
+            background: rgba(255, 255, 255, 0.95);
             padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(255, 107, 129, 0.3);
+            position: relative;
+            z-index: 1;
+            border: 3px solid #fff;
         }
 
         h1 {
+            font-family: 'Dancing Script', cursive;
+            color: var(--deep-red);
             text-align: center;
-            color: var(--primary-color);
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: var(--primary-pink);
+            font-size: 1.2rem;
             margin-bottom: 30px;
-            border-bottom: 2px solid #eee;
-            padding-bottom: 10px;
-        }
-
-        .score-board {
-            text-align: center;
-            font-size: 1.5em;
             font-weight: bold;
-            margin-bottom: 20px;
-            padding: 15px;
-            background: #e9ecef;
-            border-radius: 8px;
-            display: none;
         }
 
+        /* Thẻ câu hỏi */
         .question-card {
             background: #fff;
-            border: 1px solid #ddd;
-            border-radius: 8px;
+            border: 1px solid #ffccd5;
+            border-radius: 15px;
             padding: 20px;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
             transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
         }
 
         .question-title {
-            font-weight: bold;
-            font-size: 1.1em;
+            font-weight: 700;
+            font-size: 1.15em;
             margin-bottom: 15px;
-            color: #2c3e50;
+            color: var(--deep-red);
         }
 
         .question-image {
@@ -71,9 +96,9 @@
             margin: 15px auto;
             max-width: 100%;
             height: auto;
-            border-radius: 4px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            border: 1px solid #ddd;
+            border-radius: 10px;
+            border: 2px solid #ffccd5;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
 
         .options-list {
@@ -83,103 +108,143 @@
 
         .option-item {
             margin-bottom: 10px;
-            padding: 10px;
-            border: 1px solid #eee;
-            border-radius: 5px;
+            padding: 12px;
+            border: 2px solid #eee;
+            border-radius: 10px;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: background 0.2s, border-color 0.2s;
             display: flex;
             align-items: center;
         }
 
         .option-item:hover {
-            background-color: #f8f9fa;
+            background-color: var(--light-pink);
+            border-color: var(--primary-pink);
         }
 
         .option-item input[type="radio"] {
             margin-right: 15px;
+            accent-color: var(--deep-red);
             transform: scale(1.2);
         }
 
+        /* Kết quả đúng/sai */
         .option-item.correct {
             background-color: #d4edda;
-            border-color: #c3e6cb;
+            border-color: var(--success-color);
             color: #155724;
-            font-weight: bold;
         }
 
         .option-item.wrong {
             background-color: #f8d7da;
-            border-color: #f5c6cb;
+            border-color: var(--error-color);
             color: #721c24;
-            opacity: 0.8;
         }
 
         .explanation {
             margin-top: 15px;
             padding: 15px;
-            background-color: #e2e3e5;
-            border-left: 5px solid var(--primary-color);
+            background-color: #fff0f6;
+            border-left: 5px solid var(--deep-red);
             border-radius: 4px;
             display: none;
             font-size: 0.95em;
+            color: #444;
         }
 
+        /* Nút điều khiển */
         .controls {
             text-align: center;
             margin-top: 30px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
         }
 
         button {
-            padding: 12px 30px;
-            font-size: 1em;
+            padding: 12px 25px;
+            font-size: 1.1em;
             border: none;
-            border-radius: 5px;
+            border-radius: 50px;
             cursor: pointer;
+            font-family: 'Nunito', sans-serif;
             font-weight: bold;
-            transition: background 0.3s;
-            margin: 0 10px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin: 5px;
         }
 
         #submit-btn {
-            background-color: var(--primary-color);
+            background-color: var(--deep-red);
             color: white;
+            box-shadow: 0 4px 10px rgba(214, 48, 49, 0.3);
         }
 
         #submit-btn:hover {
-            background-color: #0056b3;
+            background-color: #b33939;
+            transform: translateY(-2px);
+        }
+
+        #home-btn {
+            background-color: #636e72;
+            color: white;
         }
 
         #retry-btn {
-            background-color: #6c757d;
+            background-color: var(--primary-pink);
             color: white;
             display: none;
         }
 
-        #retry-btn:hover {
-            background-color: #545b62;
+        .score-board {
+            text-align: center;
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #fff;
+            border-radius: 10px;
+            border: 2px dashed var(--primary-pink);
+            color: var(--deep-red);
+            display: none;
         }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>ÔN TẬP THI GPLX HẠNG A1 (40 CÂU)</h1>
-    
-    <div id="score-board" class="score-board"></div>
+    <script>
+        function createHeart() {
+            const heart = document.createElement('div');
+            heart.classList.add('bg-heart');
+            heart.innerHTML = '❤';
+            heart.style.left = Math.random() * 100 + 'vw';
+            heart.style.animationDuration = Math.random() * 3 + 5 + 's'; 
+            heart.style.fontSize = Math.random() * 20 + 10 + 'px';
+            document.body.appendChild(heart);
+            setTimeout(() => { heart.remove(); }, 8000);
+        }
+        setInterval(createHeart, 300);
+    </script>
 
-    <div id="quiz-container">
+    <div class="container">
+        <h1>Ôn Tập 40 Câu Đầu 💖</h1>
+        <div class="subtitle">Vợ yêu làm bài thật tốt nha! Anh luôn ủng hộ vợ 😘</div>
+        
+        <div id="score-board" class="score-board"></div>
+
+        <div id="quiz-container">
+            </div>
+
+        <div class="controls">
+            <button id="submit-btn" onclick="submitQuiz()">Nộp Bài Xem Điểm</button>
+            <button id="retry-btn" onclick="location.reload()">Làm Lại Đề Này</button>
+            <button id="home-btn" onclick="home()">🏡 Về Trang Chủ</button>
         </div>
-
-    <div class="controls">
-        <button id="submit-btn" onclick="submitQuiz()">Nộp Bài</button>
-        <button id="retry-btn" onclick="location.reload()">Làm Lại Đề Mới</button>
-<button id="btn-submit" onclick="home()">Quay lại trang chủ</button>
     </div>
-</div>
 
 <script>
-    const questionData = [
+    // --- DỮ LIỆU CÂU HỎI TỪ FILE 40.xlsx ---
+    const rawQuestionData = [
     {
         "id": 1,
         "question": "Khi điều khiển phương tiện tham gia giao thông, những hành vi nào dưới đây bị nghiêm cấm?",
@@ -703,10 +768,8 @@
 ];
 
     let currentQuestions = [];
-function home() {
-window.location.href = 'home.html';
-}
 
+    // Hàm đảo câu hỏi (Shuffle)
     function shuffle(array) {
         let currentIndex = array.length, randomIndex;
         while (currentIndex != 0) {
@@ -717,6 +780,12 @@ window.location.href = 'home.html';
         return array;
     }
 
+    // Hàm điều hướng về trang chủ
+    function home() {
+        window.location.href = 'home.html';
+    }
+
+    // --- LOGIC XỬ LÝ TRẮC NGHIỆM ---
     function initQuiz() {
         const container = document.getElementById('quiz-container');
         container.innerHTML = '';
@@ -724,7 +793,8 @@ window.location.href = 'home.html';
         document.getElementById('submit-btn').style.display = 'inline-block';
         document.getElementById('retry-btn').style.display = 'none';
 
-        currentQuestions = JSON.parse(JSON.stringify(questionData));
+        // Deep copy và xáo trộn câu hỏi
+        currentQuestions = JSON.parse(JSON.stringify(rawQuestionData));
         shuffle(currentQuestions);
 
         currentQuestions.forEach((q, index) => {
@@ -732,33 +802,40 @@ window.location.href = 'home.html';
             card.className = 'question-card';
             card.id = `question-${index}`;
 
+            // XỬ LÝ TIÊU ĐỀ CÂU HỎI
+            let displayIndex = index + 1;
+            let displayTitle = `Câu ${displayIndex}: ${q.question}`;
+
+            // XỬ LÝ HÌNH ẢNH
             let imgHTML = '';
             if (q.img && q.img.trim() !== "") {
                 imgHTML = `<img src="${q.img}" class="question-image" alt="Hình ảnh câu hỏi">`;
             }
 
             let optionsHTML = '';
-            const optionKeys = Object.keys(q.options);
+            const optionKeys = ['A', 'B', 'C', 'D'];
             
             optionKeys.forEach(key => {
-                optionsHTML += `
-                    <li class="option-item" id="opt-${index}-${key}">
-                        <label style="width: 100%; cursor: pointer; display: flex; align-items: center;">
-                            <input type="radio" name="q${index}" value="${key}">
-                            <span><b>${key}.</b> ${q.options[key]}</span>
-                        </label>
-                    </li>
-                `;
+                if(q.options[key]) {
+                    optionsHTML += `
+                        <li class="option-item" id="opt-${index}-${key}">
+                            <label style="width: 100%; cursor: pointer; display: flex; align-items: center;">
+                                <input type="radio" name="q${index}" value="${key}">
+                                <span style="margin-left: 10px;"><b>${key}.</b> ${q.options[key]}</span>
+                            </label>
+                        </li>
+                    `;
+                }
             });
 
             card.innerHTML = `
-                <div class="question-title">Câu ${index + 1}: ${q.question}</div>
+                <div class="question-title">${displayTitle}</div>
                 ${imgHTML}
                 <ul class="options-list">
                     ${optionsHTML}
                 </ul>
                 <div class="explanation" id="exp-${index}">
-                    <strong>Giải thích:</strong> ${q.explain}
+                    <strong>💡 Giải thích:</strong> ${q.explain}
                 </div>
             `;
             container.appendChild(card);
@@ -772,41 +849,52 @@ window.location.href = 'home.html';
         currentQuestions.forEach((q, index) => {
             const selected = document.querySelector(`input[name="q${index}"]:checked`);
             const explanation = document.getElementById(`exp-${index}`);
+            
+            // Hiện giải thích
             explanation.style.display = 'block';
 
             const correctKey = q.correct;
             const correctOptionElement = document.getElementById(`opt-${index}-${correctKey}`);
             
+            // Tô màu đáp án đúng (Xanh)
             if(correctOptionElement) correctOptionElement.classList.add('correct');
 
             if (selected) {
                 if (selected.value === correctKey) {
                     score++;
                 } else {
+                    // Tô màu đáp án sai (Đỏ)
                     const wrongOptionElement = document.getElementById(`opt-${index}-${selected.value}`);
                     if(wrongOptionElement) wrongOptionElement.classList.add('wrong');
                 }
             }
             
+            // Khóa không cho chọn lại
             const radios = document.querySelectorAll(`input[name="q${index}"]`);
             radios.forEach(r => r.disabled = true);
         });
 
+        // Hiển thị điểm số
         const scoreBoard = document.getElementById('score-board');
-        scoreBoard.innerHTML = `Kết quả: <span style="color: ${score >= 21 ? 'green' : 'red'}">${score}/${total}</span>`;
-        if(score >= 21) {
-            scoreBoard.innerHTML += "<br><small style='color:green'>Chúc mừng! Bạn đã đạt yêu cầu (A1 >= 21/25).</small>";
-        } else {
-            scoreBoard.innerHTML += "<br><small style='color:red'>Bạn chưa đạt. Hãy ôn tập thêm nhé.</small>";
-        }
         scoreBoard.style.display = 'block';
         
+        let msg = "";
+        if(score === total) msg = "Tuyệt vời! Vợ quá xuất sắc! ❤️";
+        else if(score >= 35) msg = "Giỏi lắm vợ yêu, gần tuyệt đối rồi!";
+        else if(score >= 21) msg = "Đạt yêu cầu rồi nè! Cố thêm chút nữa cho chắc.";
+        else msg = "Không sao đâu, vợ làm lại lần nữa là thuộc ngay thôi!";
+
+        scoreBoard.innerHTML = `Kết quả: ${score}/${total} câu đúng<br><small>${msg}</small>`;
+        
+        // Cuộn lên đầu
         window.scrollTo({ top: 0, behavior: 'smooth' });
 
+        // Đổi nút
         document.getElementById('submit-btn').style.display = 'none';
         document.getElementById('retry-btn').style.display = 'inline-block';
     }
 
+    // Chạy khi tải trang
     document.addEventListener('DOMContentLoaded', initQuiz);
 
 </script>
