@@ -3,216 +3,682 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Thông Báo Gửi Vợ Yêu ❤️</title>
+    <title>Ôn Tập Câu 1 - 25: Khởi Động Nhẹ Nhàng 💖</title>
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
     
     <style>
         :root {
-            /* Màu chủ đạo cho thông báo bên trong */
             --primary-pink: #ff6b81;
+            --light-pink: #ffeff3;
             --deep-red: #d63031;
             --text-color: #2d3436;
+            --success-color: #27ae60;
+            --error-color: #c0392b;
         }
 
         body {
             font-family: 'Nunito', sans-serif;
-            /* Bầu trời đêm màu đen xanh */
-            background: radial-gradient(ellipse at bottom, #1B2735 0%, #090A0F 100%);
+            background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
+            background-color: #ffdde1; 
+            background-image: linear-gradient(to top, #ff9a9e 0%, #fecfef 99%, #fecfef 100%);
             min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
             margin: 0;
-            padding: 50px 20px;
-            text-align: center;
-            overflow-y: auto; 
-            overflow-x: hidden;
-            box-sizing: border-box;
-            color: #fff; /* Màu chữ mặc định bên ngoài là trắng */
-        }
-
-        /* Hiệu ứng trăng (vẫn giữ nguyên) */
-        .moon {
-            position: fixed;
-            top: 50px;
-            right: 50px;
-            width: 80px;
-            height: 80px;
-            background: #f1c40f;
-            border-radius: 50%;
-            box-shadow: 0 0 20px #f1c40f, 0 0 50px #f1c40f;
-            animation: glow 3s infinite alternate;
-            z-index: 0;
-        }
-
-        /* Hiệu ứng sao */
-        .star {
-            position: fixed;
-            background: white;
-            border-radius: 50%;
-            /* Sao nhấp nháy với tốc độ và độ sáng khác nhau */
-            animation: twinkle var(--duration) infinite alternate;
-            z-index: 0;
-            opacity: var(--opacity);
-        }
-
-        @keyframes glow {
-            from { box-shadow: 0 0 10px #f1c40f, 0 0 30px #f1c40f; }
-            to { box-shadow: 0 0 25px #f1c40f, 0 0 60px #f1c40f; }
-        }
-
-        @keyframes twinkle {
-            from { opacity: 0.2; transform: scale(0.8); }
-            to { opacity: 1; transform: scale(1); }
-        }
-
-        /* Khung thông báo chính (giữ nền trắng để dễ đọc) */
-        .container {
-            background: rgba(255, 255, 255, 0.95);
-            padding: 40px;
-            border-radius: 25px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
-            max-width: 600px;
-            width: 100%;
-            border: 4px solid rgba(255, 255, 255, 0.2);
+            padding: 20px;
+            color: var(--text-color);
             position: relative;
-            z-index: 10;
-            margin: auto;
-            color: var(--text-color); /* Màu chữ bên trong quay về màu tối */
+        }
+
+        /* Hiệu ứng tim bay nền */
+        .bg-heart {
+            position: fixed;
+            top: 0; left: 0;
+            color: rgba(255, 255, 255, 0.6);
+            animation: floatUp 10s linear infinite;
+            z-index: 0;
+            user-select: none;
+            pointer-events: none;
+        }
+
+        @keyframes floatUp {
+            0% { transform: translateY(100vh) scale(0.5); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translateY(-100px) scale(1.5); opacity: 0; }
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(255, 107, 129, 0.3);
+            position: relative;
+            z-index: 1;
+            border: 3px solid #fff;
         }
 
         h1 {
             font-family: 'Dancing Script', cursive;
             color: var(--deep-red);
+            text-align: center;
             font-size: 2.8rem;
-            margin-bottom: 20px;
-            line-height: 1.2;
+            margin-bottom: 10px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
         }
 
-        p {
-            font-size: 1.2rem;
-            color: #555;
-            line-height: 1.6;
-            margin-bottom: 25px;
-        }
-
-        .highlight {
+        .subtitle {
+            text-align: center;
             color: var(--primary-pink);
+            font-size: 1.2rem;
+            margin-bottom: 30px;
             font-weight: bold;
-            font-size: 1.3rem;
         }
 
-        .funny-note {
-            background-color: #fff0f6;
-            border-left: 5px solid var(--primary-pink);
-            padding: 15px;
-            border-radius: 5px;
-            font-style: italic;
-            margin-top: 20px;
-            color: #444;
+        /* Thẻ câu hỏi */
+        .question-card {
+            background: #fff;
+            border: 1px solid #ffccd5;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 25px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
         }
 
-        .signature {
-            font-family: 'Dancing Script', cursive;
-            margin-top: 30px;
-            font-size: 1.5rem;
+        .question-title {
+            font-weight: 700;
+            font-size: 1.15em;
+            margin-bottom: 15px;
             color: var(--deep-red);
         }
 
-        .sleepy-icon {
-            font-size: 4rem;
+        .question-image {
             display: block;
-            margin: 0 auto 20px;
-            animation: sleep 2s infinite;
+            margin: 15px auto;
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            border: 2px solid #ffccd5;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
 
-        @keyframes sleep {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
+        .options-list {
+            list-style-type: none;
+            padding: 0;
         }
-        
-        /* Nút Home */
-        .home-btn {
-            display: inline-block;
+
+        .option-item {
+            margin-bottom: 10px;
+            padding: 12px;
+            border: 2px solid #eee;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background 0.2s, border-color 0.2s;
+            display: flex;
+            align-items: center;
+        }
+
+        .option-item:hover {
+            background-color: var(--light-pink);
+            border-color: var(--primary-pink);
+        }
+
+        .option-item input[type="radio"] {
+            margin-right: 15px;
+            accent-color: var(--deep-red);
+            transform: scale(1.2);
+        }
+
+        /* Kết quả đúng/sai */
+        .option-item.correct {
+            background-color: #d4edda;
+            border-color: var(--success-color);
+            color: #155724;
+        }
+
+        .option-item.wrong {
+            background-color: #f8d7da;
+            border-color: var(--error-color);
+            color: #721c24;
+        }
+
+        .explanation {
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #fff0f6;
+            border-left: 5px solid var(--deep-red);
+            border-radius: 4px;
+            display: none;
+            font-size: 0.95em;
+            color: #444;
+        }
+
+        /* Nút điều khiển */
+        .controls {
+            text-align: center;
             margin-top: 30px;
-            padding: 12px 30px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 12px 25px;
+            font-size: 1.1em;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-family: 'Nunito', sans-serif;
+            font-weight: bold;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin: 5px;
+        }
+
+        #submit-btn {
+            background-color: var(--deep-red);
+            color: white;
+            box-shadow: 0 4px 10px rgba(214, 48, 49, 0.3);
+        }
+
+        #submit-btn:hover {
+            background-color: #b33939;
+            transform: translateY(-2px);
+        }
+
+        #home-btn {
+            background-color: #636e72;
+            color: white;
+        }
+
+        #retry-btn {
             background-color: var(--primary-pink);
             color: white;
-            text-decoration: none;
-            border-radius: 50px;
+            display: none;
+        }
+
+        .score-board {
+            text-align: center;
+            font-size: 1.5em;
             font-weight: bold;
-            font-size: 1.1rem;
-            box-shadow: 0 4px 15px rgba(255, 107, 129, 0.4);
-            transition: all 0.3s ease;
-            cursor: pointer;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #fff;
+            border-radius: 10px;
+            border: 2px dashed var(--primary-pink);
+            color: var(--deep-red);
+            display: none;
         }
-
-        .home-btn:hover {
-            background-color: var(--deep-red);
-            transform: translateY(-3px);
-            box-shadow: 0 6px 20px rgba(214, 48, 49, 0.5);
-        }
-
     </style>
 </head>
 <body>
 
-    <div class="moon"></div>
-    
     <script>
-        // Tăng số lượng sao lên 150
-        for(let i=0; i<150; i++) {
-            let star = document.createElement('div');
-            star.className = 'star';
-            
-            // Random kích thước sao (nhỏ hơn để nhìn xa xăm)
-            star.style.width = Math.random() * 2 + 1 + 'px';
-            star.style.height = star.style.width;
-            
-            // Random vị trí
-            star.style.top = Math.random() * 100 + 'vh';
-            star.style.left = Math.random() * 100 + 'vw';
-            
-            // Random các thuộc tính hoạt hình cho tự nhiên hơn
-            star.style.setProperty('--duration', Math.random() * 3 + 1 + 's');
-            star.style.setProperty('--opacity', Math.random());
-            star.style.animationDelay = Math.random() * 2 + 's';
-            
-            document.body.appendChild(star);
+        function createHeart() {
+            const heart = document.createElement('div');
+            heart.classList.add('bg-heart');
+            heart.innerHTML = '❤';
+            heart.style.left = Math.random() * 100 + 'vw';
+            heart.style.animationDuration = Math.random() * 3 + 5 + 's'; 
+            heart.style.fontSize = Math.random() * 20 + 10 + 'px';
+            document.body.appendChild(heart);
+            setTimeout(() => { heart.remove(); }, 8000);
         }
+        setInterval(createHeart, 300);
     </script>
 
     <div class="container">
-        <div class="sleepy-icon">😴 💤</div>
-        <h1>Gửi Vợ Yêu Dấu! ❤️</h1>
+        <h1>Ôn Tập Câu 1 - 25 💖</h1>
+        <div class="subtitle">Bắt đầu nhẹ nhàng thôi vợ yêu nhé! Anh tin vợ làm tốt mà 😘</div>
         
-        <p>
-            Vợ ơi, bây giờ đã là <span class="highlight">12h30 giờ khuya</span> rồi. <br>
-            Anh đã làm xong được <span class="highlight">vài phần</span> cho vợ ôn tập rồi đó.
-        </p>
+        <div id="score-board" class="score-board"></div>
 
-        <p>
-            Mấy phần còn lại, anh xin phép <span class="highlight">nợ lại đến khi rảnh</span> sẽ làm tiếp nha.
-        </p>
+        <div id="quiz-container">
+            </div>
 
-        <div class="funny-note">
-            ⚠️ <strong>Lý do tạm ngưng:</strong> <br>
-            Mắt anh đã díp lại, đầu hơi quay quay rồi. Nếu thức nữa là "Tiền Đình" nó ghé thăm thì khổ lắm! 😵‍💫
+        <div class="controls">
+            <button id="submit-btn" onclick="submitQuiz()">Nộp Bài Xem Điểm</button>
+            <button id="retry-btn" onclick="location.reload()">Làm Lại Đề Này</button>
+            <button id="home-btn" onclick="home()">🏡 Về Trang Chủ</button>
         </div>
-
-        <p>
-            Vợ cứ ôn kỹ mấy phần anh đã làm xong trước đi nhé. Mai mốt anh khỏe, anh lại cày tiếp phục vụ vợ thi đậu 100 điểm!
-        </p>
-
-        <div class="signature">
-            Chúc vợ ngủ ngon! Yêu vợ nhiều! 💖<br>
-            - Chồng Đình Long -
-        </div>
-        
-        <br>
-        <a href="home.html" class="home-btn">🏡 Về Trang Chủ</a>
     </div>
+
+<script>
+    // --- DỮ LIỆU CÂU HỎI TỪ FILE 1-25.xlsx ---
+    const rawQuestionData = [
+    {
+        "id": 1,
+        "question": "Phần của đường bộ được sử dụng cho phương tiện giao thông đường bộ đi lại là gì?",
+        "img": "",
+        "options": {
+            "A": "Phần mặt đường và lề đường.",
+            "B": "Phần đường xe chạy.",
+            "C": "Phần đường xe cơ giới."
+        },
+        "correct": "B",
+        "explain": "Phần đường xe chạy là phần của đường bộ được sử dụng cho phương tiện giao thông qua lại."
+    },
+    {
+        "id": 2,
+        "question": "Làn đường là gì?",
+        "img": "",
+        "options": {
+            "A": "Là một phần của phần đường xe chạy được chia theo chiều dọc của đường, sử dụng cho xe chạy.",
+            "B": "Là một phần của phần đường xe chạy được chia theo chiều dọc của đường, có đủ chiều rộng cho xe chạy an toàn.",
+            "C": "Là đường cho xe ô tô chạy, dừng, đỗ an toàn."
+        },
+        "correct": "B",
+        "explain": "Làn đường phải được chia theo chiều dọc và có đủ chiều rộng cho xe chạy an toàn."
+    },
+    {
+        "id": 3,
+        "question": "Khổ giới hạn của đường bộ được hiểu như thế nào là đúng?",
+        "img": "",
+        "options": {
+            "A": "Khổ giới hạn của đường bộ là khoảng trống có kích thước giới hạn về chiều rộng, chiều cao của đường bộ để các xe, bao gồm cả hàng hoá xếp trên xe đi qua được an toàn và được xác định theo quy chuẩn, tiêu chuẩn kỹ thuật của đường bộ.",
+            "B": "Là khoảng trống có kích thước giới hạn về chiều rộng của đường, cầu, bến phà, hầm trên đường bộ để các xe kể cả hàng hóa xếp trên xe đi qua được an toàn.",
+            "C": "Là khoảng trống có kích thước giới hạn về chiều cao của cầu, bến phà, hầm trên đường bộ để các xe đi qua được an toàn."
+        },
+        "correct": "A",
+        "explain": "Khổ giới hạn bao gồm cả giới hạn về chiều rộng và chiều cao để đảm bảo xe đi qua an toàn."
+    },
+    {
+        "id": 4,
+        "question": "Dải phân cách được lắp đặt để làm gì?",
+        "img": "",
+        "options": {
+            "A": "Để phân chia các làn đường dành cho xe cơ giới và xe thô sơ trên đường cao tốc.",
+            "B": "Dải phân cách là bộ phận của đường để phân chia mặt đường thành hai chiều xe chạy riêng biệt hoặc để phân chia phần đường của xe cơ giới và xe thô sơ.",
+            "C": "Để phân chia làn đường của các xe có trọng tải lớn và nhỏ."
+        },
+        "correct": "B",
+        "explain": "Dải phân cách dùng để chia mặt đường thành hai chiều xe chạy riêng biệt hoặc phân chia xe cơ giới và thô sơ."
+    },
+    {
+        "id": 5,
+        "question": "Vạch kẻ đường là gì?",
+        "img": "",
+        "options": {
+            "A": "Vạch kẻ đường là vạch chỉ sự phân chia làn đường, vị trí hoặc hướng đi, vị trí dừng lại.",
+            "B": "Là báo hiệu để tài xế biết vị trí dừng đỗ xe.",
+            "C": "Là ký hiệu trên mặt đường để trang trí."
+        },
+        "correct": "A",
+        "explain": "Vạch kẻ đường dùng để phân chia làn, hướng đi, vị trí dừng."
+    },
+    {
+        "id": 6,
+        "question": "Người lái xe được hiểu như thế nào trong các khái niệm dưới đây?",
+        "img": "",
+        "options": {
+            "A": "Là người điều khiển xe cơ giới.",
+            "B": "Là người điều khiển xe thô sơ.",
+            "C": "Là người điều khiển xe có súc vật kéo."
+        },
+        "correct": "A",
+        "explain": "Người lái xe là người điều khiển xe cơ giới."
+    },
+    {
+        "id": 7,
+        "question": "Trong các khái niệm dưới đây, \"dải phân cách\" được hiểu như thế nào là đúng?",
+        "img": "",
+        "options": {
+            "A": "Là bộ phận của đường để ngăn cách không cho các loại xe vào những nơi không được phép.",
+            "B": "Là bộ phận của đường để phân tách phần đường xe chạy và hành lang an toàn giao thông.",
+            "C": "Là bộ phận của đường để phân chia mặt đường thành hai chiều xe chạy riêng biệt hoặc để phân chia phần đường của xe cơ giới và xe thô sơ."
+        },
+        "correct": "C",
+        "explain": "Dải phân cách chia đường thành hai chiều hoặc chia xe cơ giới/thô sơ."
+    },
+    {
+        "id": 8,
+        "question": "Dải phân cách trên đường bộ gồm những loại nào?",
+        "img": "",
+        "options": {
+            "A": "Dải phân cách gồm loại cố định và loại di động.",
+            "B": "Dải phân cách gồm loại tường chống ồn, hộ lan cứng và hộ lan mềm.",
+            "C": "Dải phân cách gồm giá long môn và biển báo hiệu đường bộ."
+        },
+        "correct": "A",
+        "explain": "Dải phân cách có 2 loại: Cố định và Di động."
+    },
+    {
+        "id": 9,
+        "question": "Khái niệm \"người điều khiển giao thông\" được hiểu như thế nào là đúng?",
+        "img": "",
+        "options": {
+            "A": "Là người điều khiển phương tiện tham gia giao thông tại nơi thi công, nơi ùn tắc giao thông, ở bến phà, tại cầu đường bộ đi chung với đường sắt.",
+            "B": "Là cảnh sát giao thông, người được giao nhiệm vụ hướng dẫn giao thông tại nơi thi công, nơi ùn tắc giao thông, ở bến phà, tại cầu đường bộ đi chung với đường sắt.",
+            "C": "Là người tham gia giao thông tại nơi thi công, nơi ùn tắc giao thông, ở bến phà, tại cầu đường bộ đi chung với đường sắt."
+        },
+        "correct": "B",
+        "explain": "Người điều khiển giao thông bao gồm CSGT và người được giao nhiệm vụ hướng dẫn giao thông."
+    },
+    {
+        "id": 10,
+        "question": "Trong các khái niệm dưới đây, khái niệm \"dừng xe\" được hiểu như thế nào là đúng?",
+        "img": "",
+        "options": {
+            "A": "Là trạng thái đứng yên của phương tiện giao thông không giới hạn thời gian để cho người lên, xuống phương tiện, xếp dỡ hàng hóa hoặc thực hiện công việc khác.",
+            "B": "Là trạng thái đứng yên tạm thời của phương tiện giao thông trong một khoảng thời gian cần thiết đủ để cho người lên, xuống phương tiện, xếp dỡ hàng hóa hoặc thực hiện công việc khác.",
+            "C": "Là trạng thái đứng yên của phương tiện giao thông không giới hạn thời gian giữa 02 lần vận chuyển hàng hoá hoặc hành khách."
+        },
+        "correct": "B",
+        "explain": "Dừng xe là trạng thái đứng yên TẠM THỜI trong khoảng thời gian cần thiết."
+    },
+    {
+        "id": 11,
+        "question": "Khái niệm \"đỗ xe\" được hiểu như thế nào là đúng?",
+        "img": "",
+        "options": {
+            "A": "Là trạng thái đứng yên của phương tiện giao thông có giới hạn trong một khoảng thời gian cần thiết đủ để cho người lên, xuống phương tiện, xếp dỡ hàng hóa hoặc thực hiện công việc khác.",
+            "B": "Là trạng thái đứng yên của phương tiện giao thông không giới hạn thời gian.",
+            "C": "Là trạng thái đứng yên của phương tiện giao thông không giới hạn thời gian để cho người lên, xuống phương tiện, xếp dỡ hàng hóa hoặc thực hiện công việc khác."
+        },
+        "correct": "B",
+        "explain": "Đỗ xe là trạng thái đứng yên KHÔNG GIỚI HẠN thời gian."
+    },
+    {
+        "id": 12,
+        "question": "Cuộc đua xe chỉ được thực hiện khi nào?",
+        "img": "",
+        "options": {
+            "A": "Diễn ra trên đường phố không có người qua lại.",
+            "B": "Được người dân ủng hộ.",
+            "C": "Được cơ quan có thẩm quyền cấp phép."
+        },
+        "correct": "C",
+        "explain": "Mọi cuộc đua xe phải được cơ quan có thẩm quyền cấp phép."
+    },
+    {
+        "id": 13,
+        "question": "Người điều khiển phương tiện giao thông đường bộ mà trong cơ thể có chất ma túy có bị nghiêm cấm hay không?",
+        "img": "",
+        "options": {
+            "A": "Bị nghiêm cấm.",
+            "B": "Không bị nghiêm cấm.",
+            "C": "Không bị nghiêm cấm, nếu có chất ma túy ở mức nhẹ, có thể điều khiển phương tiện tham gia giao thông."
+        },
+        "correct": "A",
+        "explain": "Điều khiển phương tiện khi có chất ma túy là hành vi bị NGHIÊM CẤM tuyệt đối."
+    },
+    {
+        "id": 14,
+        "question": "Sử dụng rượu, bia khi lái xe, nếu bị phát hiện thì bị xử lý như thế nào?",
+        "img": "",
+        "options": {
+            "A": "Chỉ bị nhắc nhở.",
+            "B": "Bị xử phạt hành chính hoặc có thể bị xử lý hình sự tùy theo mức độ vi phạm.",
+            "C": "Không bị xử lý hình sự."
+        },
+        "correct": "B",
+        "explain": "Vi phạm nồng độ cồn sẽ bị phạt hành chính hoặc hình sự tùy mức độ."
+    },
+    {
+        "id": 15,
+        "question": "Theo Luật phòng, chống tác hại của rượu, bia, đối tượng nào dưới đây bị cấm sử dụng rượu, bia khi tham gia giao thông?",
+        "img": "",
+        "options": {
+            "A": "Người điều khiển: Xe ô tô, xe mô tô, xe đạp, xe gắn máy.",
+            "B": "Người ngồi phía sau người điều khiển xe cơ giới.",
+            "C": "Người đi bộ."
+        },
+        "correct": "A",
+        "explain": "Người điều khiển phương tiện (kể cả xe đạp) bị cấm sử dụng rượu bia."
+    },
+    {
+        "id": 16,
+        "question": "Câu hỏi 16*: Hành vi điều khiển xe cơ giới chạy quá tốc độ quy định, giành đường, vượt ẩu có bị nghiêm cấm hay không?",
+        "img": "",
+        "options": {
+            "A": "Bị nghiêm cấm.",
+            "B": "Bị nghiêm cấm tùy trường hợp.",
+            "C": "Không bị nghiêm cấm."
+        },
+        "correct": "A",
+        "explain": "Chạy quá tốc độ, lạng lách, vượt ẩu là hành vi gây nguy hiểm và bị nghiêm cấm."
+    },
+    {
+        "id": 17,
+        "question": "Khi lái xe trên đường, người lái xe cần quan sát và bảo đảm tốc độ phương tiện như thế nào?",
+        "img": "",
+        "options": {
+            "A": "Chỉ lớn hơn tốc độ tối đa cho phép khi đường vắng.",
+            "B": "Chỉ lớn hơn tốc độ tối đa cho phép vào ban đêm.",
+            "C": "Không vượt quá tốc độ cho phép."
+        },
+        "correct": "C",
+        "explain": "Không bao giờ được vượt quá tốc độ tối đa cho phép."
+    },
+    {
+        "id": 18,
+        "question": "Phương tiện giao thông đường bộ di chuyển với tốc độ thấp hơn phải đi như thế nào?",
+        "img": "",
+        "options": {
+            "A": "Đi về phía bên trái.",
+            "B": "Đi về phía bên phải.",
+            "C": "Đi ở giữa."
+        },
+        "correct": "B",
+        "explain": "Xe đi chậm hơn phải đi về phía bên phải."
+    },
+    {
+        "id": 19,
+        "question": "Trên đường có nhiều làn đường, khi điều khiển phương tiện ở tốc độ chậm bạn phải đi ở làn đường nào?",
+        "img": "",
+        "options": {
+            "A": "Đi ở làn phải trong cùng.",
+            "B": "Đi ở làn phía bên trái.",
+            "C": "Đi ở làn giữa."
+        },
+        "correct": "A",
+        "explain": "Xe đi chậm phải đi ở làn bên phải trong cùng."
+    },
+    {
+        "id": 20,
+        "question": "Câu hỏi 20: Hành vi vượt xe tại các vị trí có tầm nhìn hạn chế, đường vòng, đầu dốc có bị nghiêm cấm hay không?",
+        "img": "",
+        "options": {
+            "A": "Không bị nghiêm cấm.",
+            "B": "Không bị nghiêm cấm khi rất vội.",
+            "C": "Bị nghiêm cấm."
+        },
+        "correct": "C",
+        "explain": "Vượt xe ở nơi tầm nhìn hạn chế, đường vòng, đầu dốc là rất nguy hiểm và bị cấm."
+    },
+    {
+        "id": 21,
+        "question": "Câu hỏi 21: Hành vi lắp đặt, sử dụng còi, đèn không đúng thiết kế của nhà sản xuất đối với từng loại xe cơ giới có được phép hay không?",
+        "img": "",
+        "options": {
+            "A": "Được phép.",
+            "B": "Không được phép.",
+            "C": "Được phép tùy trường hợp."
+        },
+        "correct": "B",
+        "explain": "Việc tự ý thay đổi kết cấu, còi, đèn của xe là không được phép."
+    },
+    {
+        "id": 22,
+        "question": "Câu hỏi 22: Những hành vi nào sau đây bị cấm?",
+        "img": "",
+        "options": {
+            "A": "1. Cải tạo xe ô tô loại khác thành xe ô tô chở người phục vụ mục đích quốc phòng, an ninh.",
+            "B": "2. Cải tạo trái phép; cố ý can thiệp làm sai lệch chỉ số trên đồng hồ báo quãng đường đã chạy của xe ô tô; cắt, hàn, tẩy xóa, đục sửa, đóng lại trái phép số khung, số động cơ của xe cơ giới, xe máy chuyên dùng."
+        },
+        "correct": "B",
+        "explain": "Việc tự ý thay đổi kết cấu, thông số kỹ thuật hoặc làm sai lệch thông tin định danh của xe là hành vi bị cấm."
+    },
+    {
+        "id": 23,
+        "question": "Câu hỏi 23: Hành vi nào sau đây bị cấm?",
+        "img": "",
+        "options": {
+            "A": "1. Lắp đặt, sử dụng thiết bị âm thanh, ánh sáng trên xe cơ giới, xe máy chuyên dùng gây mất trật tự, an toàn giao thông đường bộ.",
+            "B": "2. Cản trở người, phương tiện tham gia giao thông trên đường bộ; ném gạch, đất, đá, cát hoặc vật thể khác vào người, phương tiện đang tham gia giao thông trên đường bộ.",
+            "C": "3. Cả hai ý trên."
+        },
+        "correct": "C",
+        "explain": "Cả hai hành vi trên đều gây nguy hiểm và mất an toàn cho người và phương tiện tham gia giao thông."
+    },
+    {
+        "id": 24,
+        "question": "Câu hỏi 24: Việc sản xuất, sử dụng, mua, bán trái phép biển số xe có bị nghiêm cấm hay không?",
+        "img": "",
+        "options": {
+            "A": "1. Không bị nghiêm cấm.",
+            "B": "2. Bị nghiêm cấm.",
+            "C": "3. Bị nghiêm cấm tuỳ trường hợp."
+        },
+        "correct": "B",
+        "explain": "Biển số xe là do cơ quan nhà nước có thẩm quyền cấp, mọi hành vi sản xuất, mua bán trái phép đều bị nghiêm cấm."
+    },
+    {
+        "id": 25,
+        "question": "Câu hỏi 25: Khi điều khiển phương tiện tham gia giao thông, những hành vi nào dưới đây bị nghiêm cấm?",
+        "img": "",
+        "options": {
+            "A": "1. Thay đổi tốc độ của xe trên đường bộ.",
+            "B": "2. Thay đổi tay số của xe trên đường bộ.",
+            "C": "3. Lạng lách, đánh võng trên đường bộ."
+        },
+        "correct": "C",
+        "explain": "Hành vi lạng lách, đánh võng gây nguy hiểm cho bản thân và người khác nên bị nghiêm cấm."
+    }
+];
+
+    let currentQuestions = [];
+
+    // Hàm đảo câu hỏi (Shuffle)
+    function shuffle(array) {
+        let currentIndex = array.length, randomIndex;
+        while (currentIndex != 0) {
+            randomIndex = Math.floor(Math.random() * currentIndex);
+            currentIndex--;
+            [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+        }
+        return array;
+    }
+
+    // Hàm điều hướng về trang chủ
+    function home() {
+        window.location.href = 'home.html';
+    }
+
+    // --- LOGIC XỬ LÝ TRẮC NGHIỆM ---
+    function initQuiz() {
+        const container = document.getElementById('quiz-container');
+        container.innerHTML = '';
+        document.getElementById('score-board').style.display = 'none';
+        document.getElementById('submit-btn').style.display = 'inline-block';
+        document.getElementById('retry-btn').style.display = 'none';
+
+        // Deep copy và xáo trộn câu hỏi
+        currentQuestions = JSON.parse(JSON.stringify(rawQuestionData));
+        shuffle(currentQuestions);
+
+        currentQuestions.forEach((q, index) => {
+            const card = document.createElement('div');
+            card.className = 'question-card';
+            card.id = `question-${index}`;
+
+            // XỬ LÝ TIÊU ĐỀ CÂU HỎI
+            // Loại bỏ phần "Câu hỏi XX:" cũ để hiển thị số thứ tự mới (1-25)
+            let cleanQuestion = q.question.replace(/^Câu (hỏi )?\d+[\.\:\*]*\s*/i, "");
+            let displayIndex = index + 1;
+            let displayTitle = `Câu ${displayIndex}: ${cleanQuestion}`;
+
+            // XỬ LÝ HÌNH ẢNH
+            let imgHTML = '';
+            if (q.img && q.img.trim() !== "") {
+                imgHTML = `<img src="${q.img}" class="question-image" alt="Hình ảnh minh họa">`;
+            }
+
+            let optionsHTML = '';
+            const optionKeys = ['A', 'B', 'C', 'D'];
+            
+            optionKeys.forEach(key => {
+                if(q.options[key]) {
+                    optionsHTML += `
+                        <li class="option-item" id="opt-${index}-${key}">
+                            <label style="width: 100%; cursor: pointer; display: flex; align-items: center;">
+                                <input type="radio" name="q${index}" value="${key}">
+                                <span style="margin-left: 10px;"><b>${key}.</b> ${q.options[key]}</span>
+                            </label>
+                        </li>
+                    `;
+                }
+            });
+
+            card.innerHTML = `
+                <div class="question-title">${displayTitle}</div>
+                ${imgHTML}
+                <ul class="options-list">
+                    ${optionsHTML}
+                </ul>
+                <div class="explanation" id="exp-${index}">
+                    <strong>💡 Giải thích:</strong> ${q.explain}
+                </div>
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    function submitQuiz() {
+        let score = 0;
+        let total = currentQuestions.length;
+
+        currentQuestions.forEach((q, index) => {
+            const selected = document.querySelector(`input[name="q${index}"]:checked`);
+            const explanation = document.getElementById(`exp-${index}`);
+            
+            // Hiện giải thích
+            explanation.style.display = 'block';
+
+            const correctKey = q.correct;
+            const correctOptionElement = document.getElementById(`opt-${index}-${correctKey}`);
+            
+            // Tô màu đáp án đúng (Xanh)
+            if(correctOptionElement) correctOptionElement.classList.add('correct');
+
+            if (selected) {
+                if (selected.value === correctKey) {
+                    score++;
+                } else {
+                    // Tô màu đáp án sai (Đỏ)
+                    const wrongOptionElement = document.getElementById(`opt-${index}-${selected.value}`);
+                    if(wrongOptionElement) wrongOptionElement.classList.add('wrong');
+                }
+            }
+            
+            // Khóa không cho chọn lại
+            const radios = document.querySelectorAll(`input[name="q${index}"]`);
+            radios.forEach(r => r.disabled = true);
+        });
+
+        // Hiển thị điểm số
+        const scoreBoard = document.getElementById('score-board');
+        scoreBoard.style.display = 'block';
+        
+        let msg = "";
+        if(score === total) msg = "Tuyệt vời! Vợ quá xuất sắc! ❤️";
+        else if(score >= 21) msg = "Giỏi lắm vợ yêu! Đậu rồi nè (>= 21/25). Cố lên xíu nữa cho điểm tuyệt đối nha!";
+        else msg = "Không sao đâu, vợ làm lại lần nữa là thuộc ngay thôi! Cố lên!";
+
+        scoreBoard.innerHTML = `Kết quả: ${score}/${total} câu đúng<br><small>${msg}</small>`;
+        
+        // Cuộn lên đầu
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+
+        // Đổi nút
+        document.getElementById('submit-btn').style.display = 'none';
+        document.getElementById('retry-btn').style.display = 'inline-block';
+    }
+
+    // Chạy khi tải trang
+    document.addEventListener('DOMContentLoaded', initQuiz);
+
+</script>
 
 </body>
 </html>
