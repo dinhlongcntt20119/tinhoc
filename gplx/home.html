@@ -13,7 +13,7 @@
             --light-pink: #ffeff3;
             --deep-red: #d63031;
             --text-color: #2d3436;
-            --selection2-color: #ff4757; /* Màu đặc trưng của lựa chọn 2 */
+            --selection2-color: #ff4757;
         }
 
         body {
@@ -24,16 +24,18 @@
             min-height: 100vh;
             display: flex;
             justify-content: center;
-            align-items: center;
+            align-items: flex-start; /* Sửa align-items để cho phép cuộn trang nếu nội dung dài */
             margin: 0;
-            padding: 20px;
+            padding: 40px 20px; /* Tăng padding để không bị sát lề */
+            overflow-y: auto; /* Cho phép cuộn body */
             overflow-x: hidden;
-            position: relative;
+            box-sizing: border-box;
         }
 
         /* Hiệu ứng tim bay nền */
         .bg-heart {
-            position: absolute;
+            position: fixed; /* Đổi thành fixed để tim bay toàn màn hình kể cả khi cuộn */
+            top: 0; left: 0;
             color: rgba(255, 255, 255, 0.6);
             animation: floatUp 10s linear infinite;
             z-index: 0;
@@ -56,43 +58,44 @@
             max-width: 600px;
             width: 100%;
             position: relative;
-            z-index: 1;
+            z-index: 10; /* Tăng z-index để nổi lên trên */
             border: 4px solid #fff;
+            margin: auto; /* Căn giữa */
         }
 
-        /* --- CẤU HÌNH FONT PACIFICO (LỰA CHỌN 2) --- */
         h1 {
-            font-family: 'Pacifico', cursive; /* Font chữ vui tươi, tròn trịa */
-            color: var(--selection2-color);   /* Màu hồng đỏ tươi tắn */
-            font-size: 2.8rem;
-            margin-bottom: 15px;
-            text-shadow: 2px 2px 0px rgba(255, 255, 255, 0.8); /* Viền bóng trắng tạo nét dễ thương */
-            font-weight: normal; /* Font này đậm sẵn nên để normal cho đẹp */
+            font-family: 'Pacifico', cursive;
+            color: var(--selection2-color);
+            font-size: 2.2rem;
+            margin-bottom: 5px;
+            text-shadow: 2px 2px 0px rgba(255, 255, 255, 0.8);
+            font-weight: normal;
             line-height: 1.3;
+        }
+
+        h3 {
+            font-family: 'Pacifico', cursive;
+            color: var(--deep-red);
+            font-size: 1.5rem;
+            margin-top: 5px;
+            margin-bottom: 15px;
         }
 
         h2 {
             font-family: 'Pacifico', cursive;
             color: var(--primary-pink);
-            font-size: 1.6rem;
+            font-size: 1.4rem;
             margin-top: 0;
             margin-bottom: 30px;
             font-weight: normal;
         }
-h3 {
-            font-family: 'Time Newroman', cursive;
-            color: var(--primary-pink);
-            font-size: 1.6rem;
-            margin-top: 0;
-            margin-bottom: 30px;
-            font-weight: normal;
-        }
-
 
         .menu-list {
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 15px; /* Tăng khoảng cách giữa các nút */
+            width: 100%;
+            /* Bỏ max-height và overflow để danh sách tự giãn */
         }
 
         .menu-item {
@@ -100,7 +103,7 @@ h3 {
             text-decoration: none;
             background-color: var(--light-pink);
             color: var(--text-color);
-            padding: 15px 20px;
+            padding: 15px 20px; /* Tăng padding cho nút to dễ bấm */
             border-radius: 50px;
             font-weight: 700;
             font-size: 1.1rem;
@@ -108,6 +111,8 @@ h3 {
             border: 2px solid transparent;
             position: relative;
             overflow: hidden;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05); /* Thêm bóng nhẹ cho từng nút */
         }
 
         .menu-item:hover {
@@ -130,11 +135,12 @@ h3 {
             animation: beat 0.5s infinite alternate;
         }
 
-        /* Style riêng cho nút câu liệt */
+        /* Style riêng cho nút quan trọng */
         .menu-item.special {
             background-color: #fff0f0;
             border: 2px dashed var(--deep-red);
             color: var(--deep-red);
+            font-weight: 800;
         }
         
         .menu-item.special:hover {
@@ -148,18 +154,18 @@ h3 {
         }
 
         .footer-note {
-            margin-top: 30px;
+            margin-top: 40px;
             font-size: 1.1rem;
             color: #636e72;
-            font-family: 'Pacifico', cursive; /* Footer cũng dùng font Pacifico */
+            font-family: 'Pacifico', cursive;
             font-weight: normal;
         }
 
         /* Responsive cho điện thoại */
         @media (max-width: 480px) {
-            h1 { font-size: 2rem; }
-            h2 { font-size: 1.4rem; }
-            .container { padding: 25px 15px; }
+            h1 { font-size: 1.8rem; }
+            h2 { font-size: 1.2rem; }
+            .container { padding: 30px 15px; }
             .menu-item { font-size: 1rem; padding: 12px; }
         }
     </style>
@@ -171,9 +177,12 @@ h3 {
             const heart = document.createElement('div');
             heart.classList.add('bg-heart');
             heart.innerHTML = '❤';
+            // Random vị trí xuất phát
             heart.style.left = Math.random() * 100 + 'vw';
-            heart.style.animationDuration = Math.random() * 3 + 5 + 's'; 
+            heart.style.top = '100vh'; 
             heart.style.fontSize = Math.random() * 20 + 10 + 'px';
+            heart.style.animationDuration = Math.random() * 3 + 5 + 's'; 
+            
             document.body.appendChild(heart);
             
             setTimeout(() => {
@@ -184,41 +193,57 @@ h3 {
     </script>
 
     <div class="container">
-        <h1>Chào vợ yêu đến với trang web💑</h1>
- <h3>ÔN TẬP THI GPLX HẠNG A1 💑</h3>
-        <h2>Chúc bà xã mau thuộc bài và thi tốt 💖</h2>
+        <h1>Chào vợ yêu đến với trang web 💑</h1>
+        <h3>ÔN TẬP THI GPLX HẠNG A1</h3>
+        <h2>Chúc bà xã học mỗi ngày 25 câu cho nhẹ nhàng nhé 💖</h2>
 
         <div class="menu-list">
-		<a href="meo_thi_a1.html" class="menu-item special">
-                ⚠️ Mẹo thi nè vợ (Quan trọng nè vợ)
+            <a href="meo_thi.html" class="menu-item special check-link">
+                ⚠️ Mẹo thi (Đọc cái này trước nè vợ)
             </a>
 
-            <a href="liet.html" class="menu-item special">
-                ⚠️ Ôn tập 20 câu điểm liệt (Quan trọng nè vợ)
+            <a href="liet.html" class="menu-item special check-link">
+                ⚠️ 20 câu điểm liệt (Không được sai nha)
             </a>
 
-            <a href="40caudau.html" class="menu-item">
-                Ôn tập 40 câu đầu (1 - 40)
+            <a href="1-25.html" class="menu-item check-link">
+                Phần 1: Câu 1 - 25
             </a>
 
-            <a href="41-80.html" class="menu-item">
-                Ôn tập câu 41 - 80
+            <a href="26-50.html" class="menu-item check-link">
+                Phần 2: Câu 26 - 50
             </a>
 
-            <a href="81-120.html" class="menu-item">
-                Ôn tập câu 81 - 120
+            <a href="51-75.html" class="menu-item check-link">
+                Phần 3: Câu 51 - 75
             </a>
 
-            <a href="121-160.html" class="menu-item">
-                Ôn tập câu 121 - 160
+            <a href="76-100.html" class="menu-item check-link">
+                Phần 4: Câu 76 - 100
             </a>
 
-            <a href="161-200.html" class="menu-item">
-                Ôn tập câu 161 - 200
+            <a href="101-125.html" class="menu-item check-link">
+                Phần 5: Câu 101 - 125
             </a>
 
-            <a href="201-250.html" class="menu-item">
-                Ôn tập 50 câu cuối (201 - 250)
+            <a href="126-150.html" class="menu-item check-link">
+                Phần 6: Câu 126 - 150
+            </a>
+            
+            <a href="151-175.html" class="menu-item check-link">
+                Phần 7: Câu 151 - 175
+            </a>
+
+            <a href="176-200.html" class="menu-item check-link">
+                Phần 8: Câu 176 - 200
+            </a>
+
+            <a href="201-225.html" class="menu-item check-link">
+                Phần 9: Câu 201 - 225
+            </a>
+
+            <a href="226-250.html" class="menu-item check-link">
+                Phần 10: Câu 226 - 250 (Về đích)
             </a>
         </div>
 
@@ -226,6 +251,8 @@ h3 {
             Made with all my love for you ❤️ Đình Long
         </div>
     </div>
+
+    
 
 </body>
 </html>
