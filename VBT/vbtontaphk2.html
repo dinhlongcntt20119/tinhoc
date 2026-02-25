@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ôn tập Học kì II - Tin học 4</title>
+    <style>
+        /* --- CẤU TRÚC CHUNG --- */
+        body { font-family: "Segoe UI", Arial, sans-serif; background-color: #f4f6f9; margin: 0; padding: 20px; color: #333; }
+        .page { background-color: #fff; max-width: 950px; margin: 0 auto; padding: 40px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-radius: 12px; }
+        
+        h1 { font-size: 22pt; font-weight: bold; text-transform: uppercase; text-align: center; color: #2c3e50; margin: 10px 0; border-bottom: 2px solid #3498db; padding-bottom: 20px; }
+        
+        .question-block { margin-bottom: 30px; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; background-color: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: all 0.3s; }
+        .question-title { font-weight: bold; font-size: 13pt; margin-bottom: 15px; color: #2980b9; line-height: 1.5; }
+
+        /* --- BẢNG BIỂU --- */
+        table.custom-table { width: 100%; border-collapse: collapse; margin-top: 10px; table-layout: fixed; }
+        table.custom-table th, table.custom-table td { border: 1px solid #ccc; padding: 8px; vertical-align: middle; word-wrap: break-word; }
+        table.custom-table th { background-color: #f2f2f2; text-align: center; font-weight: bold; color: #444; font-size: 0.95em; }
+        
+        /* --- KÉO THẢ --- */
+        .drag-source-area { background-color: #f8f9fa; border: 2px dashed #bdc3c7; border-radius: 8px; padding: 10px; margin-bottom: 15px; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+        .word-tile { background-color: #3498db; color: white; padding: 6px 12px; border-radius: 4px; cursor: grab; font-weight: bold; font-size: 10pt; box-shadow: 0 2px 0 #21618c; user-select: none; z-index: 100; }
+        .drop-zone { background: #fafafa; border-radius: 4px; border: 1px dashed #ccc; display: flex; flex-wrap: wrap; align-items: flex-start; align-content: flex-start; gap: 5px; padding: 5px; transition: 0.2s; width: 100%; box-sizing: border-box; min-height: 40px; }
+        .drop-zone.drag-over { background-color: #eafaf1; border: 2px dashed #27ae60; }
+
+        /* --- INPUTS, SELECTS & IMAGES --- */
+        .text-input { padding: 5px; border: 1px solid #ccc; border-radius: 4px; width: 100%; box-sizing: border-box; }
+        textarea.text-input { font-family: inherit; resize: vertical; min-height: 60px; }
+        .radio-option { display: block; margin: 8px 0; cursor: pointer; padding: 8px; border-radius: 4px; border: 1px solid transparent; }
+        .radio-option:hover { background: #f0f8ff; border-color: #b3d7ff; }
+        .radio-inline { display: inline-block; margin-right: 20px; cursor: pointer; }
+        input[type="radio"], input[type="checkbox"] { transform: scale(1.3); margin-right: 10px; vertical-align: middle; }
+
+        .q10-options { display: flex; gap: 15px; align-items: stretch; justify-content: space-between; flex-wrap: wrap; margin-top: 10px;}
+        .q10-box { border: 2px solid #ddd; padding: 10px; text-align: center; border-radius: 8px; cursor: pointer; background: #fff; flex: 1; display: flex; flex-direction: column; align-items: center; min-width: 120px;}
+        .q10-box:hover { border-color: #3498db; background-color: #f9fbff; }
+        .q10-box img { max-height: 80px; width: auto; margin-top: 10px; object-fit: contain; }
+        
+        .inline-icon { height: 26px; vertical-align: middle; margin: 0 4px; border: 1px solid #ddd; border-radius: 3px;}
+        .mock-btn { display: inline-block; border: 1px solid #999; padding: 4px 10px; background: #f0f0f0; border-radius: 4px; font-weight: bold; margin: 0 2px; box-shadow: 0 1px 2px rgba(0,0,0,0.1);}
+
+        /* --- CÂU 4: TELEX (Gạch chân) --- */
+        .telex-word { cursor: pointer; padding: 3px 6px; border-radius: 4px; display: inline-block; transition: 0.2s; font-family: monospace; font-size: 1.1em;}
+        .telex-word:hover { background: #eee; }
+        .telex-word.selected { text-decoration: underline; text-decoration-color: #c0392b; text-decoration-thickness: 3px; background: #ffe6e6; }
+        .telex-word.correct-ans { border: 2px solid #27ae60; background: #eafaf1 !important; text-decoration: none;}
+        .telex-word.wrong-ans { border: 2px solid #c0392b; background: #fdedec !important;}
+
+        /* --- KẾT QUẢ & CẢNH BÁO --- */
+        .correct { border: 2px solid #27ae60 !important; background-color: #eafaf1 !important; }
+        .wrong { border: 2px solid #c0392b !important; background-color: #fdedec !important; }
+        
+        .show-answer-box { margin-top: 8px; padding: 10px; background: #fff5f5; border: 1px solid #c0392b; color: #c0392b; font-weight: bold; border-radius: 4px; display: none; font-size: 0.95rem; }
+        .missing-alert { border: 2px solid #e74c3c !important; box-shadow: 0 0 8px rgba(231, 76, 60, 0.4); }
+
+        /* --- BUTTONS --- */
+        .controls { text-align: center; margin-top: 30px; padding: 20px; border-top: 2px solid #eee; position: sticky; bottom: 0; background: white; z-index: 1000; }
+        .btn { padding: 12px 30px; border: none; border-radius: 30px; cursor: pointer; font-weight: bold; font-size: 13pt; margin: 0 10px; color: white; transition: 0.2s; box-shadow: 0 3px 6px rgba(0,0,0,0.1); }
+        .btn-check { background-color: #27ae60; }
+        .btn-retry { background-color: #e67e22; }
+
+    </style>
+</head>
+<body>
+
+<div class="page">
+    <h1>ÔN TẬP HỌC KÌ II - TIN HỌC 4</h1>
+
+    <div class="question-block" id="q1">
+        <div class="question-title">1. Khoanh tròn vào đáp án đúng. Để kích hoạt phần mềm soạn thảo văn bản Word, em nháy đúp chuột vào biểu tượng nào trên màn hình nền?</div>
+        <div class="q10-options">
+            <label class="q10-box">
+                <div><input type="radio" name="q1" value="A"> <b>A.</b></div>
+                <img src="chrome.png" alt="Chrome">
+            </label>
+            <label class="q10-box">
+                <div><input type="radio" name="q1" value="B"> <b>B.</b></div>
+                <img src="powerpoint.png" alt="PowerPoint">
+            </label>
+            <label class="q10-box">
+                <div><input type="radio" name="q1" value="C"> <b>C.</b></div>
+                <img src="word.png" alt="Word">
+            </label>
+            <label class="q10-box">
+                <div><input type="radio" name="q1" value="D"> <b>D.</b></div>
+                <img src="rapit.png" alt="RapidTyping">
+            </label>
+        </div>
+        <div class="show-answer-box">Đáp án đúng: C (Biểu tượng Word)</div>
+    </div>
+
+    <div class="question-block" id="q2">
+        <div class="question-title">2. Kéo thả các tên gọi ở trên vào đúng với các vị trí đánh số tương ứng của cửa sổ phần mềm Word ở bảng bên dưới.</div>
+        <div style="text-align: center; margin-bottom: 15px;">
+            <img src="trang65c1.png" alt="Cửa sổ làm việc của Word" style="max-width: 100%; border: 1px solid #ccc; border-radius: 5px;">
+        </div>
+        <div class="drag-source-area" id="src_q2" ondrop="drop(event)" ondragover="allowDrop(event)">
+            <div class="word-tile" draggable="true" ondragstart="drag(event)" id="w_dailenh" data-val="1">Dải lệnh</div>
+            <div class="word-tile" draggable="true" ondragstart="drag(event)" id="w_contro" data-val="2">Con trỏ soạn thảo</div>
+            <div class="word-tile" draggable="true" ondragstart="drag(event)" id="w_vung" data-val="3">Vùng soạn thảo</div>
+            <div class="word-tile" draggable="true" ondragstart="drag(event)" id="w_thuoc" data-val="4">Thước kẻ</div>
+        </div>
+        <table class="custom-table" style="width: 70%; margin: 0 auto;">
+            <tr><th width="30%">Vị trí trên hình</th><th>Thành phần (Kéo vào đây)</th></tr>
+            <tr><td align="center"><b>Vị trí 1</b></td><td><div class="drop-zone" data-expect="1" ondrop="drop(event)" ondragover="allowDrop(event)"></div></td></tr>
+            <tr><td align="center"><b>Vị trí 2</b></td><td><div class="drop-zone" data-expect="2" ondrop="drop(event)" ondragover="allowDrop(event)"></div></td></tr>
+            <tr><td align="center"><b>Vị trí 3</b></td><td><div class="drop-zone" data-expect="3" ondrop="drop(event)" ondragover="allowDrop(event)"></div></td></tr>
+            <tr><td align="center"><b>Vị trí 4</b></td><td><div class="drop-zone" data-expect="4" ondrop="drop(event)" ondragover="allowDrop(event)"></div></td></tr>
+        </table>
+        <div class="show-answer-box">Đáp án đúng từ trên xuống dưới: 1. Dải lệnh -> 2. Con trỏ soạn thảo -> 3. Vùng soạn thảo -> 4. Thước kẻ</div>
+    </div>
+
+    <div class="question-block" id="q3">
+        <div class="question-title">3. Đánh dấu X vào ô trống để chỉ ra các phương án đúng. Khi trên máy tính có các biểu tượng <img src="trang66c3.png" alt="Biểu tượng Unikey" class="inline-icon" style="height: 30px;"> ta có thể khẳng định:</div>
+        <table class="custom-table">
+            <tr><th style="text-align: left;">Khẳng định</th><th width="80">Đánh dấu</th></tr>
+            <tr><td>A. Máy tính có phần mềm gõ tiếng Việt Unikey.</td><td align="center"><input type="checkbox" class="q3-check" value="A"></td></tr>
+            <tr><td>B. Phần mềm Unikey chưa được kích hoạt.</td><td align="center"><input type="checkbox" class="q3-check" value="B"></td></tr>
+            <tr><td>C. Phần mềm Unikey đang ở chế độ gõ tiếng Việt.</td><td align="center"><input type="checkbox" class="q3-check" value="C"></td></tr>
+            <tr><td>D. Phần mềm Unikey đang ở chế độ gõ tiếng Anh.</td><td align="center"><input type="checkbox" class="q3-check" value="D"></td></tr>
+        </table>
+        <div class="show-answer-box">Đáp án đúng: A và C</div>
+    </div>
+
+    <div class="question-block" id="q4">
+        <div class="question-title">4. Một bạn sử dụng phần mềm Word và kiểu gõ Telex để gõ văn bản tiếng Việt. Em hãy gạch chân <i style="color: #c0392b;">(nhấp chuột vào)</i> các phím mà bạn đã gõ <b>sai quy tắc</b> trong Bảng 1.</div>
+        <table class="custom-table">
+            <tr><th width="35%">Văn bản tiếng Việt</th><th>Các phím đã gõ (Nhấp vào từ gõ sai)</th></tr>
+            <tr>
+                <td>Yêu tổ quốc, yêu đồng bào</td>
+                <td>
+                    <span class="telex-word" onclick="toggleUnderline(this)">Yeeu</span> 
+                    <span class="telex-word" onclick="toggleUnderline(this)">toor</span> 
+                    <span class="telex-word" onclick="toggleUnderline(this)" data-ans="wrong">quosoc,</span> 
+                    <span class="telex-word" onclick="toggleUnderline(this)">yeeu</span> 
+                    <span class="telex-word" onclick="toggleUnderline(this)" data-ans="wrong">ddoonfg</span> 
+                    <span class="telex-word" onclick="toggleUnderline(this)">baof</span>
+                </td>
+            </tr>
+            <tr>
+                <td>Học tập tốt lao động tốt</td>
+                <td>
+                    <span class="telex-word" onclick="toggleUnderline(this)">Hocs</span> 
+                    <span class="telex-word" onclick="toggleUnderline(this)" data-ans="wrong">taapx</span> 
+                    <span class="telex-word" onclick="toggleUnderline(this)">toots,</span> 
+                    <span class="telex-word" onclick="toggleUnderline(this)">lao</span> 
+                    <span class="telex-word" onclick="toggleUnderline(this)">ddoongj</span> 
+                    <span class="telex-word" onclick="toggleUnderline(this)">toots</span>
+                </td>
+            </tr>
+            <tr>
+                <td>Đoàn kết tốt, kỉ luật tốt</td>
+                <td>
+                    <span class="telex-word" onclick="toggleUnderline(this)">Ddoanf</span> 
+                    <span class="telex-word" onclick="toggleUnderline(this)" data-ans="wrong">keetf</span> 
+                    <span class="telex-word" onclick="toggleUnderline(this)">toots,</span> 
+                    <span class="telex-word" onclick="toggleUnderline(this)">kir</span> 
+                    <span class="telex-word" onclick="toggleUnderline(this)">luaats</span> 
+                    <span class="telex-word" onclick="toggleUnderline(this)">toots</span>
+                </td>
+            </tr>
+        </table>
+        <div class="show-answer-box">Đáp án: Các từ gõ sai là: <br> - <b>quosoc</b> (đúng: quoocs) <br> - <b>ddoonfg</b> (đúng: ddoongf) <br> - <b>taapx</b> (đúng: taapj) <br> - <b>keetf</b> (đúng: keets)</div>
+    </div>
+
+    <div class="question-block" id="q5">
+        <div class="question-title">5. Sắp xếp các thao tác dưới đây theo thứ tự thực hiện lưu tệp văn bản.</div>
+        <p style="line-height: 1.8;">
+            A. Mở thư mục sẽ chứa tệp văn bản.<br>
+            B. Nháy chuột vào nút lệnh <b>Save</b> <img src="trang66c5b.png" alt="Save Icon" class="inline-icon">.<br>
+            C. Nháy chuột vào nút lệnh <b>Browse</b> <img src="trang66c5c.png" alt="Browse Icon" class="inline-icon">.<br>
+            D. Gõ tên tệp.<br>
+            E. Nháy chuột vào nút lệnh <b>Save</b> <span style="font-size: 1.2em; vertical-align: middle; margin-left: 5px;">💾</span> (hoặc gõ tổ hợp phím Ctrl + S).
+        </p>
+        <p style="font-weight: bold; font-size: 1.1em; margin-top: 15px;">
+            Thứ tự đúng: 
+            <input type="text" class="text-input" style="width: 50px; text-align:center; display: inline-block;" data-ans="B"> ➔ 
+            <input type="text" class="text-input" style="width: 50px; text-align:center; display: inline-block;" data-ans="C"> ➔ 
+            <input type="text" class="text-input" style="width: 50px; text-align:center; display: inline-block;" data-ans="A"> ➔ 
+            <input type="text" class="text-input" style="width: 50px; text-align:center; display: inline-block;" data-ans="D"> ➔ 
+            <input type="text" class="text-input" style="width: 50px; text-align:center; display: inline-block;" data-ans="E">
+        </p>
+        <div class="show-answer-box">Thứ tự đúng: B -> C -> A -> D -> E</div>
+    </div>
+
+    <div class="question-block" id="q6">
+        <div class="question-title">6. Sắp xếp các việc dưới đây theo thứ tự thực hiện chèn hình ảnh vào văn bản.</div>
+        <p style="line-height: 1.8;">
+            A. Chọn thẻ <b>Insert</b> > Pictures <img src="trang66c6a.png" alt="Pictures Icon" class="inline-icon" style="height: 35px;">.<br>
+            B. Đặt con trỏ soạn thảo vào vị trí cần chèn hình ảnh.<br>
+            C. Trong cửa sổ <b>Insert Picture</b> thực hiện: mở thư mục chứa tệp ảnh; chọn tệp ảnh; chọn nút lệnh Insert <img src="trang66c6c.png" alt="Insert Button" class="inline-icon">.
+        </p>
+        <p style="font-weight: bold; font-size: 1.1em; margin-top: 15px;">
+            Thứ tự đúng: 
+            <input type="text" class="text-input" style="width: 50px; text-align:center; display: inline-block;" data-ans="B"> ➔ 
+            <input type="text" class="text-input" style="width: 50px; text-align:center; display: inline-block;" data-ans="A"> ➔ 
+            <input type="text" class="text-input" style="width: 50px; text-align:center; display: inline-block;" data-ans="C">
+        </p>
+        <div class="show-answer-box">Thứ tự đúng: B -> A -> C</div>
+    </div>
+
+    <div class="question-block" id="q7">
+        <div class="question-title">7. Sắp xếp các thao tác dưới đây theo thứ tự thực hiện thay đổi cách bố trí hình ảnh trong trang văn bản.</div>
+        <p style="line-height: 1.8;">
+            A. Nháy chuột vào nút lệnh <b>Layout Options</b> <img src="trang67c7a.png" alt="Layout Options Icon" class="inline-icon">.<br>
+            B. Chọn hình ảnh.<br>
+            C. Chọn kiểu bố trí.
+        </p>
+        <p style="font-weight: bold; font-size: 1.1em; margin-top: 15px;">
+            Thứ tự đúng: 
+            <input type="text" class="text-input" style="width: 50px; text-align:center; display: inline-block;" data-ans="B"> ➔ 
+            <input type="text" class="text-input" style="width: 50px; text-align:center; display: inline-block;" data-ans="A"> ➔ 
+            <input type="text" class="text-input" style="width: 50px; text-align:center; display: inline-block;" data-ans="C">
+        </p>
+        <div class="show-answer-box">Thứ tự đúng: B -> A -> C</div>
+    </div>
+
+    <div class="question-block" id="q8">
+        <div class="question-title">8. Khi so sánh sự giống và khác nhau giữa hai thao tác <b>Sao chép</b> và <b>Di chuyển</b> một phần (khối) văn bản, có ý kiến cho rằng:</div>
+        <div style="background-color: #fdfdfd; padding: 15px; border: 1px solid #ddd; border-radius: 5px; margin-bottom: 15px; line-height: 1.8;">
+            <b>Giống nhau:</b><br>
+            - Cùng có 4 bước thực hiện.<br>
+            - Các Bước 1, 3, 4 thao tác giống nhau.<br><br>
+            <b>Khác nhau:</b><br>
+            - Ở Bước 2:<br>
+            &nbsp;&nbsp;&nbsp;+ Sao chép: chọn nút lệnh <span style="font-size: 1.2em; vertical-align: middle;">📄</span> Copy (Ctrl + C).<br>
+            &nbsp;&nbsp;&nbsp;+ Di chuyển: chọn nút lệnh <span style="font-size: 1.2em; vertical-align: middle;">✂️</span> Cut (Ctrl + X).
+        </div>
+        
+        <p><b>Em có đồng ý với ý kiến trên hay không? Tại sao?</b></p>
+        <div style="margin-bottom: 10px;">
+            <label class="radio-inline"><input type="radio" name="q8_agree" value="yes"> Đồng ý</label>
+            <label class="radio-inline"><input type="radio" name="q8_agree" value="no"> Không đồng ý</label>
+        </div>
+        <textarea class="text-input" placeholder="Viết giải thích của em vào đây..."></textarea>
+        
+        <div class="show-answer-box">
+            <b>Gợi ý đáp án:</b> Đồng ý. <br>
+            Giải thích: Vì cả hai thao tác đều trải qua 4 bước (B1: Chọn phần văn bản, B3: Đưa con trỏ đến vị trí mới, B4: Dán/Paste). Chúng chỉ khác nhau ở Bước 2 là ra lệnh Copy hay Cut.
+        </div>
+    </div>
+
+    <div class="question-block" id="q9">
+        <div class="question-title">9. Nối mỗi dãy thao tác ở cột bên trái với tác dụng tương ứng ở cột bên phải.</div>
+        <div class="drag-source-area" id="src_q9" ondrop="drop(event)" ondragover="allowDrop(event)">
+            <div class="word-tile" draggable="true" ondragstart="drag(event)" id="t_q9_a" data-val="a">a) Nhập văn bản vào khung văn bản.</div>
+            <div class="word-tile" draggable="true" ondragstart="drag(event)" id="t_q9_b" data-val="b">b) Thêm trang nội dung.</div>
+            <div class="word-tile" draggable="true" ondragstart="drag(event)" id="t_q9_c" data-val="c">c) Tạo bài trình chiếu với trang đầu tiên là trang tiêu đề.</div>
+        </div>
+        <table class="custom-table">
+            <tr><th width="50%">Dãy thao tác</th><th>Tác dụng (Kéo vào đây)</th></tr>
+            <tr>
+                <td style="line-height: 1.6;">1. Khởi động PowerPoint rồi chọn Blank Presentation.</td>
+                <td><div class="drop-zone" data-expect="c" ondrop="drop(event)" ondragover="allowDrop(event)"></div></td>
+            </tr>
+            <tr>
+                <td style="line-height: 1.6;">2. Chọn Home > New Slide.</td>
+                <td><div class="drop-zone" data-expect="b" ondrop="drop(event)" ondragover="allowDrop(event)"></div></td>
+            </tr>
+            <tr>
+                <td style="line-height: 1.6;">3. Nháy chuột vào trong khung văn bản rồi gõ nội dung văn bản.</td>
+                <td><div class="drop-zone" data-expect="a" ondrop="drop(event)" ondragover="allowDrop(event)"></div></td>
+            </tr>
+        </table>
+        <div class="show-answer-box">Đáp án: 1 nối với (c), 2 nối với (b), 3 nối với (a)</div>
+    </div>
+
+    <div class="question-block" id="q10">
+        <div class="question-title">10. Nối mỗi dãy thao tác ở cột bên trái với một kết quả tương ứng ở cột bên phải.</div>
+        <div class="drag-source-area" id="src_q10" ondrop="drop(event)" ondragover="allowDrop(event)">
+            <div class="word-tile" draggable="true" ondragstart="drag(event)" id="t_q10_a" data-val="a">a) Thay đổi vị trí khung văn bản</div>
+            <div class="word-tile" draggable="true" ondragstart="drag(event)" id="t_q10_b" data-val="b">b) Thay đổi kích thước khung văn bản</div>
+        </div>
+        <table class="custom-table">
+            <tr><th width="50%">Dãy thao tác</th><th>Kết quả (Kéo vào đây)</th></tr>
+            <tr>
+                <td style="line-height: 1.6;">1. ❶ Chọn khung văn bản. <br> ❷ Di chuyển con trỏ chuột vào nút tròn trên khung văn bản sao cho con trỏ chuột có dạng mũi tên hai chiều. <br> ❸ Kéo thả chuột.</td>
+                <td><div class="drop-zone" data-expect="b" ondrop="drop(event)" ondragover="allowDrop(event)"></div></td>
+            </tr>
+            <tr>
+                <td style="line-height: 1.6;">2. ❶ Di chuyển con trỏ chuột vào khung văn bản sao cho con trỏ chuột có dạng mũi tên bốn chiều. <br> ❷ Kéo thả chuột.</td>
+                <td><div class="drop-zone" data-expect="a" ondrop="drop(event)" ondragover="allowDrop(event)"></div></td>
+            </tr>
+        </table>
+        <div class="show-answer-box">Đáp án: Thao tác 1 nối với (b), Thao tác 2 nối với (a)</div>
+    </div>
+
+    <div class="question-block" id="q11">
+        <div class="question-title">11. Sắp xếp các thao tác dưới đây theo thứ tự thực hiện thay đổi dấu đầu dòng.</div>
+        <p style="line-height: 1.8;">
+            A. Chọn thẻ <b>Home</b>.<br>
+            B. Chọn phần văn bản.<br>
+            C. Chọn một mẫu dấu đầu dòng trong danh sách mở ra.<br>
+            D. Mở danh sách dấu đầu dòng.
+        </p>
+        <p style="font-weight: bold; font-size: 1.1em; margin-top: 15px;">
+            Thứ tự đúng: 
+            <input type="text" class="text-input" style="width: 50px; text-align:center; display: inline-block;" data-ans="B"> ➔ 
+            <input type="text" class="text-input" style="width: 50px; text-align:center; display: inline-block;" data-ans="A"> ➔ 
+            <input type="text" class="text-input" style="width: 50px; text-align:center; display: inline-block;" data-ans="D"> ➔ 
+            <input type="text" class="text-input" style="width: 50px; text-align:center; display: inline-block;" data-ans="C">
+        </p>
+        <div class="show-answer-box">Thứ tự đúng: B -> A -> D -> C</div>
+    </div>
+
+    <div class="question-block" id="q12">
+        <div class="question-title">12. Phát biểu sau đúng hay sai?</div>
+        <div style="background-color: #fdfdfd; padding: 15px; border: 1px solid #ddd; border-radius: 5px; margin-bottom: 15px; line-height: 1.8;">
+            Các bước định dạng văn bản trên trang chiếu:<br>
+            ❶ Chọn phần văn bản cần định dạng.<br>
+            ❷ Trong dải lệnh <b>Home</b>:<br>
+            &nbsp;&nbsp;&nbsp;- Sử dụng các nút lệnh: <b>B</b>, <i>I</i>, <u>U</u> để thay đổi kiểu chữ.<br>
+            &nbsp;&nbsp;&nbsp;- Sử dụng nút lệnh Font Color <span class="mock-btn" style="padding: 0 4px; background: #eee;">A ▼</span> để thay đổi màu chữ.<br>
+            &nbsp;&nbsp;&nbsp;- Sử dụng nút lệnh Font Size <span class="mock-btn" style="padding: 0 4px; background: #eee;">24 ▼</span> để thay đổi cỡ chữ.
+        </div>
+        <table class="custom-table" style="width: 50%;">
+            <tr><th style="text-align: left;">Trả lời:</th><th width="80">Đúng</th><th width="80">Sai</th></tr>
+            <tr>
+                <td>Đánh dấu vào ô tương ứng:</td>
+                <td align="center"><input type="radio" name="q12" value="Đúng"></td>
+                <td align="center"><input type="radio" name="q12" value="Sai"></td>
+            </tr>
+        </table>
+        <div class="show-answer-box">Đáp án: Đúng</div>
+    </div>
+
+    <div class="question-block" id="q13">
+        <div class="question-title">13. Sắp xếp các thao tác dưới đây theo thứ tự thực hiện tạo hiệu ứng chuyển trang cho trang chiếu.</div>
+        <p style="line-height: 1.8;">
+            A. Chọn thẻ <b>Transitions</b>.<br>
+            B. Chọn một kiểu hiệu ứng chuyển trang áp dụng cho trang chiếu.<br>
+            C. Chọn trang chiếu.
+        </p>
+        <p style="font-weight: bold; font-size: 1.1em; margin-top: 15px;">
+            Thứ tự đúng: 
+            <input type="text" class="text-input" style="width: 50px; text-align:center; display: inline-block;" data-ans="C"> ➔ 
+            <input type="text" class="text-input" style="width: 50px; text-align:center; display: inline-block;" data-ans="A"> ➔ 
+            <input type="text" class="text-input" style="width: 50px; text-align:center; display: inline-block;" data-ans="B">
+        </p>
+        <div class="show-answer-box">Thứ tự đúng: C -> A -> B</div>
+    </div>
+
+    <div class="question-block" id="q14">
+        <div class="question-title">14. Nối nút lệnh ở cột bên trái với chức năng tương ứng ở cột bên phải.</div>
+        <div class="drag-source-area" id="src_q14" ondrop="drop(event)" ondragover="allowDrop(event)">
+            <div class="word-tile" draggable="true" ondragstart="drag(event)" id="t_q14_a" data-val="a" style="max-width: 45%;">a) Huỷ hiệu ứng chuyển trang đã áp dụng cho trang chiếu hiện thời.</div>
+            <div class="word-tile" draggable="true" ondragstart="drag(event)" id="t_q14_b" data-val="b" style="max-width: 45%;">b) Áp dụng hiệu ứng chuyển trang đã chọn cho tất cả các trang chiếu.</div>
+        </div>
+        <table class="custom-table">
+            <tr><th width="30%">Nút lệnh</th><th>Chức năng (Kéo vào đây)</th></tr>
+            <tr>
+                <td align="center"><span class="mock-btn">Apply To All</span></td>
+                <td><div class="drop-zone" data-expect="b" ondrop="drop(event)" ondragover="allowDrop(event)"></div></td>
+            </tr>
+            <tr>
+                <td align="center"><span class="mock-btn">None</span></td>
+                <td><div class="drop-zone" data-expect="a" ondrop="drop(event)" ondragover="allowDrop(event)"></div></td>
+            </tr>
+        </table>
+        <div class="show-answer-box">Đáp án: Apply To All nối với (b), None nối với (a)</div>
+    </div>
+
+    <div class="question-block" id="q15">
+        <div class="question-title">15. Điền cụm từ thích hợp vào chỗ chấm để chú thích cho cửa sổ làm việc của Scratch.</div>
+        <div style="text-align: center; margin-bottom: 15px;">
+            <img src="trang69c15.png" alt="Cửa sổ làm việc của Scratch" style="max-width: 100%; border: 1px solid #ccc; border-radius: 5px;">
+        </div>
+        <table class="custom-table" style="border: none; margin-top: 20px;">
+            <tr style="border: none;">
+                <td style="border: none;">1) <input type="text" class="text-input" data-ans="Các thẻ"></td>
+                <td style="border: none;">4) <input type="text" class="text-input" data-ans="Nút chạy/dừng"></td>
+                <td style="border: none;">7) <input type="text" class="text-input" data-ans="Khu vực kịch bản"></td>
+            </tr>
+            <tr style="border: none;">
+                <td style="border: none;">2) <input type="text" class="text-input" data-ans="Các nhóm lệnh"></td>
+                <td style="border: none;">5) <input type="text" class="text-input" data-ans="Sân khấu"></td>
+                <td style="border: none;">8) <input type="text" class="text-input" data-ans="Quản lý nhân vật"></td>
+            </tr>
+            <tr style="border: none;">
+                <td style="border: none;">3) <input type="text" class="text-input" data-ans="Khu vực lệnh"></td>
+                <td style="border: none;">6) <input type="text" class="text-input" data-ans="Nhân vật"></td>
+                <td style="border: none;">9) <input type="text" class="text-input" data-ans="Phông nền"></td>
+            </tr>
+        </table>
+        <div class="show-answer-box">
+            <b>Gợi ý đáp án đúng:</b><br>
+            1) Các thẻ lệnh &nbsp;&nbsp;|&nbsp;&nbsp; 2) Các nhóm lệnh &nbsp;&nbsp;|&nbsp;&nbsp; 3) Khu vực các khối lệnh<br>
+            4) Nút Cờ xanh, Nút đỏ (Chạy/Dừng) &nbsp;&nbsp;|&nbsp;&nbsp; 5) Sân khấu &nbsp;&nbsp;|&nbsp;&nbsp; 6) Nhân vật<br>
+            7) Khu vực lập trình (Vùng kịch bản) &nbsp;&nbsp;|&nbsp;&nbsp; 8) Khu vực quản lý nhân vật &nbsp;&nbsp;|&nbsp;&nbsp; 9) Khu vực phông nền
+        </div>
+    </div>
+
+    <div class="controls">
+        <button class="btn btn-check" onclick="checkAll()">Nộp bài & Kiểm tra</button>
+        <button class="btn btn-retry" onclick="location.reload()">Làm lại</button>
+    </div>
+</div>
+
+<script>
+    /* --- LOGIC CLICK ĐỂ GẠCH CHÂN (CÂU 4) --- */
+    function toggleUnderline(el) {
+        el.classList.toggle('selected');
+        el.closest('.question-block').classList.remove('missing-alert');
+    }
+
+    /* --- LOGIC KÉO THẢ --- */
+    function allowDrop(ev) { ev.preventDefault(); ev.target.closest('.drop-zone, .drag-source-area').classList.add('drag-over'); }
+    
+    document.addEventListener("dragleave", function(event) { 
+        if (event.target.closest('.drop-zone, .drag-source-area')) {
+            event.target.closest('.drop-zone, .drag-source-area').classList.remove("drag-over");
+        }
+    });
+
+    function drag(ev) { ev.dataTransfer.setData("text", ev.target.id); }
+    
+    function drop(ev) {
+        ev.preventDefault();
+        let target = ev.target.closest('.drop-zone, .drag-source-area');
+        if (target) {
+            target.classList.remove("drag-over");
+            var data = ev.dataTransfer.getData("text");
+            var draggedEl = document.getElementById(data);
+            if (draggedEl) target.appendChild(draggedEl);
+        }
+    }
+
+    /* --- LOGIC VALIDATE (KIỂM TRA HOÀN THÀNH) --- */
+    function validateCompletion() {
+        let unanswerred = [];
+
+        // 1. Drop Zones
+        document.querySelectorAll('.drop-zone').forEach(zone => {
+           if (!zone.querySelector('.word-tile')) {
+               zone.classList.add('missing-alert');
+               unanswerred.push(zone);
+           } else {
+               zone.classList.remove('missing-alert');
+           }
+        });
+
+        // 2. Text inputs & Textarea
+        document.querySelectorAll('.text-input').forEach(inp => {
+            if (inp.value.trim() === "") {
+                inp.classList.add('missing-alert');
+                unanswerred.push(inp);
+            } else {
+                inp.classList.remove('missing-alert');
+            }
+        });
+
+        // 3. Radio groups
+        const groups = ['q1', 'q8_agree', 'q12'];
+        groups.forEach(name => {
+            let options = document.getElementsByName(name);
+            let checked = false;
+            for(let i=0; i<options.length; i++) if(options[i].checked) checked = true;
+            
+            let container = options[0].closest('.q10-options') || options[0].closest('div');
+            if(!container.classList.contains('q10-options')) {
+                container = options[0].closest('.question-block');
+            }
+
+            if (!checked && container) {
+                container.classList.add('missing-alert');
+                unanswerred.push(container);
+            } else if (container) {
+                container.classList.remove('missing-alert');
+            }
+        });
+
+        // 4. Checkbox
+        let q3Checked = false;
+        document.querySelectorAll('.q3-check').forEach(chk => { if(chk.checked) q3Checked = true; });
+        if(!q3Checked) {
+            document.querySelector('#q3 .custom-table').classList.add('missing-alert');
+            unanswerred.push(document.querySelector('#q3'));
+        } else {
+            document.querySelector('#q3 .custom-table').classList.remove('missing-alert');
+        }
+
+        // 5. Gạch chân
+        let q4Selected = false;
+        document.querySelectorAll('.telex-word').forEach(sp => { if(sp.classList.contains('selected')) q4Selected = true; });
+        if(!q4Selected) {
+            document.querySelector('#q4 .custom-table').classList.add('missing-alert');
+            unanswerred.push(document.querySelector('#q4'));
+        } else {
+            document.querySelector('#q4 .custom-table').classList.remove('missing-alert');
+        }
+
+        return unanswerred.length === 0;
+    }
+
+    /* --- LOGIC CHẤM ĐIỂM --- */
+    function checkAll() {
+        if (!validateCompletion()) {
+            alert("Bạn chưa hoàn thành tất cả các câu hỏi! Vui lòng kiểm tra các ô được viền đỏ.");
+            return;
+        }
+
+        // Reset hiển thị đáp án cũ
+        document.querySelectorAll('.show-answer-box').forEach(el => el.style.display = 'none');
+
+        // 1. Chấm Radio
+        checkRadioGroup('q1', 'C');
+        checkRadioGroup('q12', 'Đúng');
+        
+        // Hiện đáp án cho câu tự luận 8
+        let q8Agree = document.querySelector('input[name="q8_agree"]:checked');
+        if(q8Agree && q8Agree.value === 'yes') {
+             q8Agree.parentElement.style.color = '#27ae60';
+             q8Agree.parentElement.style.fontWeight = 'bold';
+        } else if (q8Agree) {
+             q8Agree.parentElement.style.color = '#c0392b';
+        }
+        document.querySelector('#q8 .show-answer-box').style.display = 'block';
+
+        // 2. Chấm Kéo thả
+        document.querySelectorAll('.drop-zone').forEach(zone => {
+            let expected = zone.getAttribute('data-expect');
+            let isCorrect = true;
+            let hasItems = false;
+            
+            let children = Array.from(zone.children);
+            children.forEach(child => {
+                if(child.draggable) { 
+                    hasItems = true;
+                    if (child.getAttribute('data-val') !== expected) isCorrect = false;
+                }
+            });
+
+            if (hasItems && isCorrect) {
+                zone.classList.add('correct');
+                zone.classList.remove('wrong');
+            } else {
+                zone.classList.add('wrong');
+                zone.classList.remove('correct');
+                let parentBlock = zone.closest('.question-block');
+                if(parentBlock.querySelector('.show-answer-box')) parentBlock.querySelector('.show-answer-box').style.display = 'block';
+            }
+        });
+
+        // 3. Chấm Checkbox (Câu 3)
+        let q3CorrectAns = ['A', 'C'];
+        let q3Wrong = false;
+        document.querySelectorAll('.q3-check').forEach(chk => {
+            if(chk.checked) {
+                if(q3CorrectAns.includes(chk.value)) {
+                    chk.parentElement.classList.add('correct');
+                } else {
+                    chk.parentElement.classList.add('wrong');
+                    q3Wrong = true;
+                }
+            } else {
+                if(q3CorrectAns.includes(chk.value)) q3Wrong = true; // Bỏ sót đáp án đúng
+            }
+        });
+        if(q3Wrong) document.querySelector('#q3 .show-answer-box').style.display = 'block';
+
+        // 4. Chấm Gạch chân (Câu 4)
+        let q4Correct = true;
+        document.querySelectorAll('.telex-word').forEach(span => {
+            let isWrongAns = span.getAttribute('data-ans') === 'wrong';
+            let isSelected = span.classList.contains('selected');
+            
+            if (isSelected && isWrongAns) {
+                span.classList.add('correct-ans'); 
+            } else if (isSelected && !isWrongAns) {
+                span.classList.add('wrong-ans'); 
+                q4Correct = false;
+            } else if (!isSelected && isWrongAns) {
+                span.classList.add('wrong-ans'); 
+                q4Correct = false;
+            }
+        });
+        if (!q4Correct) document.querySelector('#q4 .show-answer-box').style.display = 'block';
+
+        // 5. Chấm Input Text (Các câu 5,6,7,11,13,15)
+        document.querySelectorAll('input.text-input').forEach(input => {
+            // Đối với Câu 15 (câu trả lời dài/tương đối), hiển thị đáp án gợi ý là chính
+            if(input.closest('#q15')) {
+                input.classList.add('correct'); // Mặc định chuyển xanh cho học sinh đối chiếu
+                document.querySelector('#q15 .show-answer-box').style.display = 'block';
+            } else if (input.getAttribute('data-ans')) {
+                let userVal = input.value.trim().toUpperCase(); 
+                let correctVal = input.getAttribute('data-ans').toUpperCase();
+                
+                if (userVal === correctVal) {
+                    input.classList.add('correct');
+                    input.classList.remove('wrong');
+                } else {
+                    input.classList.add('wrong');
+                    input.classList.remove('correct');
+                    let parentBlock = input.closest('.question-block');
+                    if(parentBlock.querySelector('.show-answer-box')) parentBlock.querySelector('.show-answer-box').style.display = 'block';
+                }
+            }
+        });
+
+        alert("Đã kiểm tra bài làm. Các phần sai sẽ được khoanh đỏ và hiển thị đáp án bên dưới.");
+    }
+
+    function checkRadioGroup(name, correctVal) {
+        let options = document.getElementsByName(name);
+        let anyCorrect = false;
+        for(let i=0; i<options.length; i++) {
+            if(options[i].checked) {
+                if(options[i].value === correctVal) {
+                    if(options[i].closest('.q10-box')){
+                        options[i].closest('.q10-box').style.borderColor = '#27ae60';
+                        options[i].closest('.q10-box').style.backgroundColor = '#eafaf1';
+                    } else {
+                         options[i].parentElement.classList.add('correct');
+                    }
+                    anyCorrect = true;
+                } else {
+                     if(options[i].closest('.q10-box')){
+                        options[i].closest('.q10-box').style.borderColor = '#c0392b';
+                        options[i].closest('.q10-box').style.backgroundColor = '#fdedec';
+                     } else {
+                         options[i].parentElement.classList.add('wrong');
+                     }
+                }
+            } else {
+                 if(options[i].closest('.q10-box')){
+                     options[i].closest('.q10-box').style.borderColor = '#ddd';
+                     options[i].closest('.q10-box').style.backgroundColor = '#fff';
+                 } else {
+                     options[i].parentElement.classList.remove('correct', 'wrong');
+                 }
+            }
+        }
+        if(!anyCorrect) {
+            let el = document.querySelector(`input[name="${name}"]`).closest('.question-block');
+            if(el.querySelector('.show-answer-box')) el.querySelector('.show-answer-box').style.display = 'block';
+        }
+    }
+</script>
+
+</body>
+</html>
