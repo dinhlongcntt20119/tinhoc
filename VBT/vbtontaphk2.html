@@ -19,15 +19,31 @@
         table.custom-table th, table.custom-table td { border: 1px solid #ccc; padding: 8px; vertical-align: middle; word-wrap: break-word; }
         table.custom-table th { background-color: #f2f2f2; text-align: center; font-weight: bold; color: #444; font-size: 0.95em; }
         
-        /* --- KÉO THẢ --- */
-        .drag-source-area { background-color: #f8f9fa; border: 2px dashed #bdc3c7; border-radius: 8px; padding: 10px; margin-bottom: 15px; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+        /* --- KÉO THẢ (STICKY) --- */
+        .drag-source-area { 
+            background-color: #f8f9fa; 
+            border: 2px dashed #3498db;
+            border-radius: 8px; 
+            padding: 10px; 
+            margin-bottom: 15px; 
+            display: flex; 
+            flex-wrap: wrap; 
+            justify-content: center; 
+            gap: 10px; 
+            
+            position: sticky; 
+            top: 10px; 
+            z-index: 110; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.15); 
+        }
+        
         .word-tile { background-color: #3498db; color: white; padding: 6px 12px; border-radius: 4px; cursor: grab; font-weight: bold; font-size: 10pt; box-shadow: 0 2px 0 #21618c; user-select: none; z-index: 100; }
         .drop-zone { background: #fafafa; border-radius: 4px; border: 1px dashed #ccc; display: flex; flex-wrap: wrap; align-items: flex-start; align-content: flex-start; gap: 5px; padding: 5px; transition: 0.2s; width: 100%; box-sizing: border-box; min-height: 40px; }
         .drop-zone.drag-over { background-color: #eafaf1; border: 2px dashed #27ae60; }
 
         /* --- INPUTS, SELECTS & IMAGES --- */
         .text-input { padding: 5px; border: 1px solid #ccc; border-radius: 4px; width: 100%; box-sizing: border-box; }
-        textarea.text-input { font-family: inherit; resize: vertical; min-height: 60px; }
+        textarea.text-input { font-family: inherit; resize: vertical; min-height: 60px; margin-bottom: 10px; }
         .radio-option { display: block; margin: 8px 0; cursor: pointer; padding: 8px; border-radius: 4px; border: 1px solid transparent; }
         .radio-option:hover { background: #f0f8ff; border-color: #b3d7ff; }
         .radio-inline { display: inline-block; margin-right: 20px; cursor: pointer; }
@@ -363,33 +379,177 @@
     </div>
 
     <div class="question-block" id="q15">
-        <div class="question-title">15. Điền cụm từ thích hợp vào chỗ chấm để chú thích cho cửa sổ làm việc của Scratch.</div>
+        <div class="question-title">15. Kéo thả các cụm từ thích hợp ở bên dưới vào đúng với các vị trí đánh số tương ứng để chú thích cho cửa sổ làm việc của Scratch.</div>
+        
         <div style="text-align: center; margin-bottom: 15px;">
-            <img src="trang69c15.png" alt="Cửa sổ làm việc của Scratch" style="max-width: 100%; border: 1px solid #ccc; border-radius: 5px;">
+            <img src="trang69c15.png" alt="Cửa sổ làm việc của Scratch" style="max-width: 90%; border: 1px solid #ccc; border-radius: 5px;">
         </div>
+
+        <div class="drag-source-area" id="src_q15" ondrop="drop(event)" ondragover="allowDrop(event)">
+            <div class="word-tile" draggable="true" ondragstart="drag(event)" id="sc_1" data-val="the">Các thẻ lệnh</div>
+            <div class="word-tile" draggable="true" ondragstart="drag(event)" id="sc_2" data-val="nhomlenh">Các nhóm lệnh</div>
+            <div class="word-tile" draggable="true" ondragstart="drag(event)" id="sc_3" data-val="khuvuc">Khu vực các khối lệnh</div>
+            <div class="word-tile" draggable="true" ondragstart="drag(event)" id="sc_4" data-val="nut">Nút chạy/dừng</div>
+            <div class="word-tile" draggable="true" ondragstart="drag(event)" id="sc_5" data-val="sankhau">Sân khấu</div>
+            <div class="word-tile" draggable="true" ondragstart="drag(event)" id="sc_6" data-val="nhanvat">Nhân vật</div>
+            <div class="word-tile" draggable="true" ondragstart="drag(event)" id="sc_7" data-val="kichban">Khu vực kịch bản</div>
+            <div class="word-tile" draggable="true" ondragstart="drag(event)" id="sc_8" data-val="quanly">Quản lý nhân vật</div>
+            <div class="word-tile" draggable="true" ondragstart="drag(event)" id="sc_9" data-val="phongnen">Khu vực phông nền</div>
+        </div>
+
         <table class="custom-table" style="border: none; margin-top: 20px;">
             <tr style="border: none;">
-                <td style="border: none;">1) <input type="text" class="text-input" data-ans="Các thẻ"></td>
-                <td style="border: none;">4) <input type="text" class="text-input" data-ans="Nút chạy/dừng"></td>
-                <td style="border: none;">7) <input type="text" class="text-input" data-ans="Khu vực kịch bản"></td>
+                <td style="border: none;">1) <div class="drop-zone" data-expect="the" ondrop="drop(event)" ondragover="allowDrop(event)" style="min-height: 40px; border-color: #aaa;"></div></td>
+                <td style="border: none;">4) <div class="drop-zone" data-expect="nut" ondrop="drop(event)" ondragover="allowDrop(event)" style="min-height: 40px; border-color: #aaa;"></div></td>
+                <td style="border: none;">7) <div class="drop-zone" data-expect="kichban" ondrop="drop(event)" ondragover="allowDrop(event)" style="min-height: 40px; border-color: #aaa;"></div></td>
             </tr>
             <tr style="border: none;">
-                <td style="border: none;">2) <input type="text" class="text-input" data-ans="Các nhóm lệnh"></td>
-                <td style="border: none;">5) <input type="text" class="text-input" data-ans="Sân khấu"></td>
-                <td style="border: none;">8) <input type="text" class="text-input" data-ans="Quản lý nhân vật"></td>
+                <td style="border: none;">2) <div class="drop-zone" data-expect="nhomlenh" ondrop="drop(event)" ondragover="allowDrop(event)" style="min-height: 40px; border-color: #aaa;"></div></td>
+                <td style="border: none;">5) <div class="drop-zone" data-expect="sankhau" ondrop="drop(event)" ondragover="allowDrop(event)" style="min-height: 40px; border-color: #aaa;"></div></td>
+                <td style="border: none;">8) <div class="drop-zone" data-expect="quanly" ondrop="drop(event)" ondragover="allowDrop(event)" style="min-height: 40px; border-color: #aaa;"></div></td>
             </tr>
             <tr style="border: none;">
-                <td style="border: none;">3) <input type="text" class="text-input" data-ans="Khu vực lệnh"></td>
-                <td style="border: none;">6) <input type="text" class="text-input" data-ans="Nhân vật"></td>
-                <td style="border: none;">9) <input type="text" class="text-input" data-ans="Phông nền"></td>
+                <td style="border: none;">3) <div class="drop-zone" data-expect="khuvuc" ondrop="drop(event)" ondragover="allowDrop(event)" style="min-height: 40px; border-color: #aaa;"></div></td>
+                <td style="border: none;">6) <div class="drop-zone" data-expect="nhanvat" ondrop="drop(event)" ondragover="allowDrop(event)" style="min-height: 40px; border-color: #aaa;"></div></td>
+                <td style="border: none;">9) <div class="drop-zone" data-expect="phongnen" ondrop="drop(event)" ondragover="allowDrop(event)" style="min-height: 40px; border-color: #aaa;"></div></td>
             </tr>
         </table>
         <div class="show-answer-box">
             <b>Gợi ý đáp án đúng:</b><br>
             1) Các thẻ lệnh &nbsp;&nbsp;|&nbsp;&nbsp; 2) Các nhóm lệnh &nbsp;&nbsp;|&nbsp;&nbsp; 3) Khu vực các khối lệnh<br>
-            4) Nút Cờ xanh, Nút đỏ (Chạy/Dừng) &nbsp;&nbsp;|&nbsp;&nbsp; 5) Sân khấu &nbsp;&nbsp;|&nbsp;&nbsp; 6) Nhân vật<br>
-            7) Khu vực lập trình (Vùng kịch bản) &nbsp;&nbsp;|&nbsp;&nbsp; 8) Khu vực quản lý nhân vật &nbsp;&nbsp;|&nbsp;&nbsp; 9) Khu vực phông nền
+            4) Nút chạy/dừng &nbsp;&nbsp;|&nbsp;&nbsp; 5) Sân khấu &nbsp;&nbsp;|&nbsp;&nbsp; 6) Nhân vật<br>
+            7) Khu vực kịch bản &nbsp;&nbsp;|&nbsp;&nbsp; 8) Quản lý nhân vật &nbsp;&nbsp;|&nbsp;&nbsp; 9) Khu vực phông nền
         </div>
+    </div>
+
+    <div class="question-block" id="q16">
+        <div class="question-title">16. Sắp xếp các thao tác dưới đây theo thứ tự thực hiện mở một chương trình Scratch có sẵn.</div>
+        <p style="line-height: 1.8;">
+            A. Chọn <b>Mở từ máy tính</b>.<br>
+            B. Chọn thẻ <b>Tập tin</b>.<br>
+            C. Trong cửa sổ <b>Open</b>: mở thư mục chứa tệp chương trình, chọn tệp chương trình cần mở, chọn nút lệnh <span class="mock-btn">Open</span>.
+        </p>
+        <p style="font-weight: bold; font-size: 1.1em; margin-top: 15px;">
+            Thứ tự đúng: 
+            <input type="text" class="text-input" style="width: 50px; text-align:center; display: inline-block;" data-ans="B"> ➔ 
+            <input type="text" class="text-input" style="width: 50px; text-align:center; display: inline-block;" data-ans="A"> ➔ 
+            <input type="text" class="text-input" style="width: 50px; text-align:center; display: inline-block;" data-ans="C">
+        </p>
+        <div class="show-answer-box">Thứ tự đúng: B -> A -> C</div>
+    </div>
+
+    <div class="question-block" id="q17">
+        <div class="question-title">17. Trong các lệnh của Scratch có những giá trị (số hoặc chữ) có thể thay đổi được, gọi là tham số của lệnh. Đúng ghi Đ, sai ghi S.</div>
+        <table class="custom-table">
+            <tr><th style="text-align: left;">Nội dung</th><th width="60">Đ</th><th width="60">S</th></tr>
+            <tr>
+                <td>A. Có thể sử dụng lệnh Scratch điều khiển nhân vật hoạt động trên sân khấu.</td>
+                <td align="center"><input type="radio" name="q17_a" value="Đ"></td>
+                <td align="center"><input type="radio" name="q17_a" value="S"></td>
+            </tr>
+            <tr>
+                <td>B. Có thể thay đổi tham số trong các lệnh của chương trình Scratch.</td>
+                <td align="center"><input type="radio" name="q17_b" value="Đ"></td>
+                <td align="center"><input type="radio" name="q17_b" value="S"></td>
+            </tr>
+            <tr>
+                <td>C. Khi thay đổi giá trị tham số trong các lệnh kết quả chạy chương trình không thay đổi.</td>
+                <td align="center"><input type="radio" name="q17_c" value="Đ"></td>
+                <td align="center"><input type="radio" name="q17_c" value="S"></td>
+            </tr>
+            <tr>
+                <td>D. Trò chơi là chương trình máy tính.</td>
+                <td align="center"><input type="radio" name="q17_d" value="Đ"></td>
+                <td align="center"><input type="radio" name="q17_d" value="S"></td>
+            </tr>
+        </table>
+        <div class="show-answer-box">Đáp án: A-Đ, B-Đ, C-S, D-Đ</div>
+    </div>
+
+    <div class="question-block" id="q18">
+        <div class="question-title">18. Quan sát chương trình Scratch dưới đây và trả lời các câu hỏi.</div>
+        <div style="text-align: center; margin-bottom: 15px;">
+            <img src="trang70c18.png" alt="Chương trình Scratch" style="max-width: 100%; border: 1px solid #ccc; border-radius: 5px;">
+        </div>
+        
+        <p>a) Khi nháy chuột vào nút lệnh cờ xanh (Go) <img src="go.png" alt="Go Icon" class="inline-icon" style="height: 20px;"> điều gì sẽ xảy ra?</p>
+        <textarea class="text-input" placeholder="Nhập câu trả lời của em..."></textarea>
+        
+        <p>b) Tại sao chú mèo Scratch lại nói được các câu thoại khi chạy chương trình?</p>
+        <textarea class="text-input" placeholder="Nhập câu trả lời của em..."></textarea>
+
+        <p>c) Tại sao khi nháy chuột vào nút lệnh cờ xanh (Go) <img src="go.png" alt="Go Icon" class="inline-icon" style="height: 20px;"> thì chú mèo Scratch bắt đầu nói các câu thoại?</p>
+        <textarea class="text-input" placeholder="Nhập câu trả lời của em..."></textarea>
+        
+        <div class="show-answer-box" style="margin-top: 15px;">
+            <b>Gợi ý đáp án:</b><br>
+            a) Chú mèo sẽ lần lượt hiện bong bóng thoại để nói các câu "Chào các bạn!", "Tớ là mèo Scratch", "Từ hôm nay tớ sẽ cùng các bạn học lập trình Scratch nhé", "Chúc các bạn học giỏi!", mỗi câu xuất hiện trong 3 giây.<br>
+            b) Vì trong kịch bản chương trình, dưới khối lệnh sự kiện "khi bấm vào cờ xanh" đã được ghép nối tiếp các khối lệnh "nói ... trong 3 giây".<br>
+            c) Tương tự câu b, vì các khối lệnh hội thoại được gắn liền ngay phía dưới khối lệnh sự kiện bắt đầu (lá cờ xanh).
+        </div>
+    </div>
+
+    <div class="question-block" id="q19">
+        <div class="question-title">19. Phát biểu dưới đây là đúng hay sai?</div>
+        <p style="font-size: 1.1em;">Cách lưu một tệp chương trình Scratch vào máy tính cũng tương tự cách lưu một tệp PowerPoint hay tệp Word.</p>
+        <table class="custom-table" style="width: 50%;">
+            <tr><th style="text-align: left;">Trả lời:</th><th width="80">Đúng</th><th width="80">Sai</th></tr>
+            <tr>
+                <td>Đánh dấu vào ô tương ứng:</td>
+                <td align="center"><input type="radio" name="q19" value="Đúng"></td>
+                <td align="center"><input type="radio" name="q19" value="Sai"></td>
+            </tr>
+        </table>
+        <div class="show-answer-box">Đáp án: Đúng</div>
+    </div>
+
+    <div class="question-block" id="q20">
+        <div class="question-title">20. Kéo thả các cụm từ thích hợp ở bên dưới vào đúng với các vị trí đánh số tương ứng để chú thích cho Hình bên dưới.</div>
+        <div style="text-align: center; margin-bottom: 15px;">
+            <img src="trang71c20.png" alt="Khu vực tạo nhân vật và sân khấu" style="max-width: 60%; border: 1px solid #ccc; border-radius: 5px;">
+        </div>
+
+        <div class="drag-source-area" id="src_q20" ondrop="drop(event)" ondragover="allowDrop(event)">
+            <div class="word-tile" draggable="true" ondragstart="drag(event)" id="w20_1" data-val="quanly">Khu vực quản lý nhân vật</div>
+            <div class="word-tile" draggable="true" ondragstart="drag(event)" id="w20_2" data-val="thongtin">Thông tin nhân vật</div>
+            <div class="word-tile" draggable="true" ondragstart="drag(event)" id="w20_3" data-val="chonnhanvat">Chọn một nhân vật</div>
+        </div>
+
+        <table class="custom-table" style="width: 80%; margin: 0 auto; border: none;">
+            <tr style="border: none;">
+                <td style="border: none; text-align: right; font-weight: bold; width: 50px;">1)</td>
+                <td style="border: none;"><div class="drop-zone" data-expect="quanly" ondrop="drop(event)" ondragover="allowDrop(event)" style="min-height: 40px; border-color: #aaa;"></div></td>
+            </tr>
+            <tr style="border: none;">
+                <td style="border: none; text-align: right; font-weight: bold;">2)</td>
+                <td style="border: none;"><div class="drop-zone" data-expect="thongtin" ondrop="drop(event)" ondragover="allowDrop(event)" style="min-height: 40px; border-color: #aaa;"></div></td>
+            </tr>
+            <tr style="border: none;">
+                <td style="border: none; text-align: right; font-weight: bold;">3)</td>
+                <td style="border: none;"><div class="drop-zone" data-expect="chonnhanvat" ondrop="drop(event)" ondragover="allowDrop(event)" style="min-height: 40px; border-color: #aaa;"></div></td>
+            </tr>
+        </table>
+        <div class="show-answer-box">
+            Gợi ý đáp án đúng:<br> 1) Khu vực quản lý nhân vật <br> 2) Thông tin nhân vật <br> 3) Chọn một nhân vật
+        </div>
+    </div>
+
+    <div class="question-block" id="q21">
+        <div class="question-title">21. Khoanh tròn vào chữ cái đặt trước đáp án đúng. Khi chạy chương trình ở Hình 4, nhân vật cô bọ cánh cứng sẽ di chuyển như thế nào trên sân khấu?</div>
+        
+        <div style="display: flex; gap: 20px; align-items: flex-start; margin-top: 15px;">
+            <div style="flex: 1;">
+                <label class="radio-option"><input type="radio" name="q21" value="A"> A. Theo các cạnh của hình vuông, cạnh 100 bước.</label>
+                <label class="radio-option"><input type="radio" name="q21" value="B"> B. Theo các cạnh của hình chữ nhật (dài 200 bước, rộng 100 bước).</label>
+                <label class="radio-option"><input type="radio" name="q21" value="C"> C. Di chuyển theo các cạnh của hình tam giác, cạnh 100 bước.</label>
+                <label class="radio-option"><input type="radio" name="q21" value="D"> D. Tiến thẳng 600 bước.</label>
+            </div>
+            <div style="flex: 0 0 250px; text-align: center;">
+                <img src="trang72c21.png" alt="Hình 4" style="max-width: 100%; border: 1px solid #ccc; border-radius: 5px;">
+            </div>
+        </div>
+        
+        <div class="show-answer-box">Đáp án đúng: B (Vì có các lệnh di chuyển 100 bước và 200 bước đan xen kết hợp xoay phải 90 độ, tạo thành đường đi hình chữ nhật)</div>
     </div>
 
     <div class="controls">
@@ -452,14 +612,16 @@
         });
 
         // 3. Radio groups
-        const groups = ['q1', 'q8_agree', 'q12'];
+        const groups = ['q1', 'q8_agree', 'q12', 'q17_a', 'q17_b', 'q17_c', 'q17_d', 'q19', 'q21'];
         groups.forEach(name => {
             let options = document.getElementsByName(name);
             let checked = false;
             for(let i=0; i<options.length; i++) if(options[i].checked) checked = true;
             
             let container = options[0].closest('.q10-options') || options[0].closest('div');
-            if(!container.classList.contains('q10-options')) {
+            if(!container.classList.contains('q10-options') && options[0].closest('.custom-table')) {
+                container = options[0].closest('td') || options[0].closest('tr');
+            } else if (!container.classList.contains('q10-options')){
                 container = options[0].closest('.question-block');
             }
 
@@ -507,8 +669,13 @@
         // 1. Chấm Radio
         checkRadioGroup('q1', 'C');
         checkRadioGroup('q12', 'Đúng');
+        checkRadioGroup('q19', 'Đúng');
+        checkRadioGroup('q21', 'B');
         
-        // Hiện đáp án cho câu tự luận 8
+        const q17Ans = { 'q17_a':'Đ', 'q17_b':'Đ', 'q17_c':'S', 'q17_d':'Đ' };
+        ['q17_a', 'q17_b', 'q17_c', 'q17_d'].forEach(name => checkRadioGroup(name, q17Ans[name]));
+        
+        // Hiện đáp án cho câu tự luận 8 & 18
         let q8Agree = document.querySelector('input[name="q8_agree"]:checked');
         if(q8Agree && q8Agree.value === 'yes') {
              q8Agree.parentElement.style.color = '#27ae60';
@@ -517,6 +684,7 @@
              q8Agree.parentElement.style.color = '#c0392b';
         }
         document.querySelector('#q8 .show-answer-box').style.display = 'block';
+        document.querySelector('#q18 .show-answer-box').style.display = 'block';
 
         // 2. Chấm Kéo thả
         document.querySelectorAll('.drop-zone').forEach(zone => {
@@ -578,13 +746,9 @@
         });
         if (!q4Correct) document.querySelector('#q4 .show-answer-box').style.display = 'block';
 
-        // 5. Chấm Input Text (Các câu 5,6,7,11,13,15)
+        // 5. Chấm Input Text
         document.querySelectorAll('input.text-input').forEach(input => {
-            // Đối với Câu 15 (câu trả lời dài/tương đối), hiển thị đáp án gợi ý là chính
-            if(input.closest('#q15')) {
-                input.classList.add('correct'); // Mặc định chuyển xanh cho học sinh đối chiếu
-                document.querySelector('#q15 .show-answer-box').style.display = 'block';
-            } else if (input.getAttribute('data-ans')) {
+            if (input.getAttribute('data-ans')) {
                 let userVal = input.value.trim().toUpperCase(); 
                 let correctVal = input.getAttribute('data-ans').toUpperCase();
                 
@@ -634,8 +798,11 @@
             }
         }
         if(!anyCorrect) {
-            let el = document.querySelector(`input[name="${name}"]`).closest('.question-block');
-            if(el.querySelector('.show-answer-box')) el.querySelector('.show-answer-box').style.display = 'block';
+            let el = document.querySelector(`input[name="${name}"]`);
+            if(el) {
+                let block = el.closest('.question-block');
+                if(block && block.querySelector('.show-answer-box')) block.querySelector('.show-answer-box').style.display = 'block';
+            }
         }
     }
 </script>
