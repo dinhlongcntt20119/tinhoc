@@ -1,0 +1,118 @@
+@import "tailwindcss";
+
+:root {
+    --primary-color: #0056b3; 
+    --accent-color: #00a8ff; 
+    --bg-color: #f4f7f6;
+    --text-color: #333;
+    --card-bg: #ffffff;
+    --review-color: #ff9800; /* Màu cam cho phần ôn tập */
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    background-image: radial-gradient(#dbe9f4 1px, transparent 1px);
+    background-size: 20px 20px;
+}
+
+/* --- HEADER --- */
+.site-header {
+    background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+    color: white;
+    padding: 20px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    border-bottom: 5px solid #ffcc00;
+}
+
+.header-left h1 {
+    font-family: 'Source Code Pro', monospace;
+    font-size: 2.2rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 5px;
+}
+
+.header-left h2 { font-size: 1.1rem; font-weight: 400; opacity: 0.9; }
+
+.header-right {
+    text-align: right;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.3);
+}
+
+.teacher-name { font-size: 1.1rem; font-weight: bold; color: #fff; margin-top: 5px; }
+
+/* --- WEB MAP --- */
+.container { max-width: 1200px; margin: 40px auto; padding: 0 20px; }
+
+.sitemap-title {
+    text-align: center; margin-bottom: 40px; font-size: 1.8rem;
+    color: var(--primary-color); position: relative; text-transform: uppercase;
+}
+.sitemap-title::after {
+    content: ''; display: block; width: 80px; height: 4px;
+    background: var(--accent-color); margin: 10px auto; border-radius: 2px;
+}
+
+.topic-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 25px;
+}
+
+.topic-card {
+    background: var(--card-bg); border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    overflow: hidden; transition: transform 0.3s ease;
+    border-top: 4px solid var(--accent-color);
+    display: flex;
+    flex-direction: column;
+}
+.topic-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+
+/* Card Ôn tập có màu khác để nổi bật */
+.review-card { border-top-color: var(--review-color); }
+.review-card .topic-header { color: #d35400; background-color: #fff3e0; }
+.review-card .lesson-link:hover { border-left-color: var(--review-color); color: #d35400; }
+
+.topic-header {
+    background: #eef7ff; padding: 15px; font-weight: bold;
+    color: var(--primary-color); border-bottom: 1px solid #dae1e7;
+    display: flex; align-items: center; gap: 10px; font-size: 1.05rem;
+    min-height: 60px; /* Đảm bảo chiều cao tiêu đề đều nhau */
+}
+
+.lesson-list { list-style: none; padding: 10px; flex-grow: 1;}
+.lesson-list li { margin-bottom: 5px; }
+
+.lesson-link {
+    display: block; text-decoration: none; color: #555;
+    padding: 10px 12px; border-radius: 6px; font-size: 0.95rem;
+    transition: all 0.2s; border-left: 4px solid transparent;
+}
+.lesson-link:hover {
+    background-color: #f8f9fa; color: var(--primary-color);
+    border-left: 4px solid var(--accent-color); padding-left: 18px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+.lesson-link i { margin-right: 10px; color: #aaa; width: 20px; text-align: center; }
+
+.site-footer {
+    text-align: center; padding: 20px; margin-top: 50px;
+    color: #777; font-size: 0.9rem; border-top: 1px solid #ddd;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .site-header { flex-direction: column; text-align: center; gap: 15px; }
+    .header-right { text-align: center; width: 100%; }
+}
