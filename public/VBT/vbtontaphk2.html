@@ -6,8 +6,14 @@
     <title>Ôn tập Học kì II - Tin học 4</title>
     <style>
         /* --- CẤU TRÚC CHUNG --- */
-        body { font-family: "Segoe UI", Arial, sans-serif; background-color: #f4f6f9; margin: 0; padding: 20px; color: #333; }
-        .page { background-color: #fff; max-width: 950px; margin: 0 auto; padding: 40px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-radius: 12px; }
+        body { font-family: "Segoe UI", Arial, sans-serif; background-color: #f4f6f9; margin: 0; padding: 10px; color: #333; }
+        .page { background-color: #fff; max-width: 950px; margin: 0 auto; padding: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-radius: 12px; }
+        
+        @media (max-width: 600px) {
+            .page { padding: 15px; }
+            h1 { font-size: 1.5rem !important; }
+            .question-title { font-size: 1.1rem !important; }
+        }
         
         h1 { font-size: 22pt; font-weight: bold; text-transform: uppercase; text-align: center; color: #2c3e50; margin: 10px 0; border-bottom: 2px solid #3498db; padding-bottom: 20px; }
         
@@ -15,7 +21,8 @@
         .question-title { font-weight: bold; font-size: 13pt; margin-bottom: 15px; color: #2980b9; line-height: 1.5; }
 
         /* --- BẢNG BIỂU --- */
-        table.custom-table { width: 100%; border-collapse: collapse; margin-top: 10px; table-layout: fixed; }
+        .table-responsive { overflow-x: auto; margin-top: 10px; }
+        table.custom-table { width: 100%; border-collapse: collapse; min-width: 400px; }
         table.custom-table th, table.custom-table td { border: 1px solid #ccc; padding: 8px; vertical-align: middle; word-wrap: break-word; }
         table.custom-table th { background-color: #f2f2f2; text-align: center; font-weight: bold; color: #444; font-size: 0.95em; }
         
@@ -97,10 +104,16 @@
             <button class="btn btn-check" style="width: 100%; margin: 0;" onclick="startQuiz()">Vào làm bài</button>
         </div>
     </div>
-    <header id="mainHeader" style="display:none; background: linear-gradient(135deg, #0056b3, #00a8ff); color: white; padding: 15px 40px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+    <header id="mainHeader" style="display:none; background: linear-gradient(135deg, #0056b3, #00a8ff); color: white; padding: 15px 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px;">
         <div style="font-size: 1.2rem; font-weight: bold;"><i class="fas fa-book"></i> VBT TIN HỌC 4</div>
-        <div id="displayInfo" style="font-size: 1.1rem; background: rgba(255,255,255,0.2); padding: 5px 15px; border-radius: 20px;"></div>
+        <div id="displayInfo" style="font-size: 0.9rem; background: rgba(255,255,255,0.2); padding: 5px 15px; border-radius: 20px;"></div>
     </header>
+    <style>
+        @media (max-width: 600px) {
+            #mainHeader { padding: 10px 15px !important; flex-direction: column; text-align: center; }
+            #displayInfo { font-size: 0.85rem; }
+        }
+    </style>
     
 
 

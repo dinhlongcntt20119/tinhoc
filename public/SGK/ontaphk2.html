@@ -24,21 +24,31 @@
         body { font-family: 'Roboto', sans-serif; background-color: var(--bg-color); color: var(--text-color); }
 
         /* Header */
-        header { background: linear-gradient(135deg, var(--primary-color), #004494); color: white; padding: 20px 40px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border-bottom: 4px solid var(--accent-color); }
-        .header-content { max-width: 1000px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
+        header { background: linear-gradient(135deg, var(--primary-color), #004494); color: white; padding: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border-bottom: 4px solid var(--accent-color); }
+        .header-content { max-width: 1000px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
         .logo-area { font-family: 'Source Code Pro', monospace; font-size: 1.8rem; font-weight: bold; }
         .sub-title { font-size: 1rem; opacity: 0.9; margin-top: 5px; }
 
+        @media (max-width: 600px) {
+            header { padding: 15px; }
+            .logo-area { font-size: 1.4rem; }
+            .sub-title { font-size: 0.85rem; }
+            .header-content { flex-direction: column; text-align: center; }
+        }
+
         /* Main */
-        .container { max-width: 900px; margin: 40px auto; padding: 0 20px; }
+        .container { max-width: 900px; margin: 30px auto; padding: 0 15px; }
+        @media (max-width: 600px) { .container { margin: 15px auto; } }
         
         /* Question Card */
         .quiz-card { background: white; border-radius: 10px; padding: 25px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border-left: 5px solid var(--accent-color); }
+        @media (max-width: 600px) { .quiz-card { padding: 15px; } }
         .q-title { font-weight: bold; font-size: 1.1rem; margin-bottom: 15px; color: var(--primary-color); }
         .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         
         .option-label { 
             display: block; padding: 10px 15px; border: 1px solid #ddd; border-radius: 6px; cursor: pointer; transition: 0.2s; position: relative;
+            word-break: break-word;
         }
         .option-label:hover { background-color: #fff5f5; border-color: var(--accent-color); }
         .option-label input { margin-right: 10px; }
@@ -60,7 +70,8 @@
 
         /* Modal */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 200; }
-        .modal-content { background: white; padding: 30px; border-radius: 15px; text-align: center; width: 400px; animation: popUp 0.3s ease; }
+        .modal-content { background: white; padding: 30px; border-radius: 15px; text-align: center; width: 95%; max-width: 400px; animation: popUp 0.3s ease; }
+        @media (max-width: 480px) { .modal-content { padding: 20px; } }
         @keyframes popUp { from {transform: scale(0.8); opacity: 0;} to {transform: scale(1); opacity: 1;} }
         .score-circle { width: 120px; height: 120px; background: var(--accent-color); color: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 2.5rem; font-weight: bold; margin: 20px auto; }
 
@@ -87,17 +98,24 @@
             <button class="btn btn-check" style="width: 100%; margin: 0;" onclick="startQuiz()">Vào làm bài</button>
         </div>
     </div>
-    <header id="mainHeader" style="display:none; background: linear-gradient(135deg, #0056b3, #00a8ff); color: white; padding: 15px 40px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
-        <div class="header-content" style="max-width: 1000px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; width: 100%;">
+    <header id="mainHeader" style="display:none; background: linear-gradient(135deg, #0056b3, #00a8ff); color: white; padding: 15px 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+        <div class="header-content" style="max-width: 1000px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; width: 100%; flex-wrap: wrap; gap: 10px;">
             <a href="../index.html" style="text-decoration: none; color: white;">
                 <div style="font-family: 'Source Code Pro', monospace; font-size: 1.5rem; font-weight: bold;"><i class="fas fa-laptop-code fa-beat" style="color: #ffeb3b; margin-right: 8px;"></i> TIN HỌC 4</div>
             </a>
-            <div style="font-size: 0.9rem; opacity: 0.9; text-align: right;">
+            <div id="header-user-info" style="font-size: 0.9rem; opacity: 0.9; text-align: right;">
                 <div>GV - Nguyễn Đình Bạch Long</div>
                 <div class="sub-title" style="margin-top: 5px;">Học sinh: <span id="displayInfo" style="color: #ffeb3b; font-weight: bold;"></span></div>
             </div>
         </div>
     </header>
+    <style>
+        @media (max-width: 600px) {
+            #mainHeader { padding: 10px 15px !important; }
+            #mainHeader .header-content { flex-direction: column; text-align: center; }
+            #header-user-info { text-align: center !important; }
+        }
+    </style>
     
 
 
