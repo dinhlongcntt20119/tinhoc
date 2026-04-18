@@ -6,6 +6,7 @@
     <title>Quản trị viên - Tin học 4</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         /* ... existing styles ... */
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -62,6 +63,8 @@
         .btn-delete { background: #ff5252; padding: 5px 10px; font-size: 0.8rem; }
         .btn-delete:hover { background: #ff1744; }
         .btn-back { background: #607d8b; margin-bottom: 15px; }
+        .btn-export { background: #2e7d32; margin-bottom: 15px; }
+        .btn-export:hover { background: #1b5e20; }
         
         .logout-btn { background: #dc3545; }
         .settings-btn { background: #6c757d; }
@@ -155,7 +158,10 @@
             </div>
 
             <div id="student-view" style="display: none;">
-                <button class="btn btn-back" onclick="showClassList()"><i class="fas fa-arrow-left"></i> Quay lại danh sách lớp</button>
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                    <button class="btn btn-back" onclick="showClassList()"><i class="fas fa-arrow-left"></i> Quay lại danh sách lớp</button>
+                    <button class="btn btn-export" onclick="exportData()"><i class="fas fa-file-excel"></i> Xuất Excel danh sách này</button>
+                </div>
                 <div id="selected-class-title" style="margin-bottom: 15px; font-weight: bold; font-size: 1.2rem; color: #0056b3;"></div>
                 <div style="overflow-x: auto;">
                     <table>
@@ -368,6 +374,46 @@
             
             showClassList();
             loadQuizData(quizType);
+        };
+
+        window.exportData = function() {
+            if (filteredSubmissions.length === 0) {
+                alert("Không có dữ liệu để xuất!");
+                return;
+            }
+
+            const data = filteredSubmissions.map(s => {
+                let scoreText = s.quizType === 'thuchanhhk2' ? "Hoàn thành" : s.score;
+                let totalText = s.quizType === 'thuchanhhk2' ? "N/A" : s.total;
+                return {
+                    "Họ và tên": s.studentName,
+                    "Lớp": s.studentClass,
+                    "Điểm số": scoreText,
+                    "Tổng câu": totalText,
+                    "Tỷ lệ": s.quizType === 'thuchanhhk2' ? "N/A" : ((s.score / s.total) * 100).toFixed(0) + "%",
+                    "Thời gian nộp": new Date(s.createdAt).toLocaleString('vi-VN'),
+                    "Loại bài": s.quizType
+                };
+            });
+
+            const ws = XLSX.utils.json_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Danh sách học sinh");
+
+            // Format column widths
+            const wscols = [
+                {wch: 25}, // studentName
+                {wch: 10}, // studentClass
+                {wch: 10}, // score
+                {wch: 10}, // total
+                {wch: 10}, // ratio
+                {wch: 25}, // time
+                {wch: 15}  // type
+            ];
+            ws['!cols'] = wscols;
+
+            const filename = `DanhSach_${selectedClass}_${currentQuizType}_${new Date().getTime()}.xlsx`;
+            XLSX.writeFile(wb, filename);
         };
 
         window.checkLogin = async function() {
