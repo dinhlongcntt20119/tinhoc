@@ -171,15 +171,12 @@
                     studentName: studentInfo.name,
                     studentClass: studentInfo.class,
                     quizType: "thuchanhhk2",
-                    score: 10,
-                    total: 10,
-                    status: "viewed",
                     schoolId: "tin-hoc-4",
                     createdAt: new Date().toISOString()
                 });
 
                 document.getElementById('doneBadge').style.display = 'block';
-                btn.innerText = 'Đã ghi nhận';
+                btn.innerText = 'Đã hoàn thành';
                 alert("Hệ thống đã ghi nhận em đã hoàn thành ôn tập thực hành!");
             } catch (e) {
                 btn.innerText = 'Đã xem';

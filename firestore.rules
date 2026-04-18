@@ -13,16 +13,18 @@ service cloud.firestore {
     function existing() { return resource.data; }
 
     function isValidSubmission(data) {
-      return data.keys().hasAll(['studentName', 'studentClass', 'quizType', 'score', 'total', 'answers', 'schoolId', 'createdAt']) &&
-             data.keys().size() == 8 &&
-             data.studentName is string && data.studentName.size() <= 100 &&
+      return data.studentName is string && data.studentName.size() <= 100 &&
              data.studentClass is string && data.studentClass.size() <= 50 &&
              data.quizType is string && data.quizType.size() <= 64 &&
-             data.score is number &&
-             data.total is number &&
-             data.answers is string && data.answers.size() <= 10000 &&
              data.schoolId is string && data.schoolId.size() <= 50 &&
-             data.createdAt is string && data.createdAt.size() <= 30;
+             data.createdAt is string && data.createdAt.size() <= 40 &&
+             (
+               (data.quizType == 'ontaphk2' && data.keys().hasAll(['studentName', 'studentClass', 'quizType', 'score', 'total', 'answers', 'schoolId', 'createdAt']) && 
+                data.score is number && data.total is number && data.answers is string && data.answers.size() <= 10000) ||
+               (data.quizType == 'vbtontaphk2' && data.keys().hasAll(['studentName', 'studentClass', 'quizType', 'score', 'total', 'schoolId', 'createdAt']) && 
+                data.score is number && data.total is number) ||
+               (data.quizType == 'thuchanhhk2' && data.keys().hasAll(['studentName', 'studentClass', 'quizType', 'schoolId', 'createdAt']) && data.keys().size() == 5)
+             );
     }
 
     function isValidQuizConfig(data) {
