@@ -14,7 +14,10 @@ service cloud.firestore {
 
     function isSignedIn() { return request.auth != null; }
     function isAdmin() { 
-      return isSignedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+      return isSignedIn() && (
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid)) ||
+        (request.auth.token.email == 'dinhlongcntt20119@gmail.com' && request.auth.token.email_verified == true)
+      );
     }
 
     function isValidSubmission(data) {
@@ -40,15 +43,14 @@ service cloud.firestore {
     }
 
     match /submissions/{submissionId} {
-      allow get, list, delete: if isSignedIn();
+      allow get, list, delete, update: if isAdmin();
       allow create: if isValidId(submissionId) && isValidSubmission(incoming());
-      allow update: if isSignedIn();
     }
 
     match /settings/{settingId} {
       allow get: if settingId == 'quizConfig' || settingId == 'adminAuth';
-      allow list: if isSignedIn();
-      allow create, update, delete: if isSignedIn();
+      allow list: if isAdmin();
+      allow create, update, delete: if isAdmin();
     }
 
     match /admins/{uid} {
