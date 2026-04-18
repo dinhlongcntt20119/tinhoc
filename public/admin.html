@@ -63,9 +63,18 @@
         .btn-delete:hover { background: #ff1744; }
         .btn-back { background: #607d8b; margin-bottom: 15px; }
         
-        .logout-btn { background: #dc3545; margin-top: 30px; }
+        .logout-btn { background: #dc3545; }
+        .settings-btn { background: #6c757d; }
 
         .empty-state { padding: 40px; text-align: center; color: #888; border: 2px dashed #ddd; border-radius: 12px; margin-top: 20px; }
+
+        /* Modal Styles */
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); align-items: center; justify-content: center; }
+        .modal-content { background-color: white; padding: 30px; border-radius: 12px; width: 90%; max-width: 450px; position: relative; }
+        .modal-header { font-size: 1.5rem; font-weight: bold; color: #0056b3; margin-bottom: 20px; text-align: center; }
+        .close-modal { position: absolute; top: 15px; right: 20px; font-size: 1.5rem; cursor: pointer; color: #888; }
+        
+        #auth-guide { margin-top: 15px; background: #fff5f5; border: 1px solid #feb2b2; padding: 12px; border-radius: 6px; font-size: 0.85rem; color: #c53030; display: none; }
     </style>
 </head>
 <body>
@@ -83,6 +92,14 @@
         </div>
         <button class="btn btn-full" onclick="checkLogin()">Đăng nhập</button>
         <div id="error-msg" class="text-center">Sai tên đăng nhập hoặc mật khẩu!</div>
+        
+        <div id="auth-guide">
+            <strong>⚠️ Lỗi cấu hình hệ thống:</strong><br>
+            Bạn cần bật <b>Anonymous Authentication</b> trong Firebase Console mới có thể đăng nhập.<br><br>
+            1. Truy cập <a href="https://console.firebase.google.com/" target="_blank">Firebase Console</a><br>
+            2. Chọn dự án -> Build -> Authentication -> Sign-in method<br>
+            3. Bật (Enable) <b>Anonymous</b> và lưu lại.
+        </div>
     </div>
 
     <!-- Dashboard View -->
@@ -145,8 +162,26 @@
             </div>
         </div>
 
-        <div class="text-center">
-            <button class="btn logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Đăng xuất hệ thống</button>
+        <div class="text-center" style="margin-top: 30px; display: flex; justify-content: center; gap: 10px;">
+            <button class="btn settings-btn" onclick="openPasswordModal()"><i class="fas fa-key"></i> Đổi mật khẩu</button>
+            <button class="btn logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Đăng xuất</button>
+        </div>
+    </div>
+
+    <!-- Password Modal -->
+    <div id="passwordModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closePasswordModal()">&times;</span>
+            <div class="modal-header">Đổi mật khẩu Admin</div>
+            <div class="form-group">
+                <label>Mật khẩu mới</label>
+                <input type="password" id="newPassword" placeholder="Nhập mật khẩu mới">
+            </div>
+            <div class="form-group">
+                <label>Xác nhận mật khẩu</label>
+                <input type="password" id="confirmPassword" placeholder="Nhập lại mật khẩu mới">
+            </div>
+            <button class="btn btn-full" onclick="updatePassword()">Cập nhật mật khẩu</button>
         </div>
     </div>
 
@@ -158,6 +193,13 @@
         window.db = db;
         window.auth = auth;
         let currentQuizType = 'ontaphk2';
+
+        async function hashPassword(password) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(password);
+            const hash = await crypto.subtle.digest('SHA-256', data);
+            return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
+        }
         let allSubmissions = [];
         let filteredSubmissions = [];
         let selectedClass = null;
@@ -315,22 +357,83 @@
         window.checkLogin = async function() {
             const u = document.getElementById('username').value;
             const p = document.getElementById('password').value;
-            if (u === 'Admin' && p === 'thaylongtinhoc') {
-                const btn = document.querySelector('.btn-full');
-                const origText = btn.innerText;
-                btn.innerText = 'Đang xác thực...';
-                btn.disabled = true;
-                try {
-                    await signInAnonymously(auth);
+            
+            const btn = document.querySelector('.btn-full');
+            const origText = btn.innerText;
+            btn.innerText = 'Đang xác thực...';
+            btn.disabled = true;
+            document.getElementById('error-msg').style.display = 'none';
+            document.getElementById('auth-guide').style.display = 'none';
+
+            try {
+                // First ensure anonymous auth works
+                await signInAnonymously(auth);
+                
+                // Get stored password hash
+                let storedHash = null;
+                const snap = await getDoc(doc(db, "settings", "adminAuth"));
+                if (snap.exists()) {
+                    storedHash = snap.data().password;
+                } else {
+                    // Default if not set yet
+                    storedHash = await hashPassword('thaylongtinhoc');
+                }
+
+                const inputHash = await hashPassword(p);
+
+                if (u === 'Admin' && inputHash === storedHash) {
                     sessionStorage.setItem('isAdmin', 'true');
                     showDashboard();
-                } catch (e) {
-                    alert("Lỗi xác thực: " + e.message);
+                } else {
+                    document.getElementById('error-msg').style.display = 'block';
                 }
+            } catch (e) {
+                console.error("Login detail error:", e);
+                if (e.code === 'auth/admin-restricted-operation' || e.code === 'auth/operation-not-allowed') {
+                    document.getElementById('auth-guide').style.display = 'block';
+                } else {
+                    alert("Lỗi đăng nhập: " + e.message + " (Code: " + e.code + ")");
+                }
+            } finally {
                 btn.innerText = origText;
                 btn.disabled = false;
-            } else {
-                document.getElementById('error-msg').style.display = 'block';
+            }
+        };
+
+        window.openPasswordModal = function() {
+            document.getElementById('passwordModal').style.display = 'flex';
+        };
+
+        window.closePasswordModal = function() {
+            document.getElementById('passwordModal').style.display = 'none';
+        };
+
+        window.updatePassword = async function() {
+            const newP = document.getElementById('newPassword').value;
+            const confP = document.getElementById('confirmPassword').value;
+
+            if (!newP || newP.length < 6) {
+                alert("Mật khẩu mới phải từ 6 ký tự trở lên!");
+                return;
+            }
+
+            if (newP !== confP) {
+                alert("Mật khẩu xác nhận không khớp!");
+                return;
+            }
+
+            if (!confirm("Bạn có chắc chắn muốn đổi mật khẩu admin?")) return;
+
+            try {
+                const hashed = await hashPassword(newP);
+                await setDoc(doc(db, "settings", "adminAuth"), {
+                    password: hashed,
+                    updatedAt: new Date().toISOString()
+                });
+                alert("Đã cập nhật mật khẩu thành công!");
+                closePasswordModal();
+            } catch(e) {
+                alert("Lỗi khi cập nhật mật khẩu: " + e.message);
             }
         };
 

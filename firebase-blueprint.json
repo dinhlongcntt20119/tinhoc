@@ -25,6 +25,16 @@
         "updatedAt": { "type": "string" }
       },
       "required": ["shuffle", "updatedAt"]
+    },
+    "adminAuth": {
+      "title": "Admin Authentication",
+      "description": "Stores admin login credentials",
+      "type": "object",
+      "properties": {
+        "password": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["password", "updatedAt"]
     }
   },
   "firestore": {
@@ -35,6 +45,10 @@
     "settings/{settingId}": {
       "schema": { "$ref": "#/entities/quizConfig" },
       "description": "Store application settings"
+    },
+    "settings/adminAuth": {
+      "schema": { "$ref": "#/entities/adminAuth" },
+      "description": "Admin password config"
     }
   }
 }
