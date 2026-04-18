@@ -1,0 +1,51 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+
+    function isValidSubmission(data) {
+      return data.keys().hasAll(['studentName', 'studentClass', 'quizType', 'score', 'total', 'answers', 'schoolId', 'createdAt']) &&
+             data.keys().size() == 8 &&
+             data.studentName is string && data.studentName.size() <= 100 &&
+             data.studentClass is string && data.studentClass.size() <= 50 &&
+             data.quizType is string && data.quizType.size() <= 64 &&
+             data.score is number &&
+             data.total is number &&
+             data.answers is string && data.answers.size() <= 10000 &&
+             data.schoolId is string && data.schoolId.size() <= 50 &&
+             data.createdAt == request.time;
+    }
+
+    function isValidQuizConfig(data) {
+      return data.keys().hasAll(['shuffle', 'updatedAt']) &&
+             data.keys().size() == 2 &&
+             data.shuffle is bool &&
+             data.updatedAt == request.time;
+    }
+
+    match /submissions/{submissionId} {
+      allow get: if resource.data.schoolId == 'tin-hoc-4';
+      allow list: if resource.data.schoolId == 'tin-hoc-4';
+      allow create: if isValidId(submissionId) && isValidSubmission(incoming());
+      allow update: if false; 
+      allow delete: if false;
+    }
+
+    match /settings/{settingId} {
+      allow get: if settingId == 'quizConfig';
+      allow list: if false;
+      allow create: if isValidId(settingId) && isValidQuizConfig(incoming());
+      allow update: if isValidQuizConfig(incoming()) && incoming().diff(existing()).affectedKeys().hasOnly(['shuffle', 'updatedAt']);
+      allow delete: if false;
+    }
+  }
+}

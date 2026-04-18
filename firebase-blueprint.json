@@ -1,0 +1,40 @@
+{
+  "entities": {
+    "submission": {
+      "title": "Quiz Submission",
+      "description": "Student answer submission",
+      "type": "object",
+      "properties": {
+        "studentName": { "type": "string" },
+        "studentClass": { "type": "string" },
+        "quizType": { "type": "string" },
+        "score": { "type": "number" },
+        "total": { "type": "number" },
+        "answers": { "type": "string" },
+        "schoolId": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["studentName", "studentClass", "quizType", "score", "total", "answers", "schoolId", "createdAt"]
+    },
+    "quizConfig": {
+      "title": "Quiz Configuration",
+      "description": "Global config like shuffle",
+      "type": "object",
+      "properties": {
+        "shuffle": { "type": "boolean" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["shuffle", "updatedAt"]
+    }
+  },
+  "firestore": {
+    "submissions/{submissionId}": {
+      "schema": { "$ref": "#/entities/submission" },
+      "description": "Store all student submissions"
+    },
+    "settings/{settingId}": {
+      "schema": { "$ref": "#/entities/quizConfig" },
+      "description": "Store application settings"
+    }
+  }
+}

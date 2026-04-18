@@ -65,21 +65,43 @@
         .score-circle { width: 120px; height: 120px; background: var(--accent-color); color: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 2.5rem; font-weight: bold; margin: 20px auto; }
 
         @media (max-width: 600px) { .options-grid { grid-template-columns: 1fr; } }
-    </style>
+    
+        #loginScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #0056b3, #004494); display: flex; justify-content: center; align-items: center; z-index: 3000; }
+        .login-box { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); width: 100%; max-width: 400px; text-align: center; }
+        .input-group { margin-bottom: 20px; text-align: left; }
+        .input-group label { display: block; font-weight: bold; margin-bottom: 8px; color: #555; }
+        .input-group input { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; box-sizing: border-box; }
+        .sub-title { font-size: 0.9rem; }
+</style>
 </head>
 <body>
 
-    <header style="background: linear-gradient(135deg, #0056b3, #00a8ff); color: white; padding: 15px 40px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
-        <a href="../index.html" style="text-decoration: none; color: white;">
-            <div style="font-family: 'Source Code Pro', monospace; font-size: 1.5rem; font-weight: bold;"><i class="fas fa-laptop-code fa-beat" style="color: #ffeb3b; margin-right: 8px;"></i> TIN HỌC 4</div>
-        </a>
-        <div style="font-size: 0.9rem; opacity: 0.9;">GV - Nguyễn Đình Bạch Long</div>
+    
+    <div id="loginScreen">
+        <div class="login-box">
+            <h2 style="color: #0056b3; margin-bottom:20px;"><i class="fas fa-user-graduate"></i> Học sinh Lớp 4</h2>
+            <div class="input-group"><label>Họ và tên:</label><input type="text" id="studentName" placeholder="Nhập họ tên..."></div>
+            <div class="input-group"><label>Lớp:</label><input type="text" id="studentClass" placeholder="Ví dụ: 4A"></div>
+            <button class="btn btn-check" style="width: 100%; margin: 0;" onclick="startQuiz()">Vào làm bài</button>
+        </div>
+    </div>
+    <header id="mainHeader" style="display:none; background: linear-gradient(135deg, #0056b3, #00a8ff); color: white; padding: 15px 40px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+        <div class="header-content" style="max-width: 1000px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; width: 100%;">
+            <a href="../index.html" style="text-decoration: none; color: white;">
+                <div style="font-family: 'Source Code Pro', monospace; font-size: 1.5rem; font-weight: bold;"><i class="fas fa-laptop-code fa-beat" style="color: #ffeb3b; margin-right: 8px;"></i> TIN HỌC 4</div>
+            </a>
+            <div style="font-size: 0.9rem; opacity: 0.9; text-align: right;">
+                <div>GV - Nguyễn Đình Bạch Long</div>
+                <div class="sub-title" style="margin-top: 5px;">Học sinh: <span id="displayInfo" style="color: #ffeb3b; font-weight: bold;"></span></div>
+            </div>
+        </div>
     </header>
+    
 
 
     
 
-    <main class="container" id="quiz-container">
+    <main class="container" id="mainPage" style="display:none" id="quiz-container">
         <div class="breadcrumb">
             <a href="../index.html"><i class="fas fa-home"></i> Trang chủ</a> 
             <i class="fas fa-chevron-right"></i> Ôn tập học kì 2
@@ -103,50 +125,60 @@
     </div>
 
     <script>
+
+      let studentInfo = { name: "", class: "" };
+      function startQuiz() {
+          const name = document.getElementById('studentName').value.trim();
+          const className = document.getElementById('studentClass').value.trim();
+          if(!name || !className) { alert("Vui lòng nhập đủ Họ tên và Lớp!"); return; }
+          studentInfo.name = name;
+          studentInfo.class = className;
+          document.getElementById('displayInfo').innerText = name + " - " + className;
+          document.getElementById('loginScreen').style.display = 'none';
+          document.getElementById('mainHeader').style.display = 'flex';
+          const mainPage = document.getElementById('mainPage');
+          if(mainPage) mainPage.style.display = 'block';
+      }
+      
         const questions = [
-            // --- BÀI 8: SOẠN THẢO (Chèn hình, Sao chép, Di chuyển) ---
-            { q: "Câu 1: Để chèn hình ảnh vào văn bản, em chọn thẻ nào?", a: ["Home", "Insert", "Layout", "View"], correct: 1 },
-            { q: "Câu 2: Tổ hợp phím dùng để SAO CHÉP (Copy) là gì?", a: ["Ctrl + V", "Ctrl + X", "Ctrl + C", "Ctrl + A"], correct: 2 },
-            { q: "Câu 3: Tổ hợp phím dùng để DI CHUYỂN (Cut) là gì?", a: ["Ctrl + C", "Ctrl + X", "Ctrl + P", "Ctrl + S"], correct: 1 },
-            { q: "Câu 4: Sau khi Copy hoặc Cut, em dùng lệnh gì để đưa nội dung ra?", a: ["Paste (Ctrl + V)", "Delete", "Save", "Open"], correct: 0 },
-            { q: "Câu 5: Trước khi thực hiện xóa, sao chép hay di chuyển một đoạn văn bản, em phải làm gì?", a: ["Nhấn Enter", "Lưu bài", "Chọn (bôi đen) phần văn bản đó", "Tắt máy"], correct: 2 },
+            // --- 10 CÂU TỪ ĐỀ KIỂM TRA (PDF) ---
+            { q: "Câu 1: Để chèn hình ảnh vào văn bản trong phần mềm soạn thảo, em chọn thẻ nào sau đây?", a: ["Home", "Insert", "Design", "View"], correct: 1 },
+            { q: "Câu 2: Phím nào trên bàn phím thường được dùng để xóa phần văn bản đang được chọn?", a: ["Enter", "Shift", "Delete", "Ctrl"], correct: 2 },
+            { q: "Câu 3: Để di chuyển một đoạn văn bản từ vị trí này sang vị trí khác, em thực hiện thứ tự các thao tác nào?", a: ["Chọn văn bản -> Copy -> Paste", "Chọn văn bản -> Cut -> Paste", "Chọn văn bản -> Delete -> Paste", "Chọn văn bản -> Insert -> Paste"], correct: 1 },
+            { q: "Câu 4: Phần mềm nào sau đây được dùng để tạo bài trình chiếu?", a: ["Microsoft Word", "Microsoft PowerPoint", "Scratch", "Windows Media Player"], correct: 1 },
+            { q: "Câu 5: Trong phần mềm trình chiếu, nút lệnh nào dùng để thêm một trang chiếu mới?", a: ["New Slide", "Layout", "Reset", "Section"], correct: 0 },
+            { q: "Câu 6: Khi xem video về lịch sử, văn hóa trên Internet, em nên lưu ý điều gì để đảm bảo an toàn và hiệu quả?", a: ["Chỉ xem các video từ nguồn tin cậy, chính thống.", "Xem tất cả các video hiện lên trên màn hình.", "Chia sẻ thông tin cá nhân dưới phần bình luận của video.", "Tải tất cả các tệp đính kèm không rõ nguồn gốc dưới video."], correct: 0 },
+            { q: "Câu 7: Trong cửa sổ Scratch, khu vực nào là nơi hiển thị kết quả hoạt động của nhân vật?", a: ["Khu vực lệnh", "Khu vực lập trình", "Sân khấu", "Danh sách nhân vật"], correct: 2 },
+            { q: "Câu 8: Để ghép các lệnh lại với nhau trong Scratch, em thực hiện thao tác nào?", a: ["Nháy đúp chuột vào lệnh.", "Kéo thả các lệnh từ khu vực lệnh sang khu vực lập trình và gắn chúng lại với nhau.", "Nháy chuột phải vào lệnh và chọn 'Gắn'.", "Nhấn phím Enter trên bàn phím."], correct: 1 },
+            { q: "Câu 9: Nhóm lệnh nào trong Scratch chứa lệnh giúp nhân vật hiển thị bóng nói (ví dụ: 'Say Hello!')?", a: ["Motion (Chuyển động)", "Looks (Hiển thị)", "Sound (Âm thanh)", "Events (Sự kiện)"], correct: 1 },
+            { q: "Câu 10: Lệnh nào sau đây giúp nhân vật di chuyển về phía trước một khoảng nhất định?", a: [
+                "<span style='background:#4C97FF;color:#fff;padding:6px 12px;border-radius:4px;font-weight:bold;'>xoay &#8635; <span style='background:#fff;color:#000;padding:2px 8px;border-radius:10px;'>15</span> độ</span>",
+                "<span style='background:#CF63CF;color:#fff;padding:6px 12px;border-radius:4px;font-weight:bold;'>bắt đầu âm thanh <span style='background:#d38bdf;color:#fff;padding:2px 8px;border-radius:10px;'>Meow &#9660;</span></span>",
+                "<span style='background:#4C97FF;color:#fff;padding:6px 12px;border-radius:4px;font-weight:bold;'>di chuyển <span style='background:#fff;color:#000;padding:2px 8px;border-radius:10px;'>10</span> bước</span>",
+                "<span style='background:#9966FF;color:#fff;padding:6px 12px;border-radius:4px;font-weight:bold;'>nói <span style='background:#fff;color:#000;padding:2px 8px;border-radius:10px;'>Xin chào!</span></span>"
+            ], correct: 2 },
 
-            // --- BÀI 9: BÀI TRÌNH CHIẾU CỦA EM ---
-            { q: "Câu 6: Biểu tượng của phần mềm trình chiếu PowerPoint có màu gì?", a: ["Màu xanh dương (W)", "Màu xanh lá (X)", "Màu cam/đỏ (P)", "Màu vàng"], correct: 2 },
-            { q: "Câu 7: Trang đầu tiên của bài trình chiếu thường là trang gì?", a: ["Trang nội dung", "Trang tiêu đề", "Trang kết thúc", "Trang trắng"], correct: 1 },
-            { q: "Câu 8: Để thêm một trang chiếu mới, em nháy chuột vào nút lệnh nào?", a: ["New Slide", "New Folder", "New File", "Open"], correct: 0 },
-            { q: "Câu 9: Để thay đổi dấu đầu dòng cho văn bản, em chọn nút lệnh nào?", a: ["Bold (B)", "Bullets (Danh sách)", "Font Color (A)", "Italic (I)"], correct: 1 },
-
-            // --- BÀI 10: ĐỊNH DẠNG & HIỆU ỨNG ---
-            { q: "Câu 10: Để định dạng chữ in đậm, em nhấn nút nào?", a: ["I", "U", "B", "A"], correct: 2 },
-            { q: "Câu 11: Để chọn màu cho chữ, em nhấn vào nút lệnh nào?", a: ["Chữ A có gạch màu dưới chân", "Hình cây bút", "Hình cái xô", "Chữ B"], correct: 0 },
-            { q: "Câu 12: Thẻ nào dùng để tạo hiệu ứng chuyển trang (Transition)?", a: ["Animations", "Transitions", "Design", "Insert"], correct: 1 },
-            { q: "Câu 13: Nút lệnh 'Apply To All' trong thẻ Transitions có tác dụng gì?", a: ["Xóa hết hiệu ứng", "Chỉ áp dụng cho trang hiện tại", "Áp dụng hiệu ứng cho tất cả các trang", "Lưu bài"], correct: 2 },
-
-            // --- BÀI 11A & 11B: ĐA PHƯƠNG TIỆN & LUYỆN GÕ ---
-            { q: "Câu 14: Trang web nào an toàn để em tìm kiếm video phù hợp lứa tuổi?", a: ["Facebook", "YouTube Kids", "Zalo", "TikTok"], correct: 1 },
-            { q: "Câu 15: Khi đang xem video, muốn tạm dừng em nhấn nút nào?", a: ["Play (Tam giác)", "Pause (Hai gạch dọc)", "Volume (Loa)", "Full screen"], correct: 1 },
-            { q: "Câu 16: Phím nào giúp em gõ được chữ in hoa hoặc ký tự trên của phím số?", a: ["Ctrl", "Alt", "Shift", "Tab"], correct: 2 },
-            { q: "Câu 17: Để gõ dấu chấm than (!), em nhấn tổ hợp phím nào?", a: ["Shift + 1", "Shift + 2", "Ctrl + 1", "Alt + 1"], correct: 0 },
-
-            // --- BÀI 12: LÀM QUEN SCRATCH ---
-            { q: "Câu 18: Biểu tượng của phần mềm Scratch là hình gì?", a: ["Con chim", "Chú mèo", "Con rùa", "Con cá"], correct: 1 },
-            { q: "Câu 19: Khu vực nào là nơi nhân vật biểu diễn các hành động?", a: ["Khu vực Lệnh", "Khu vực Kịch bản", "Sân khấu (Stage)", "Thanh thực đơn"], correct: 2 },
-            { q: "Câu 20: Để bắt đầu chạy chương trình, em nhấn vào biểu tượng nào?", a: ["Hình bát giác đỏ", "Lá cờ xanh", "Hình tròn vàng", "Ngôi sao"], correct: 1 },
-            { q: "Câu 21: Để dừng chương trình, em nhấn vào biểu tượng nào?", a: ["Lá cờ xanh", "Hình bát giác đỏ (Stop)", "Hình tam giác", "Hình vuông"], correct: 1 },
-
-            // --- BÀI 13: KỂ CHUYỆN VỚI SCRATCH ---
-            { q: "Câu 22: Khối lệnh 'nói ... trong ... giây' (Say ... for ... seconds) thuộc nhóm lệnh nào?", a: ["Chuyển động (Màu xanh dương)", "Hiển thị (Màu tím)", "Sự kiện (Màu vàng)", "Âm thanh (Màu hồng)"], correct: 1 },
-            { q: "Câu 23: Khối lệnh 'Khi bấm vào cờ xanh' thuộc nhóm lệnh nào?", a: ["Sự kiện (Events)", "Điều khiển (Control)", "Cảm biến (Sensing)", "Hiển thị (Looks)"], correct: 0 },
-            { q: "Câu 24: Trong Scratch, các khối lệnh được thực hiện theo thứ tự nào?", a: ["Từ dưới lên trên", "Thứ tự ngẫu nhiên", "Từ trên xuống dưới (Tuần tự)", "Thực hiện cùng lúc"], correct: 2 },
-            { q: "Câu 25: Làm thế nào để xóa một khối lệnh?", a: ["Kéo thả khối lệnh ngược lại vào vùng chứa lệnh bên trái", "Nhấn nút Xóa trên bàn phím", "Nháy đúp chuột", "Tắt phần mềm"], correct: 0 },
-
-            // --- BÀI 14: ĐIỀU KHIỂN NHÂN VẬT ---
-            { q: "Câu 26: Nhóm lệnh Chuyển động (Motion) có màu gì?", a: ["Màu tím", "Màu xanh dương", "Màu vàng", "Màu cam"], correct: 1 },
-            { q: "Câu 27: Khối lệnh nào giúp nhân vật tiến về phía trước?", a: ["di chuyển 10 bước", "xoay 15 độ", "lướt tới vị trí ngẫu nhiên", "nói Xin chào"], correct: 0 },
-            { q: "Câu 28: Nếu muốn nhân vật không đi ra ngoài sân khấu rồi biến mất, ta dùng lệnh nào?", a: ["xoay 90 độ", "bật lại nếu chạm cạnh", "đi tới điểm x:0 y:0", "ẩn"], correct: 1 },
-            { q: "Câu 29: Để nhân vật đi thành hình vuông, ta kết hợp lệnh Di chuyển với lệnh nào?", a: ["Nói", "Xoay (90 độ)", "Đợi", "Âm thanh"], correct: 1 },
-            { q: "Câu 30: Nếu thay đổi số bước di chuyển từ 10 thành 50, nhân vật sẽ di chuyển thế nào?", a: ["Chậm hơn", "Nhanh hơn và xa hơn", "Đứng yên", "Đi lùi"], correct: 1 }
+            // --- 20 CÂU BIẾN THỂ (NỘI DUNG HỌC KÌ 2 - CHÂN TRỜI SÁNG TẠO) ---
+            { q: "Câu 11: Trong phần mềm soạn thảo, phím tắt nào dùng để DÁN (Paste) văn bản?", a: ["Ctrl + C", "Ctrl + V", "Ctrl + X", "Ctrl + Z"], correct: 1 },
+            { q: "Câu 12: Tác dụng của lệnh Copy trong thẻ Home là gì?", a: ["Xóa đoạn văn bản", "In đậm văn bản", "Sao chép đoạn văn bản được chọn", "Cắt đoạn văn bản"], correct: 2 },
+            { q: "Câu 13: Trong PowerPoint, nhóm lệnh Font nằm ở thẻ nào?", a: ["Home", "Insert", "Design", "Transitions"], correct: 0 },
+            { q: "Câu 14: Để căn giữa đoạn văn bản trong trang chiếu, em dùng nút lệnh nào?", a: ["Align Left", "Center", "Align Right", "Justify"], correct: 1 },
+            { q: "Câu 15: Thẻ Animations trong PowerPoint dùng để làm gì?", a: ["Thay đổi màu nền trang chiếu", "Tạo hiệu ứng xuất hiện cho đối tượng", "Thêm trang chiếu mới", "Lưu bài trình chiếu"], correct: 1 },
+            { q: "Câu 16: Thẻ Transitions dùng để làm gì?", a: ["Tạo hiệu ứng chuyển trang chiếu", "Thêm hình ảnh", "Đổi phông chữ", "Viết chữ nghệ thuật"], correct: 0 },
+            { q: "Câu 17: Phím tắt nào dùng để bắt đầu trình chiếu ngay từ ban đầu?", a: ["F1", "F3", "F5", "Esc"], correct: 2 },
+            { q: "Câu 18: Đuôi mở rộng mặc định của một tệp trình chiếu PowerPoint là gì?", a: [".docx", ".xlsx", ".pptx", ".txt"], correct: 2 },
+            { q: "Câu 19: Khi thực hành gõ bàn phím bằng 10 ngón, hai phím có gai (gờ nổi) là:", a: ["F và J", "G và H", "A và S", "K và L"], correct: 0 },
+            { q: "Câu 20: Việc đặt tay đúng vị trí khi gõ bàn phím mang lại lợi ích gì?", a: ["Giúp chơi game giỏi hơn", "Máy tính chạy nhanh hơn", "Giúp gõ nhanh, chính xác và đỡ mỏi tay", "Tăng tuổi thọ của bàn phím"], correct: 2 },
+            { q: "Câu 21: Phần mềm Scratch là gì?", a: ["Phần mềm soạn thảo văn bản", "Phần mềm tạo bài trình chiếu", "Phần mềm lập trình trực quan, tạo hoạt hình", "Phần mềm diệt virus"], correct: 2 },
+            { q: "Câu 22: Biểu tượng mặc định của nhân vật (Sprite) trong Scratch là con vật nào?", a: ["Con chó", "Chú mèo", "Con khỉ", "Con rùa"], correct: 1 },
+            { q: "Câu 23: Làm thế nào để xóa một khối lệnh em đã lỡ kéo nhầm vào khu vực lập trình?", a: ["Kéo khối lệnh trả lại về khu vực nhóm lệnh", "Bấm nút nguồn máy tính", "Không thể xóa được", "Nháy đúp chuột vào màn hình"], correct: 0 },
+            { q: "Câu 24: Khối lệnh màu Cam (Control - Điều khiển) thường chứa lệnh nào?", a: ["lặp lại 10 lần", "di chuyển 10 bước", "nói Xin chào", "đổi phông nền"], correct: 0 },
+            { q: "Câu 25: Lệnh 'đợi 1 giây' nằm trong nhóm lệnh nào của Scratch?", a: ["Motion (Chuyển động)", "Events (Sự kiện)", "Control (Điều khiển)", "Operators (Phép toán)"], correct: 2 },
+            { q: "Câu 26: Để thêm một hình nền mới cho Sân khấu, em chọn công cụ nào?", a: ["Choose a Sprite", "Choose a Backdrop", "Costumes", "Sounds"], correct: 1 },
+            { q: "Câu 27: Đâu là lệnh có tác dụng làm quay nhân vật một góc nhất định?", a: ["đi tới điểm x, y", "hiện", "xoay 15 độ", "nói Xin chào"], correct: 2 },
+            { q: "Câu 28: Nhóm lệnh Sự kiện (Events) màu Vàng thường chứa khối lệnh khởi động nào để bắt đầu chạy kịch bản?", a: ["Khi bấm vào lá cờ xanh", "Lặp lại liên tục", "Nếu - thì", "Ẩn nhân vật"], correct: 0 },
+            { q: "Câu 29: Làm thế nào để nhân vật tự động quay vào trong khi đi đụng vào mép sân khấu?", a: ["Dùng lệnh 'Ẩn'", "Dùng lệnh 'Bật lại nếu chạm cạnh'", "Chỉnh kích thước nhỏ lại", "Xóa nhân vật"], correct: 1 },
+            { q: "Câu 30: Một bài trình chiếu có chữ quá nhỏ và nhiều màu sắc sặc sỡ sẽ gây ra hậu quả gì?", a: ["Làm bài chiếu đẹp hơn", "Trang chiếu hiển thị nhanh hơn", "Rất dễ theo dõi", "Gây rối mắt và khó đọc cho người xem"], correct: 3 }
         ];
 
         function renderQuiz() {
@@ -219,5 +251,48 @@
         <div>STK: 0937438939  |  Ngân hàng: Vietinbank</div>
     </footer>
 
+
+    <script type="module">
+        import { db } from '../firebase-config.js';
+        import { collection, addDoc, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+        
+        window.firebaseDB = db;
+        window.firebaseAddDoc = addDoc;
+        window.firebaseCollection = collection;
+
+        // Auto apply global shuffle setting
+        getDoc(doc(db, "settings", "quizConfig")).then(snap => {
+            if (snap.exists() && snap.data().shuffle) {
+                if (typeof window.triggerGlobalShuffle === 'function') {
+                    window.triggerGlobalShuffle();
+                }
+            }
+        });
+    </script>
+    <script>
+        async function submitToFirebase(score, total, answersLog) {
+            if(!window.firebaseDB) return;
+            const btn = document.querySelector('.btn-check') || document.querySelector('.btn-submit');
+            const originalText = btn ? btn.innerText : '';
+            if(btn) { btn.innerText = 'Đang nộp bài...'; btn.disabled = true; }
+            try {
+                await window.firebaseAddDoc(window.firebaseCollection(window.firebaseDB, "submissions"), {
+                    studentName: studentInfo.name,
+                    studentClass: studentInfo.class,
+                    quizType: "ontaphk2",
+                    score: score,
+                    total: total,
+                    answers: answersLog,
+                    schoolId: "tin-hoc-4",
+                    createdAt: new Date().toISOString()
+                });
+                alert("Nộp bài thành công!");
+            } catch (e) {
+                alert("Lỗi nộp bài: " + e.message);
+            }
+            if(btn) { btn.innerText = originalText; btn.disabled = false; }
+        }
+    </script>
+      
 </body>
 </html>
