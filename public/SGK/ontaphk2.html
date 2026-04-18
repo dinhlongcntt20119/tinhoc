@@ -72,6 +72,8 @@
         .input-group label { display: block; font-weight: bold; margin-bottom: 8px; color: #555; }
         .input-group input { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; box-sizing: border-box; }
         .sub-title { font-size: 0.9rem; }
+
+        .missing-alert { border: 2px solid #e74c3c !important; box-shadow: 0 0 8px rgba(231, 76, 60, 0.4) !important; }
 </style>
 </head>
 <body>
@@ -199,7 +201,30 @@
             });
         }
 
+        
+        function validateCompletion() {
+            let unanswered = [];
+            questions.forEach((q, index) => {
+                const selected = document.querySelector(`input[name="q${index}"]:checked`);
+                const card = document.getElementById(`card-${index}`);
+                if (!selected) {
+                    card.classList.add('missing-alert');
+                    unanswered.push(card);
+                } else {
+                    card.classList.remove('missing-alert');
+                }
+            });
+
+            if (unanswered.length > 0) {
+                unanswered[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+                alert("Em chưa hoàn thành tất cả các câu hỏi! Vui lòng kiểm tra các câu bị viền đỏ.");
+                return false;
+            }
+            return true;
+        }
+
         function submitQuiz() {
+            if (!validateCompletion()) return;
             let score = 0;
             let answersLog = "";
             questions.forEach((q, index) => {

@@ -84,6 +84,7 @@ export default function App() {
             <ul className="lesson-list">
               <li><a href="/VBT/vbtontaphk2.html" className="lesson-link"><i className="fas fa-book-open"></i> Vở bài tập</a></li>
               <li><a href="/SGK/ontaphk2.html" className="lesson-link"><i className="fas fa-check-square"></i> Trắc nghiệm</a></li>
+              <li><a href="/SGK/thuchanhhk2.html" className="lesson-link"><i className="fas fa-keyboard"></i> Thực hành</a></li>
             </ul>
           </div>
         </div>
