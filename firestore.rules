@@ -12,6 +12,11 @@ service cloud.firestore {
     function incoming() { return request.resource.data; }
     function existing() { return resource.data; }
 
+    function isSignedIn() { return request.auth != null; }
+    function isAdmin() { 
+      return isSignedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
     function isValidSubmission(data) {
       return data.studentName is string && data.studentName.size() <= 100 &&
              data.studentClass is string && data.studentClass.size() <= 50 &&
@@ -35,19 +40,19 @@ service cloud.firestore {
     }
 
     match /submissions/{submissionId} {
-      allow get: if resource.data.schoolId == 'tin-hoc-4';
-      allow list: if resource.data.schoolId == 'tin-hoc-4';
+      allow get, list, delete: if isSignedIn();
       allow create: if isValidId(submissionId) && isValidSubmission(incoming());
-      allow update: if false; 
-      allow delete: if false;
+      allow update: if isSignedIn();
     }
 
     match /settings/{settingId} {
       allow get: if settingId == 'quizConfig';
-      allow list: if false;
-      allow create: if isValidId(settingId) && isValidQuizConfig(incoming());
-      allow update: if isValidQuizConfig(incoming()) && incoming().diff(existing()).affectedKeys().hasOnly(['shuffle', 'updatedAt']);
-      allow delete: if false;
+      allow list: if isSignedIn();
+      allow create, update, delete: if isSignedIn() && isValidQuizConfig(incoming());
+    }
+
+    match /admins/{uid} {
+      allow read, write: if isSignedIn();
     }
   }
 }

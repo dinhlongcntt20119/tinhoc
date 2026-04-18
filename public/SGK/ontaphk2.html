@@ -101,8 +101,6 @@
     
 
 
-    
-
     <main class="container" id="mainPage" style="display:none">
         <div id="quiz-container"></div>
         <div class="breadcrumb">
@@ -262,9 +260,13 @@
 
         function resetQuiz() {
             if(confirm("Làm lại từ đầu?")) {
-                renderQuiz();
-                window.scrollTo(0, 0);
+                location.reload();
             }
+        }
+
+        window.triggerGlobalShuffle = function() {
+            questions.sort(() => Math.random() - 0.5);
+            renderQuiz();
         }
 
         function closeModal() {

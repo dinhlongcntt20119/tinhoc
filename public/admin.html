@@ -151,10 +151,12 @@
     </div>
 
     <script type="module">
-        import { db } from './firebase-config.js';
+        import { db, auth } from './firebase-config.js';
         import { collection, query, where, getDocs, doc, setDoc, getDoc, deleteDoc, orderBy } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+        import { signInAnonymously } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
 
         window.db = db;
+        window.auth = auth;
         let currentQuizType = 'ontaphk2';
         let allSubmissions = [];
         let filteredSubmissions = [];
@@ -310,23 +312,38 @@
             loadQuizData(quizType);
         };
 
+        window.checkLogin = async function() {
+            const u = document.getElementById('username').value;
+            const p = document.getElementById('password').value;
+            if (u === 'Admin' && p === 'thaylongtinhoc') {
+                const btn = document.querySelector('.btn-full');
+                const origText = btn.innerText;
+                btn.innerText = 'Đang xác thực...';
+                btn.disabled = true;
+                try {
+                    await signInAnonymously(auth);
+                    sessionStorage.setItem('isAdmin', 'true');
+                    showDashboard();
+                } catch (e) {
+                    alert("Lỗi xác thực: " + e.message);
+                }
+                btn.innerText = origText;
+                btn.disabled = false;
+            } else {
+                document.getElementById('error-msg').style.display = 'block';
+            }
+        };
+
         // Initial load
-        window.loadQuizData('ontaphk2');
+        if (sessionStorage.getItem('isAdmin') === 'true') {
+            // Re-authenticate if session exists
+            signInAnonymously(auth).catch(console.error);
+            window.loadQuizData('ontaphk2');
+        }
     </script>
     
     <script>
         // Use simple global functions for non-module parts if needed
-        function checkLogin() {
-            const u = document.getElementById('username').value;
-            const p = document.getElementById('password').value;
-            if (u === 'Admin' && p === 'thaylongtinhoc') {
-                sessionStorage.setItem('isAdmin', 'true');
-                showDashboard();
-            } else {
-                document.getElementById('error-msg').style.display = 'block';
-            }
-        }
-
         function showDashboard() {
             document.getElementById('login-view').style.display = 'none';
             document.getElementById('dashboard').style.display = 'block';
