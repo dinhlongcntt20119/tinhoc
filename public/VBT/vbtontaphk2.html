@@ -469,7 +469,7 @@
     </div>
 
     <div class="question-block" id="q17">
-        <div class="question-title">17. Trong các lệnh của Scratch có những giá trị (số hoặc chữ) có thể thay đổi được, gọi là tham số của lệnh. Đúng ghi Đ, sai ghi S.</div>
+        <div class="question-title">17. Trong các lệnh của Scratch có những giá trị (số hoặc chữ) có thể thay đổi được, gọi là tham số của lệnh. Đúng ghi ��, sai ghi S.</div>
         <table class="custom-table">
             <tr><th style="text-align: left;">Nội dung</th><th width="60">Đ</th><th width="60">S</th></tr>
             <tr>
@@ -809,7 +809,44 @@
             }
         });
 
-        alert("Đã kiểm tra bài làm. Các phần sai sẽ được khoanh đỏ và hiển thị đáp án bên dưới.");
+        let score = 0;
+        let total = 0;
+        let answersLog = "";
+
+        document.querySelectorAll('.question-block').forEach((block, index) => {
+            total++;
+            let qTitle = block.querySelector('.question-title');
+            let qName = qTitle ? qTitle.innerText.split(':')[0].trim() : ("Câu " + (index + 1));
+            
+            let isWrong = block.querySelector('.wrong') || block.querySelector('.wrong-ans');
+            
+            let showAns = block.querySelector('.show-answer-box');
+            if (showAns && showAns.style.display === 'block') {
+                if (block.id !== 'q8' && block.id !== 'q18') {
+                    isWrong = true;
+                }
+            }
+
+            if (block.id === 'q8') {
+                let q8Agree = document.querySelector('input[name="q8_agree"]:checked');
+                isWrong = (!q8Agree || q8Agree.value !== 'yes');
+            }
+
+            if (block.id === 'q18') {
+                isWrong = false; // Tự luận, đã validate là có điền rồi
+            }
+
+            if (!isWrong) {
+                score++;
+                answersLog += `${qName}: ${(block.id === 'q18') ? "Đã nhập tự luận" : "Đúng"}\n`;
+            } else {
+                answersLog += `${qName}: Sai\n`;
+            }
+        });
+
+        submitToFirebase(score, total, answersLog);
+
+        alert(`Đã nộp bài! Bạn làm đúng ${score}/${total} câu. Các phần sai sẽ được khoanh đỏ và hiển thị đáp án bên dưới.`);
     }
 
     function checkRadioGroup(name, correctVal) {

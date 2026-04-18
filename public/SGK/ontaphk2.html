@@ -101,7 +101,8 @@
 
     
 
-    <main class="container" id="mainPage" style="display:none" id="quiz-container">
+    <main class="container" id="mainPage" style="display:none">
+        <div id="quiz-container"></div>
         <div class="breadcrumb">
             <a href="../index.html"><i class="fas fa-home"></i> Trang chủ</a> 
             <i class="fas fa-chevron-right"></i> Ôn tập học kì 2
@@ -200,6 +201,7 @@
 
         function submitQuiz() {
             let score = 0;
+            let answersLog = "";
             questions.forEach((q, index) => {
                 const selected = document.querySelector(`input[name="q${index}"]:checked`);
                 const card = document.getElementById(`card-${index}`);
@@ -207,6 +209,7 @@
 
                 if (selected) {
                     const val = parseInt(selected.value);
+                    answersLog += `Câu ${index + 1}: Chọn đáp án ${val + 1} - ${val === q.correct ? "ĐÚNG" : "SAI"}\n`;
                     if (val === q.correct) {
                         score++;
                         document.getElementById(`opt-${index}-${val}`).classList.add('correct-answer');
@@ -215,6 +218,7 @@
                         document.getElementById(`opt-${index}-${q.correct}`).classList.add('correct-answer');
                     }
                 } else {
+                    answersLog += `Câu ${index + 1}: Không chọn - SAI\n`;
                     document.getElementById(`opt-${index}-${q.correct}`).classList.add('correct-answer');
                 }
             });
@@ -228,6 +232,7 @@
             
             document.getElementById('feedbackText').innerText = msg;
             document.getElementById('resultModal').style.display = 'flex';
+        if(typeof submitToFirebase === "function") submitToFirebase(score, questions.length, answersLog);
         }
 
         function resetQuiz() {
