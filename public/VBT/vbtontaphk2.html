@@ -846,7 +846,7 @@ function startTest() {
         let resultMsg = "Đã kiểm tra xong bài làm!\nĐúng: " + numCorrect + " ý\nSai/Thiếu: " + numWrong + " ý\nThời gian làm bài: " + timeStr;
 
         if (window.saveToFirebase) {
-            window.saveToFirebase(stdName, stdClass, numCorrect, totalItems, timeStr).then(() => {
+            window.saveToFirebase(stdName, stdClass, Math.round((numCorrect / totalItems) * 100), 100, timeStr).then(() => {
                 alert(resultMsg + "\n\n[Hệ thống đã lưu kết quả của bạn!]");
             }).catch(e => {
                 alert(resultMsg + "\n\n(Lỗi khi lưu kết quả: " + e.message + ")");

@@ -29,8 +29,8 @@ service cloud.firestore {
              (
                (data.quizType == 'ontaphk2' && data.keys().hasAll(['studentName', 'studentClass', 'quizType', 'score', 'total', 'answers', 'schoolId', 'createdAt']) && 
                 data.score is number && data.total is number && data.answers is string && data.answers.size() <= 10000) ||
-               (data.quizType == 'vbtontaphk2' && data.keys().hasAll(['studentName', 'studentClass', 'quizType', 'score', 'total', 'schoolId', 'createdAt']) && 
-                data.score is number && data.total is number) ||
+               (data.quizType == 'vbtontaphk2' && data.keys().hasAll(['studentName', 'studentClass', 'quizType', 'score', 'total', 'timeTaken', 'schoolId', 'createdAt']) && 
+                data.score is number && data.total is number && data.timeTaken is string && data.timeTaken.size() <= 100) ||
                (data.quizType == 'thuchanhhk2' && data.keys().hasAll(['studentName', 'studentClass', 'quizType', 'schoolId', 'createdAt']) && data.keys().size() == 5)
              );
     }
