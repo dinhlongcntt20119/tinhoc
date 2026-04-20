@@ -507,30 +507,43 @@
 </footer>
 
 <!-- ══════════════════════════════════════════
-     FIREBASE – MODULE (giống ontaphk2.html)
+     FIREBASE – tự khởi tạo (không dùng import)
 ══════════════════════════════════════════ -->
 <script type="module">
-    import { db } from '../firebase-config.js';
-    import { collection, addDoc, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+    import { initializeApp }                        from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, doc, getDoc }
+                                                    from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+        projectId:          "gen-lang-client-0903475277",
+        appId:              "1:389483035958:web:1764fb5d0d98eea72bc797",
+        apiKey:             "AIzaSyDsmKup0Y3YmLQp6Yz2YCIqSiz9ODPspyw",
+        authDomain:         "gen-lang-client-0903475277.firebaseapp.com",
+        firestoreDatabaseId:"ai-studio-5db37e65-acf1-4257-8131-b31b840cd004"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db  = getFirestore(app, firebaseConfig.firestoreDatabaseId);
 
     window.firebaseDB         = db;
     window.firebaseAddDoc     = addDoc;
     window.firebaseCollection = collection;
 
     // Áp dụng cài đặt đảo câu hỏi toàn cục
-    getDoc(doc(db, "settings", "quizConfig")).then(snap => {
+    try {
+        const snap = await getDoc(doc(db, "settings", "quizConfig"));
         if (snap.exists() && snap.data().shuffle) {
             if (typeof window.triggerGlobalShuffle === 'function') {
                 window.triggerGlobalShuffle();
             }
         }
-    });
+    } catch(e) { console.warn("Không tải được cài đặt shuffle:", e.message); }
 </script>
 
 <script>
     async function submitToFirebase(score, total, answersLog) {
         if (!window.firebaseDB) {
-            throw new Error("Không kết nối được Firebase. Kiểm tra đường dẫn firebase-config.js.");
+            throw new Error("Firebase chưa khởi tạo – vui lòng tải lại trang.");
         }
         const now = new Date();
         const submittedAt = now.toLocaleString('vi-VN', {
@@ -538,8 +551,9 @@
             hour: '2-digit', minute: '2-digit', second: '2-digit',
             hour12: false
         });
-        try {
-            await window.firebaseAddDoc(window.firebaseCollection(window.firebaseDB, "submissions"), {
+        await window.firebaseAddDoc(
+            window.firebaseCollection(window.firebaseDB, "submissions"),
+            {
                 studentName:  studentInfo.name,
                 studentClass: studentInfo.class,
                 quizType:     "ontapk1hk2",
@@ -549,12 +563,8 @@
                 schoolId:     "tin-hoc-4",
                 submittedAt:  submittedAt,
                 createdAt:    now.toISOString()
-            });
-        } catch (e) {
-            // In lỗi chi tiết ra console để dễ debug
-            console.error("[Firebase] Lỗi ghi dữ liệu:", e.code, e.message);
-            throw e;
-        }
+            }
+        );
     }
 </script>
 
