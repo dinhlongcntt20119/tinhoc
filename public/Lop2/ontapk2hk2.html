@@ -616,31 +616,10 @@
         else msg = "💪 Cố gắng lên! Em hãy đọc lại bài và luyện tập thêm nhé!";
         document.getElementById('feedbackText').innerText = msg;
 
-        // Reset Firebase status về trạng thái loading
-        setFirebaseStatus("loading", "Đang lưu kết quả lên hệ thống...");
-        document.getElementById('closeModalBtn').disabled = true;
-        document.getElementById('closeModalBtn').style.opacity = '.5';
-        document.getElementById('closeModalBtn').style.cursor = 'not-allowed';
-
         document.getElementById('resultModal').style.display = 'flex';
 
-        if (typeof submitToFirebase === "function") {
-            submitToFirebase(score, questions.length, answersLog);
-        } else {
-            // Firebase chưa load xong, chờ tối đa 5 giây
-            let waited = 0;
-            const waitInterval = setInterval(() => {
-                waited += 200;
-                if (typeof submitToFirebase === "function") {
-                    clearInterval(waitInterval);
-                    submitToFirebase(score, questions.length, answersLog);
-                } else if (waited >= 5000) {
-                    clearInterval(waitInterval);
-                    setFirebaseStatus("error", "Không kết nối được hệ thống. Vui lòng thử lại.");
-                    enableCloseBtn();
-                }
-            }, 200);
-        }
+        if(typeof submitToFirebase === "function") submitToFirebase(score, questions.length, answersLog);
+        else enableCloseBtn();
     }
 
     function resetQuiz() {
@@ -718,12 +697,14 @@
 </script>
 <script>
     async function submitToFirebase(score, total, answersLog) {
-        if (!window.firebaseDB) {
-            setFirebaseStatus("error", "Không kết nối được Firebase. Vui lòng thử lại.");
-            enableCloseBtn();
-            return;
-        }
+        if(!window.firebaseDB) return;
+        const btn = document.querySelector('.btn-submit');
+        const originalText = btn ? btn.innerText : '';
+        if(btn) { btn.innerText = 'Đang nộp bài...'; btn.disabled = true; }
         setFirebaseStatus("loading", "Đang lưu kết quả lên hệ thống...");
+        document.getElementById('closeModalBtn').disabled = true;
+        document.getElementById('closeModalBtn').style.opacity = '.5';
+        document.getElementById('closeModalBtn').style.cursor = 'not-allowed';
         try {
             await window.firebaseAddDoc(window.firebaseCollection(window.firebaseDB, "submissions"), {
                 studentName:  studentInfo.name,
@@ -735,10 +716,11 @@
                 schoolId:     "tin-hoc-4",
                 createdAt:    new Date().toISOString()
             });
-            setFirebaseStatus("success", "✅ Nộp bài thành công! Kết quả đã được lưu.");
+            setFirebaseStatus("success", "Nộp bài thành công! Kết quả đã được lưu.");
         } catch (e) {
-            setFirebaseStatus("error", "❌ Lỗi nộp bài: " + e.message);
+            setFirebaseStatus("error", "Lỗi nộp bài: " + e.message);
         }
+        if(btn) { btn.innerText = originalText; btn.disabled = false; }
         enableCloseBtn();
     }
 </script>
