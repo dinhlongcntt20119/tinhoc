@@ -546,11 +546,7 @@
             throw new Error("Firebase chưa khởi tạo – vui lòng tải lại trang.");
         }
         const now = new Date();
-        const submittedAt = now.toLocaleString('vi-VN', {
-            day: '2-digit', month: '2-digit', year: 'numeric',
-            hour: '2-digit', minute: '2-digit', second: '2-digit',
-            hour12: false
-        });
+
         await window.firebaseAddDoc(
             window.firebaseCollection(window.firebaseDB, "submissions"),
             {
@@ -561,7 +557,6 @@
                 total:        total,
                 answers:      answersLog,
                 schoolId:     "tin-hoc-4",
-                submittedAt:  submittedAt,
                 createdAt:    now.toISOString()
             }
         );
