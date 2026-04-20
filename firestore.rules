@@ -31,6 +31,15 @@ service cloud.firestore {
                 data.score is number && data.total is number && data.answers is string && data.answers.size() <= 10000) ||
                (data.quizType == 'ontapk1hk2' && data.keys().hasAll(['studentName', 'studentClass', 'quizType', 'score', 'total', 'answers', 'schoolId', 'createdAt']) && 
                 data.score is number && data.total is number && data.answers is string && data.answers.size() <= 10000) ||
+               (data.quizType == 'ontapk2hk2' && data.keys().hasAll(['studentName', 'studentClass', 'quizType', 'score', 'total', 'answers', 'schoolId', 'createdAt']) && 
+                data.score is number && data.total is number && data.answers is string && data.answers.size() <= 10000) ||
+               (data.quizType == 'ontapk3hk2' && data.keys().hasAll(['studentName', 'studentClass', 'quizType', 'score', 'total', 'answers', 'schoolId', 'createdAt']) && 
+                data.score is number && data.total is number && data.answers is string && data.answers.size() <= 10000) ||
+               (data.quizType == 'ontapk5hk2' && data.keys().hasAll(['studentName', 'studentClass', 'quizType', 'score', 'total', 'answers', 'schoolId', 'createdAt']) && 
+                data.score is number && data.total is number && data.answers is string && data.answers.size() <= 10000) ||
+               (data.quizType == 'tuluank3hk2' && data.keys().hasAll(['studentName', 'studentClass', 'quizType', 'score', 'total', 'answers', 'schoolId', 'createdAt']) && 
+                data.score is number && data.total is number && data.answers is string && data.answers.size() <= 10000) ||
+               (data.quizType == 'thuchanhk5hk2' && data.keys().hasAll(['studentName', 'studentClass', 'quizType', 'schoolId', 'createdAt']) && data.keys().size() == 5) ||
                (data.quizType == 'vbtontaphk2' && data.keys().hasAll(['studentName', 'studentClass', 'quizType', 'score', 'total', 'timeTaken', 'schoolId', 'createdAt']) && 
                 data.score is number && data.total is number && data.timeTaken is string && data.timeTaken.size() <= 100) ||
                (data.quizType == 'thuchanhhk2' && data.keys().hasAll(['studentName', 'studentClass', 'quizType', 'schoolId', 'createdAt']) && data.keys().size() == 5)

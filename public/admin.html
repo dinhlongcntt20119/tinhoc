@@ -193,9 +193,9 @@
             </div>
 
             <div class="tabs">
-                <div class="tab active" data-type="ontaphk2" onclick="switchTab('trac-nghiem', 'ontaphk2')">Ôn tập trắc nghiệm HK2</div>
-                <div class="tab" data-type="vbtontaphk2" onclick="switchTab('vo-bai-tap', 'vbtontaphk2')">Ôn tập VBT HK2</div>
-                <div class="tab" data-type="thuchanhhk2" onclick="switchTab('thuc-hanh', 'thuchanhhk2')">Ôn tập thực hành HK2</div>
+                <div class="tab active" data-tab-id="trac-nghiem" data-type="ontaphk2" onclick="switchTab('trac-nghiem', 'ontaphk2')">Ôn tập trắc nghiệm HK2</div>
+                <div class="tab" data-tab-id="vo-bai-tap" data-type="vbtontaphk2" onclick="switchTab('vo-bai-tap', 'vbtontaphk2')">Ôn tập VBT HK2</div>
+                <div class="tab" data-tab-id="thuc-hanh" data-type="thuchanhhk2" onclick="switchTab('thuc-hanh', 'thuchanhhk2')">Ôn tập thực hành HK2</div>
             </div>
 
             <div id="tab-container">
@@ -275,12 +275,30 @@
         let currentGrade = null;
 
         // Mapping quizType trắc nghiệm theo từng khối
+        // Mapping quizType cho từng tab theo khối
         const GRADE_TRACNGHIEM_TYPE = {
             1: 'ontapk1hk2',
-            // Khối 2-5 dùng 'ontaphk2' mặc định
+            2: 'ontapk2hk2',
+            3: 'ontapk3hk2',
+            5: 'ontapk5hk2',
+            // Khối 4 dùng 'ontaphk2' mặc định
+        };
+        const GRADE_VBT_TYPE = {
+            3: 'tuluank3hk2',
+            // Các khối khác dùng 'vbtontaphk2' mặc định
+        };
+        const GRADE_THUCHANH_TYPE = {
+            5: 'thuchanhk5hk2',
+            // Các khối khác dùng 'thuchanhhk2' mặc định
         };
         function getTracNghiemType(grade) {
             return GRADE_TRACNGHIEM_TYPE[grade] || 'ontaphk2';
+        }
+        function getVbtType(grade) {
+            return GRADE_VBT_TYPE[grade] || 'vbtontaphk2';
+        }
+        function getThucHanhType(grade) {
+            return GRADE_THUCHANH_TYPE[grade] || 'thuchanhhk2';
         }
 
         const ADMIN_EMAIL = 'dinhlongcntt20119@gmail.com';
@@ -443,13 +461,15 @@
         };
 
         window.switchTab = function(tabId, quizType) {
-            // Nếu là tab trắc nghiệm, dùng quizType đúng theo khối hiện tại
-            if (tabId === 'trac-nghiem') {
-                quizType = getTracNghiemType(currentGrade);
-            }
+            // Recalculate correct quizType for current grade
+            if (tabId === 'trac-nghiem') quizType = getTracNghiemType(currentGrade);
+            if (tabId === 'vo-bai-tap')  quizType = getVbtType(currentGrade);
+            if (tabId === 'thuc-hanh')   quizType = getThucHanhType(currentGrade);
+
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.querySelector(`.tab[data-type="${quizType}"]`).classList.add('active');
-            
+            const activeTab = document.querySelector(`.tab[data-tab-id="${tabId}"]`);
+            if (activeTab) activeTab.classList.add('active');
+
             showClassList();
             loadQuizData(quizType);
         };
@@ -618,16 +638,28 @@
             document.getElementById('grade-selection-view').style.display = 'none';
             document.getElementById('dashboard-content').style.display = 'block';
 
-            // Cập nhật tab trắc nghiệm đúng quizType theo khối
+            // Cập nhật cả 3 tab đúng quizType theo khối
             const tracNghiemType = getTracNghiemType(grade);
-            const tracNghiemTab = document.querySelector('.tab[data-type]');
-            if (tracNghiemTab) {
-                tracNghiemTab.setAttribute('data-type', tracNghiemType);
-                tracNghiemTab.setAttribute('onclick', `switchTab('trac-nghiem', '${tracNghiemType}')`);
-            }
+            const vbtType        = getVbtType(grade);
+            const thucHanhType   = getThucHanhType(grade);
+
+            const tabConfigs = [
+                { selector: '[data-tab-id="trac-nghiem"]', type: tracNghiemType, id: 'trac-nghiem' },
+                { selector: '[data-tab-id="vo-bai-tap"]',  type: vbtType,        id: 'vo-bai-tap' },
+                { selector: '[data-tab-id="thuc-hanh"]',   type: thucHanhType,   id: 'thuc-hanh' },
+            ];
+            tabConfigs.forEach(({ selector, type, id }) => {
+                const tab = document.querySelector(selector);
+                if (tab) {
+                    tab.setAttribute('data-type', type);
+                    tab.setAttribute('onclick', `switchTab('${id}', '${type}')`);
+                }
+            });
+
             // Reset về tab trắc nghiệm khi đổi khối
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            if (tracNghiemTab) tracNghiemTab.classList.add('active');
+            const firstTab = document.querySelector('[data-tab-id="trac-nghiem"]');
+            if (firstTab) firstTab.classList.add('active');
             currentQuizType = tracNghiemType;
 
             loadQuizData(currentQuizType);
