@@ -78,6 +78,17 @@
 
         .empty-state { padding: 40px; text-align: center; color: #888; border: 2px dashed #ddd; border-radius: 12px; margin-top: 20px; }
 
+        /* Grade Selection Styles */
+        #grade-view { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-top: 30px; }
+        .grade-card { background: linear-gradient(135deg, #0056b3, #00a8ff); color: white; padding: 40px 20px; text-align: center; border-radius: 15px; cursor: pointer; font-weight: bold; font-size: 1.5rem; transition: 0.3s; box-shadow: 0 4px 15px rgba(0,0,0,0.1); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; }
+        .grade-card i { font-size: 2.5rem; }
+        .grade-card:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(0,0,0,0.2); filter: brightness(1.1); }
+        .grade-card.active { border: 4px solid #fffb00; box-shadow: 0 0 20px rgba(255, 251, 0, 0.4); }
+
+        #dashboard-content { display: none; }
+        .back-to-grades { margin-bottom: 20px; display: inline-flex; align-items: center; gap: 5px; color: #666; cursor: pointer; font-weight: 500; transition: 0.2s; }
+        .back-to-grades:hover { color: #0056b3; }
+
         /* Modal Styles */
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); align-items: center; justify-content: center; }
         .modal-content { background-color: white; padding: 30px; border-radius: 12px; width: 95%; max-width: 450px; position: relative; }
@@ -133,61 +144,99 @@
     <div class="container" id="dashboard">
         <h2 class="text-center"><i class="fas fa-chart-line"></i> Bảng điều khiển</h2>
 
-        <div class="switch-container">
-            <div style="text-align: left;">
-                <strong><i class="fas fa-random"></i> Đảo câu hỏi</strong>
-                <div style="font-size: 0.8rem; color: #666; margin-top: 3px;">Học sinh vào link sẽ gặp đề đảo nếu mục này ở trạng thái bật.</div>
-            </div>
-            <label class="switch">
-                <input type="checkbox" id="shuffleToggle">
-                <span class="slider"></span>
-            </label>
-        </div>
-
-        <div class="tabs">
-            <div class="tab active" data-type="ontaphk2" onclick="switchTab('trac-nghiem', 'ontaphk2')">Ôn tập trắc nghiệm HK2</div>
-            <div class="tab" data-type="vbtontaphk2" onclick="switchTab('vo-bai-tap', 'vbtontaphk2')">Ôn tập VBT HK2</div>
-            <div class="tab" data-type="thuchanhhk2" onclick="switchTab('thuc-hanh', 'thuchanhhk2')">Ôn tập thực hành HK2</div>
-        </div>
-
-        <div id="tab-container">
-            <div class="search-sort-bar">
-                <input type="text" id="searchInput" placeholder="Tìm kiếm tên học sinh..." oninput="applyFilters()">
-                <select id="sortSelect" onchange="applyFilters()">
-                    <option value="timeDesc">Mới nhất</option>
-                    <option value="timeAsc">Cũ nhất</option>
-                    <option value="scoreDesc">Điểm cao</option>
-                    <option value="nameAsc">Tên (A-Z)</option>
-                </select>
-            </div>
-
-            <div id="class-view">
-                <div class="class-grid" id="classGrid">
-                    <!-- Classes will be rendered here -->
+        <!-- Grade Selection Section -->
+        <div id="grade-selection-view">
+            <p class="text-center" style="color: #666; margin-bottom: 20px;">Vui lòng chọn khối lớp để xem kết quả:</p>
+            <div id="grade-view">
+                <div class="grade-card" onclick="selectGrade(1)">
+                    <i class="fas fa-child"></i>
+                    Khối 1
+                </div>
+                <div class="grade-card" onclick="selectGrade(2)">
+                    <i class="fas fa-user-graduate"></i>
+                    Khối 2
+                </div>
+                <div class="grade-card" onclick="selectGrade(3)">
+                    <i class="fas fa-book-reader"></i>
+                    Khối 3
+                </div>
+                <div class="grade-card" onclick="selectGrade(4)">
+                    <i class="fas fa-laptop-code"></i>
+                    Khối 4
+                </div>
+                <div class="grade-card" onclick="selectGrade(5)">
+                    <i class="fas fa-graduation-cap"></i>
+                    Khối 5
                 </div>
             </div>
+        </div>
 
-            <div id="student-view" style="display: none;">
-                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-                    <button class="btn btn-back" onclick="showClassList()"><i class="fas fa-arrow-left"></i> Quay lại danh sách lớp</button>
-                    <button class="btn btn-export" onclick="exportData()"><i class="fas fa-file-excel"></i> Xuất Excel danh sách này</button>
+        <!-- Dashboard Content (hidden until grade is selected) -->
+        <div id="dashboard-content">
+            <div class="back-to-grades" onclick="showGradeSelection()">
+                <i class="fas fa-chevron-left"></i> Quay lại chọn khối lớp
+            </div>
+            
+            <div id="selected-grade-info" style="background: #e3f2fd; padding: 10px 15px; border-radius: 8px; color: #1565c0; font-weight: bold; margin-bottom: 20px; text-align: center; font-size: 1.1rem;">
+                Dữ liệu Khối <span id="displayGrade"></span>
+            </div>
+
+            <div class="switch-container">
+                <div style="text-align: left;">
+                    <strong><i class="fas fa-random"></i> Đảo câu hỏi</strong>
+                    <div style="font-size: 0.8rem; color: #666; margin-top: 3px;">Học sinh vào link sẽ gặp đề đảo nếu mục này ở trạng thái bật.</div>
                 </div>
-                <div id="selected-class-title" style="margin-bottom: 15px; font-weight: bold; font-size: 1.2rem; color: #0056b3;"></div>
-                <div style="overflow-x: auto;">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Họ và tên</th>
-                                <th>Lớp</th>
-                                <th>Điểm số</th>
-                                <th>Thời gian</th>
-                                <th>Thao tác</th>
-                            </tr>
-                        </thead>
-                        <tbody id="studentTableBody">
-                            <!-- Students will be rendered here -->
-                        </tbody>
-                    </table>
+                <label class="switch">
+                    <input type="checkbox" id="shuffleToggle">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div class="tabs">
+                <div class="tab active" data-type="ontaphk2" onclick="switchTab('trac-nghiem', 'ontaphk2')">Ôn tập trắc nghiệm HK2</div>
+                <div class="tab" data-type="vbtontaphk2" onclick="switchTab('vo-bai-tap', 'vbtontaphk2')">Ôn tập VBT HK2</div>
+                <div class="tab" data-type="thuchanhhk2" onclick="switchTab('thuc-hanh', 'thuchanhhk2')">Ôn tập thực hành HK2</div>
+            </div>
+
+            <div id="tab-container">
+                <div class="search-sort-bar">
+                    <input type="text" id="searchInput" placeholder="Tìm kiếm tên học sinh..." oninput="applyFilters()">
+                    <select id="sortSelect" onchange="applyFilters()">
+                        <option value="timeDesc">Mới nhất</option>
+                        <option value="timeAsc">Cũ nhất</option>
+                        <option value="scoreDesc">Điểm cao</option>
+                        <option value="nameAsc">Tên (A-Z)</option>
+                    </select>
+                </div>
+
+                <div id="class-view">
+                    <div class="class-grid" id="classGrid">
+                        <!-- Classes will be rendered here -->
+                    </div>
+                </div>
+
+                <div id="student-view" style="display: none;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                        <button class="btn btn-back" onclick="showClassList()"><i class="fas fa-arrow-left"></i> Quay lại danh sách lớp</button>
+                        <button class="btn btn-export" onclick="exportData()"><i class="fas fa-file-excel"></i> Xuất Excel danh sách này</button>
+                    </div>
+                    <div id="selected-class-title" style="margin-bottom: 15px; font-weight: bold; font-size: 1.2rem; color: #0056b3;"></div>
+                    <div style="overflow-x: auto;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Họ và tên</th>
+                                    <th>Lớp</th>
+                                    <th>Điểm số</th>
+                                    <th>Thời gian</th>
+                                    <th>Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody id="studentTableBody">
+                                <!-- Students will be rendered here -->
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -223,6 +272,7 @@
         window.db = db;
         window.auth = auth;
         let currentQuizType = 'ontaphk2';
+        let currentGrade = null;
 
         const ADMIN_EMAIL = 'dinhlongcntt20119@gmail.com';
 
@@ -249,20 +299,25 @@
 
         window.loadQuizData = async function(quizType) {
             currentQuizType = quizType;
+            if (!currentGrade) return;
+
             const classGrid = document.getElementById('classGrid');
             classGrid.innerHTML = '<div style="grid-column: 1/-1; text-align:center;">Đang tải...</div>';
             
             try {
                 const q = query(
                     collection(db, "submissions"), 
-                     
                     where("quizType", "==", quizType),
                     orderBy("createdAt", "desc")
                 );
                 const snap = await getDocs(q);
                 allSubmissions = [];
                 snap.forEach(doc => {
-                    allSubmissions.push({ id: doc.id, ...doc.data() });
+                    const data = doc.data();
+                    // Basic grade filtering based on studentClass first character
+                    if (data.studentClass && data.studentClass.startsWith(currentGrade.toString())) {
+                        allSubmissions.push({ id: doc.id, ...data });
+                    }
                 });
 
                 renderClasses();
@@ -539,10 +594,28 @@
             if (user && (user.email === ADMIN_EMAIL || user.isAnonymous)) {
                 if (sessionStorage.getItem('isAdmin') === 'true') {
                     showDashboard();
-                    window.loadQuizData(currentQuizType);
+                    // We don't auto-load quiz data here because user needs to select grade first
                 }
             }
         });
+
+        window.selectGrade = function(grade) {
+            currentGrade = grade;
+            document.getElementById('displayGrade').innerText = grade;
+            document.getElementById('grade-selection-view').style.display = 'none';
+            document.getElementById('dashboard-content').style.display = 'block';
+            
+            // Highlight active grade card (optional, since it hides anyway)
+            // Load initial tab data
+            loadQuizData(currentQuizType);
+        };
+
+        window.showGradeSelection = function() {
+            currentGrade = null;
+            document.getElementById('grade-selection-view').style.display = 'block';
+            document.getElementById('dashboard-content').style.display = 'none';
+            allSubmissions = [];
+        };
     </script>
     
     <script>

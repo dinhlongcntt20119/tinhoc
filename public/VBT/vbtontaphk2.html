@@ -724,10 +724,24 @@ function startTest() {
     }
 
     /* --- LOGIC CHẤM ĐIỂM --- */
+    let isSubmitting = false;
+
+    let _isSubmitting = false;
     function checkAll() {
+        if (_isSubmitting) return;
+        _isSubmitting = true;
+        if (isSubmitting) return;
         if (!validateCompletion()) {
             alert("Bạn chưa hoàn thành tất cả các câu hỏi! Vui lòng kiểm tra các ô được viền đỏ.");
             return;
+        }
+
+        const submitBtn = document.querySelector('.btn-check');
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.textContent = '\u23f3 \u0110ang n\u1ed9p b\u00e0i...';
+            submitBtn.style.opacity = '0.7';
+            submitBtn.style.cursor = 'not-allowed';
         }
 
         // Reset hiển thị đáp án cũ
@@ -845,14 +859,21 @@ function startTest() {
 
         let resultMsg = "Đã kiểm tra xong bài làm!\nĐúng: " + numCorrect + " ý\nSai/Thiếu: " + numWrong + " ý\nThời gian làm bài: " + timeStr;
 
+        // Hiện thông báo kết quả NGAY, không chờ Firebase
+        alert(resultMsg);
+
+        // Gửi Firebase ngầm sau khi đóng alert
         if (window.saveToFirebase) {
-            window.saveToFirebase(stdName, stdClass, Math.round((numCorrect / totalItems) * 100), 100).then(() => {
-                alert(resultMsg + "\n\n✅ Hệ thống đã lưu kết quả của bạn!");
-            }).catch(e => {
-                alert(resultMsg + "\n\n⚠️ Lỗi khi lưu kết quả: " + e.message);
-            });
-        } else {
-            alert(resultMsg);
+            const btn = document.querySelector('.btn-check');
+            if (btn) { btn.innerText = '⏳ Đang lưu...'; btn.disabled = true; }
+            window.saveToFirebase(stdName, stdClass, Math.round((numCorrect / totalItems) * 100), 100)
+                .then(() => {
+                    if (btn) { btn.innerText = '✅ Đã lưu kết quả'; }
+                })
+                .catch(e => {
+                    if (btn) { btn.innerText = '⚠️ Lưu thất bại – thử lại'; btn.disabled = false; btn.onclick = checkAll; }
+                    alert("⚠️ Lỗi khi lưu kết quả: " + e.message);
+                });
         }
 
 }

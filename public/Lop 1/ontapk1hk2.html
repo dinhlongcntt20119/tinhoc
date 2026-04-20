@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ôn tập Học kì 2 - Tin học 1</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Source+Code+Pro:wght@600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <style>
+        :root {
+            --primary-color: #1a7f37;
+            --accent-color: #2ea44f;
+            --bg-color: #f6fef8;
+            --text-color: #1c2526;
+            --correct: #28a745;
+            --wrong:   #dc3545;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Roboto', sans-serif; background-color: var(--bg-color); color: var(--text-color); }
+
+        /* ── Login Screen ─────────────────────────────── */
+        #loginScreen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(135deg, #1a7f37, #0d5e28);
+            display: flex; justify-content: center; align-items: center; z-index: 3000;
+        }
+        .login-box {
+            background: white; padding: 40px; border-radius: 16px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.25); width: 100%; max-width: 420px; text-align: center;
+        }
+        .login-box h2 { color: var(--primary-color); margin-bottom: 8px; font-size: 1.5rem; }
+        .login-box p  { color: #666; font-size: 0.9rem; margin-bottom: 25px; }
+        .input-group  { margin-bottom: 18px; text-align: left; }
+        .input-group label { display: block; font-weight: bold; margin-bottom: 7px; color: #444; font-size: 0.95rem; }
+        .input-group input {
+            width: 100%; padding: 12px 14px; border: 2px solid #e0e0e0; border-radius: 8px;
+            font-size: 1rem; transition: border-color .2s;
+        }
+        .input-group input:focus { border-color: var(--primary-color); outline: none; }
+        .btn-start {
+            width: 100%; padding: 14px; background: var(--accent-color); color: white;
+            border: none; border-radius: 30px; font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: .3s;
+        }
+        .btn-start:hover { background: #238636; transform: translateY(-1px); }
+
+        /* ── Header ───────────────────────────────────── */
+        header {
+            display: none;
+            background: linear-gradient(135deg, #1a7f37, #238636);
+            color: white; padding: 14px 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            border-bottom: 4px solid #6ed68a;
+        }
+        .header-content {
+            max-width: 1000px; margin: 0 auto;
+            display: flex; justify-content: space-between; align-items: center;
+            flex-wrap: wrap; gap: 10px;
+        }
+        .logo-title { font-family: 'Source Code Pro', monospace; font-size: 1.5rem; font-weight: bold; }
+        .header-info { font-size: 0.9rem; opacity: .9; text-align: right; }
+        .header-info .student-name { color: #fffb70; font-weight: bold; }
+
+        /* ── Container & Cards ────────────────────────── */
+        .container { max-width: 900px; margin: 30px auto; padding: 0 15px; }
+
+        .quiz-card {
+            background: white; border-radius: 12px; padding: 24px;
+            margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+            border-left: 5px solid var(--accent-color);
+        }
+        .q-title { font-weight: bold; font-size: 1.1rem; margin-bottom: 16px; color: #0d5e28; line-height: 1.5; }
+        .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+        .option-label {
+            display: flex; align-items: center; gap: 10px;
+            padding: 11px 14px; border: 2px solid #e0e0e0; border-radius: 8px;
+            cursor: pointer; transition: .2s; font-size: 0.97rem; word-break: break-word;
+        }
+        .option-label:hover { background: #f0fff4; border-color: var(--accent-color); }
+        .option-label input[type="radio"] { flex-shrink: 0; accent-color: var(--accent-color); width: 16px; height: 16px; }
+
+        /* Kết quả */
+        .correct-answer { background: #d4edda !important; border-color: var(--correct) !important; color: #155724; font-weight: bold; }
+        .wrong-answer   { background: #f8d7da !important; border-color: var(--wrong)   !important; color: #721c24; }
+        .missing-alert  { border: 2px solid #e74c3c !important; box-shadow: 0 0 10px rgba(231,76,60,.4) !important; }
+
+        /* Nhãn đáp án A B C D */
+        .opt-letter {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 26px; height: 26px; background: var(--accent-color); color: white;
+            border-radius: 50%; font-weight: bold; font-size: 0.85rem; flex-shrink: 0;
+        }
+        .correct-answer .opt-letter { background: var(--correct); }
+        .wrong-answer   .opt-letter { background: var(--wrong); }
+
+        /* Icon minh hoạ (emoji option) */
+        .opt-icon { font-size: 1.3rem; }
+
+        /* Câu hỏi chỉ có ảnh */
+        .options-grid.img-grid { grid-template-columns: 1fr 1fr; gap: 14px; }
+        .opt-img {
+            display: block; max-width: 140px; max-height: 110px;
+            object-fit: contain; margin: 0 auto;
+            pointer-events: none; user-select: none;
+        }
+        .option-label.img-opt {
+            flex-direction: column; align-items: center;
+            justify-content: flex-start; gap: 8px;
+            padding: 14px 10px; text-align: center;
+        }
+        .option-label.img-opt .opt-letter {
+            order: -1;          /* chữ A/B/C/D lên trên ảnh */
+        }
+
+        /* ── Footer bar ───────────────────────────────── */
+        .footer-bar {
+            position: fixed; bottom: 0; left: 0; width: 100%;
+            background: white; padding: 14px 20px;
+            box-shadow: 0 -3px 12px rgba(0,0,0,0.1);
+            display: flex; justify-content: center; gap: 20px; z-index: 100;
+        }
+        .btn {
+            padding: 12px 32px; border-radius: 30px; border: none;
+            font-weight: bold; font-size: 1rem; cursor: pointer; transition: .3s;
+        }
+        .btn-submit { background: var(--accent-color); color: white; }
+        .btn-submit:hover:not(:disabled) { background: #238636; transform: translateY(-1px); }
+        .btn-submit:disabled { opacity: .6; cursor: not-allowed; }
+        .btn-reset  { background: #6c757d; color: white; }
+        .btn-reset:hover { background: #5a6268; }
+
+        /* ── Modal kết quả ────────────────────────────── */
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5); justify-content: center; align-items: center; z-index: 200; }
+        .modal-content {
+            background: white; padding: 35px; border-radius: 16px; text-align: center;
+            width: 95%; max-width: 400px; animation: popUp .3s ease;
+        }
+        @keyframes popUp { from { transform: scale(.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .score-circle {
+            width: 130px; height: 130px; background: var(--accent-color); color: white;
+            border-radius: 50%; display: flex; justify-content: center; align-items: center;
+            font-size: 2.6rem; font-weight: bold; margin: 20px auto;
+        }
+        .feedback-text { font-size: 1rem; color: #444; margin-bottom: 20px; line-height: 1.5; }
+
+        /* ── Breadcrumb ───────────────────────────────── */
+        .breadcrumb { margin-bottom: 20px; font-size: 0.9rem; color: #666; }
+        .breadcrumb a { color: var(--primary-color); text-decoration: none; font-weight: bold; }
+
+        /* ── Responsive ───────────────────────────────── */
+        @media (max-width: 600px) {
+            .options-grid { grid-template-columns: 1fr; }
+            .container { margin: 12px auto; }
+            header { padding: 10px 15px !important; }
+            .header-content { flex-direction: column; text-align: center; }
+            .header-info { text-align: center !important; }
+            .login-box { padding: 28px 20px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════
+     MÀN HÌNH NHẬP THÔNG TIN
+══════════════════════════════════════════ -->
+<div id="loginScreen">
+    <div class="login-box">
+        <h2><i class="fas fa-user-graduate"></i> Học sinh Lớp 1</h2>
+        <p>Ôn tập Học kì 2 – Tin học 1</p>
+        <div class="input-group">
+            <label for="studentName">Họ và tên:</label>
+            <input type="text" id="studentName" placeholder="Nhập họ và tên..." autocomplete="name">
+        </div>
+        <div class="input-group">
+            <label for="studentClass">Lớp:</label>
+            <input type="text" id="studentClass" placeholder="Ví dụ: 1A">
+        </div>
+        <button class="btn-start" onclick="startQuiz()">
+            <i class="fas fa-play-circle"></i> Vào làm bài
+        </button>
+    </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     HEADER (ẩn cho đến khi đăng nhập)
+══════════════════════════════════════════ -->
+<header id="mainHeader">
+    <div class="header-content">
+        <div class="logo-title">
+            <i class="fas fa-laptop-code fa-beat" style="color:#fffb70; margin-right:8px;"></i> TIN HỌC 1
+        </div>
+        <div class="header-info">
+            <div>GV – Nguyễn Đình Bạch Long</div>
+            <div style="margin-top:4px;">Học sinh: <span id="displayInfo" class="student-name"></span></div>
+        </div>
+    </div>
+</header>
+
+<!-- ══════════════════════════════════════════
+     NỘI DUNG BÀI ÔN TẬP
+══════════════════════════════════════════ -->
+<main class="container" id="mainPage" style="display:none;">
+    <div class="breadcrumb">
+        <a href="../index.html"><i class="fas fa-home"></i> Trang chủ</a>
+        <i class="fas fa-chevron-right" style="margin:0 8px; font-size:.8rem;"></i> Ôn tập Học kì 2 – Lớp 1
+    </div>
+    <div id="quiz-container"></div>
+</main>
+
+<div style="height:85px;"></div>
+
+<!-- ══════════════════════════════════════════
+     THANH FOOTER
+══════════════════════════════════════════ -->
+<div class="footer-bar">
+    <button class="btn btn-reset"  onclick="resetQuiz()"><i class="fas fa-redo"></i> Làm lại</button>
+    <button class="btn btn-submit" id="submitBtn" onclick="submitQuiz()"><i class="fas fa-check-circle"></i> Nộp bài</button>
+</div>
+
+<!-- ══════════════════════════════════════════
+     MODAL KẾT QUẢ
+══════════════════════════════════════════ -->
+<div id="resultModal" class="modal">
+    <div class="modal-content">
+        <h2 style="color:var(--primary-color);">Kết quả HK2</h2>
+        <div class="score-circle" id="scoreDisplay">0/20</div>
+        <p class="feedback-text" id="feedbackText"></p>
+        <button class="btn btn-submit" onclick="closeModal()">Xem lại bài</button>
+    </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     JAVASCRIPT – BÀI LÀM
+══════════════════════════════════════════ -->
+<script>
+    let studentInfo = { name: "", class: "" };
+    let _isSubmitting = false;
+
+    function startQuiz() {
+        const name  = document.getElementById('studentName').value.trim();
+        const cls   = document.getElementById('studentClass').value.trim();
+        if (!name || !cls) { alert("Vui lòng nhập đủ Họ tên và Lớp!"); return; }
+        studentInfo.name  = name;
+        studentInfo.class = cls;
+        document.getElementById('displayInfo').innerText = name + " – " + cls;
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('mainHeader').style.display  = 'flex';
+        document.getElementById('mainPage').style.display    = 'block';
+    }
+
+    /* ─── Danh sách câu hỏi (20 câu từ PDF) ─── */
+    const questions = [
+        {
+            q: "Câu 1: Thiết bị nào sau đây dùng để nhập chữ và số vào máy tính?",
+            a: ["Chuột máy tính", "Bàn phím máy tính", "Màn hình", "Loa"],
+            correct: 1
+        },
+        {
+            q: "Câu 2: Trên bàn phím, phím <b><i>A</i></b> và phím <b><i>S</i></b> nằm ở hàng phím nào?",
+            a: ["Hàng phím số", "Hàng phím trên", "Hàng phím cơ sở", "Hàng phím dưới"],
+            correct: 2
+        },
+        {
+            q: "Câu 3: Hai phím nào trên hàng phím cơ sở có gai (gờ nổi) để làm mốc cho việc đặt ngón tay?",
+            a: ["Phím <b>A</b> và <b>L</b>", "Phím <b>D</b> và <b>K</b>", "Phím <b>F</b> và <b>J</b>", "Phím <b>S</b> và <b>G</b>"],
+            correct: 2
+        },
+        {
+            q: "Câu 4: Để mở phần mềm vẽ Paint, em tìm biểu tượng nào trên màn hình máy tính?",
+            a: [
+                "<img src='paint.png' class='opt-img' alt='Paint'>",
+                "<img src='word.png'  class='opt-img' alt='Word'>",
+                "<img src='chrome.png' class='opt-img' alt='Chrome'>",
+                "<img src='Recycle bin.png' class='opt-img' alt='Recycle Bin'>"
+            ],
+            img: true,
+            correct: 0
+        },
+        {
+            q: "Câu 5: Khi muốn thoát khỏi phần mềm Paint, em nhấn vào nút có biểu tượng hình gì ở góc trên bên phải màn hình?",
+            a: [
+                "<img src='minimine.png'    class='opt-img' alt='Minimize'>",
+                "<img src='maximine.png'    class='opt-img' alt='Maximize'>",
+                "<img src='Close.png'       class='opt-img' alt='Close'>",
+                "<img src='restoredown.png' class='opt-img' alt='Restore Down'>"
+            ],
+            img: true,
+            correct: 2
+        },
+        {
+            q: "Câu 6: Để chọn một hình vẽ và di chuyển sang vị trí khác trong Paint, em sử dụng công cụ nào?",
+            a: ["Công cụ bút vẽ (Pencil)", "Công cụ chọn (Select)", "Công cụ tẩy (Eraser)", "Công cụ tô màu (Fill with color)"],
+            correct: 1
+        },
+        {
+            q: "Câu 7: Biểu tượng của công cụ dùng để tô màu cho hình vẽ là:",
+            a: [
+                "<img src='pen.png'   class='opt-img' alt='Bút vẽ'>",
+                "<img src='tay.png'   class='opt-img' alt='Tay'>",
+                "<img src='tomau.png' class='opt-img' alt='Tô màu'>",
+                "<img src='len.png'   class='opt-img' alt='Len'>"
+            ],
+            img: true,
+            correct: 2
+        },
+        {
+            q: "Câu 8: Để vẽ được một hình tròn thật tròn (không bị méo), em cần nhấn giữ phím nào trong khi kéo chuột?",
+            a: ["Phím <b>Enter</b>", "Phím <b>Shift</b>", "Phím <b>Ctrl</b>", "Phím <b>Space</b> (cách)"],
+            correct: 1
+        },
+        {
+            q: "Câu 9: Khi gõ phím <b><i>L</i></b> trên phần mềm Teach Typing, em sử dụng ngón tay nào của bàn tay phải?",
+            a: ["Ngón trỏ", "Ngón giữa", "Ngón áp út", "Ngón út"],
+            correct: 2
+        },
+        {
+            q: "Câu 10: Để vẽ dây cho chùm bóng bay trong bài vẽ mẫu, em nên sử dụng công cụ nào là phù hợp nhất?",
+            a: ["Công cụ vẽ hình chữ nhật", "Công cụ vẽ đường thẳng hoặc đường cong", "Công cụ vẽ hình tròn", "Công cụ tẩy"],
+            correct: 1
+        },
+        {
+            q: "Câu 11: Khi vẽ \"Chùm bóng bay\", em nên sử dụng kết hợp những công cụ nào?",
+            a: ["Hình vuông và Đường thẳng", "Hình Oval và Đường cong", "Hình tam giác và Hình thoi", "Hình sao và Hình chữ nhật"],
+            correct: 1
+        },
+        {
+            q: "Câu 12: Để vẽ \"Cột cờ Tổ quốc\", bước đầu tiên em cần chọn công cụ nào để vẽ thân cột cờ?",
+            a: ["Công cụ vẽ hình chữ nhật", "Công cụ vẽ hình tròn", "Công cụ vẽ ngôi sao", "Công cụ vẽ đường cong"],
+            correct: 0
+        },
+        {
+            q: "Câu 13: Trên bàn phím máy tính, phím nào thường là phím dài nhất?",
+            a: ["Phím <b>Enter</b>", "Phím cách <b>Spacebar</b>", "Phím <b>Shift</b>", "Phím <b>Ctrl</b>"],
+            correct: 1
+        },
+        {
+            q: "Câu 14: Để xuống dòng khi đang gõ văn bản, em sử dụng phím nào?",
+            a: ["Phím <b>Enter</b>", "Phím <b>Esc</b>", "Phím <b>Alt</b>", "Phím <b>Tab</b>"],
+            correct: 0
+        },
+        {
+            q: "Câu 15: Trong cửa sổ phần mềm Paint, khu vực nào dùng để em chọn màu vẽ?",
+            a: ["Trang vẽ", "Hộp màu (Color box)", "Thanh thực đơn", "Thanh trạng thái"],
+            correct: 1
+        },
+        {
+            q: "Câu 16: Để vẽ một chiếc tủ quần áo đơn giản, em nên sử dụng công cụ hình học nào là chính?",
+            a: ["Hình Oval", "Hình chữ nhật (Rectangle)", "Hình tam giác", "Hình trái tim"],
+            correct: 1
+        },
+        {
+            q: "Câu 17: Khi vẽ cột cờ Tổ quốc, em sẽ dùng màu gì để tô cho lá cờ?",
+            a: ["Màu xanh lá", "Màu vàng", "Màu đỏ", "Màu tím"],
+            correct: 2
+        },
+        {
+            q: "Câu 18: Hàng phím chứa các phím <b>A, S, D, F, G, H, J, K, L</b> được gọi là:",
+            a: ["Hàng phím trên", "Hàng phím dưới", "Hàng phím cơ sở", "Hàng phím số"],
+            correct: 2
+        },
+        {
+            q: "Câu 19: Khi đặt tay trên hàng cơ sở, ngón trỏ của tay trái sẽ đặt lên phím nào?",
+            a: ["Phím <b>F</b>", "Phím <b>J</b>", "Phím <b>G</b>", "Phím <b>H</b>"],
+            correct: 0
+        },
+        {
+            q: "Câu 20: Sau khi hoàn thành bức vẽ trong Paint, để lưu lại kết quả vào máy tính, em chọn lệnh nào?",
+            a: ["Open", "New", "Exit", "Save"],
+            correct: 3
+        }
+    ];
+
+    const LETTER = ["A", "B", "C", "D"];
+
+    /* ─── Render bài ─── */
+    function renderQuiz() {
+        const container = document.getElementById('quiz-container');
+        container.innerHTML = '';
+        questions.forEach((q, idx) => {
+            const isImg = !!q.img;
+            let opts = '';
+            q.a.forEach((ans, i) => {
+                opts += `
+                <label class="option-label${isImg ? ' img-opt' : ''}" id="opt-${idx}-${i}">
+                    <input type="radio" name="q${idx}" value="${i}">
+                    <span class="opt-letter">${LETTER[i]}</span>
+                    ${isImg ? ans : `<span>${ans}</span>`}
+                </label>`;
+            });
+            container.innerHTML += `
+            <div class="quiz-card" id="card-${idx}">
+                <div class="q-title">${q.q}</div>
+                <div class="options-grid${isImg ? ' img-grid' : ''}">${opts}</div>
+            </div>`;
+        });
+    }
+
+    /* ─── Kiểm tra câu chưa làm ─── */
+    function validateCompletion() {
+        let unanswered = [];
+        questions.forEach((_, idx) => {
+            const card = document.getElementById(`card-${idx}`);
+            if (!document.querySelector(`input[name="q${idx}"]:checked`)) {
+                card.classList.add('missing-alert');
+                unanswered.push(card);
+            } else {
+                card.classList.remove('missing-alert');
+            }
+        });
+        if (unanswered.length > 0) {
+            unanswered[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+            alert("Em chưa hoàn thành tất cả các câu! Vui lòng kiểm tra các câu bị viền đỏ.");
+            return false;
+        }
+        return true;
+    }
+
+    /* ─── Nộp bài ─── */
+    function submitQuiz() {
+        if (_isSubmitting) return;
+        if (!validateCompletion()) return;
+        _isSubmitting = true;
+
+        let score = 0;
+        let answersLog = "";
+
+        questions.forEach((q, idx) => {
+            const selected = document.querySelector(`input[name="q${idx}"]:checked`);
+            document.getElementById(`card-${idx}`).querySelectorAll('.option-label')
+                .forEach(el => el.classList.remove('correct-answer', 'wrong-answer'));
+
+            if (selected) {
+                const val = parseInt(selected.value);
+                const ok  = val === q.correct;
+                answersLog += `Câu ${idx + 1}: Chọn đáp án ${LETTER[val]} - ${ok ? "ĐÚNG" : "SAI"}\n`;
+                if (ok) {
+                    score++;
+                    document.getElementById(`opt-${idx}-${val}`).classList.add('correct-answer');
+                } else {
+                    document.getElementById(`opt-${idx}-${val}`).classList.add('wrong-answer');
+                    document.getElementById(`opt-${idx}-${q.correct}`).classList.add('correct-answer');
+                }
+            } else {
+                answersLog += `Câu ${idx + 1}: Không chọn - SAI\n`;
+                document.getElementById(`opt-${idx}-${q.correct}`).classList.add('correct-answer');
+            }
+        });
+
+        // Cập nhật modal kết quả
+        document.getElementById('scoreDisplay').innerText = `${score}/${questions.length}`;
+        let msg = "";
+        if (score >= 18) msg = "🌟 Tuyệt vời! Em nắm rất chắc kiến thức HK2!";
+        else if (score >= 14) msg = "👍 Khá tốt! Em cần ôn thêm một số phần nhỏ.";
+        else if (score >= 10) msg = "📚 Em cần ôn tập thêm để nắm chắc bài hơn nhé!";
+        else msg = "💪 Cố gắng lên! Em hãy đọc lại bài và luyện tập thêm nhé!";
+        document.getElementById('feedbackText').innerText = msg;
+        document.getElementById('resultModal').style.display = 'flex';
+
+        // Gửi Firebase ngầm sau khi modal hiện
+        if (typeof submitToFirebase === "function") {
+            const btn = document.getElementById('submitBtn');
+            if (btn) { btn.innerText = '⏳ Đang lưu...'; btn.disabled = true; }
+            submitToFirebase(score, questions.length, answersLog)
+                .then(() => {
+                    if (btn) btn.innerText = '✅ Đã lưu kết quả';
+                })
+                .catch(e => {
+                    if (btn) {
+                        btn.innerText = '⚠️ Lưu thất bại – thử lại';
+                        btn.disabled = false;
+                        btn.onclick = () => {
+                            submitToFirebase(score, questions.length, answersLog)
+                                .then(() => { btn.innerText = '✅ Đã lưu kết quả'; btn.disabled = true; })
+                                .catch(() => {});
+                        };
+                    }
+                    console.error("Lỗi Firebase:", e);
+                });
+        }
+    }
+
+    function resetQuiz() {
+        if (confirm("Làm lại từ đầu?")) location.reload();
+    }
+
+    function closeModal() {
+        document.getElementById('resultModal').style.display = 'none';
+    }
+
+    window.triggerGlobalShuffle = function() {
+        questions.sort(() => Math.random() - 0.5);
+        renderQuiz();
+    };
+
+    renderQuiz();
+</script>
+
+<!-- ══════════════════════════════════════════
+     FOOTER
+══════════════════════════════════════════ -->
+<footer style="background:#2c3e50; color:white; text-align:center; padding:20px; margin-top:40px; font-size:.9rem;">
+    &copy; 2025 – Website hỗ trợ học tập Tin học 1 | GV Nguyễn Đình Bạch Long
+    <div>Email: dinhlongcntt20119@gmail.com &nbsp;|&nbsp; SĐT: 0937438939</div>
+    <div>STK: 0937438939 &nbsp;|&nbsp; Ngân hàng: Vietinbank</div>
+</footer>
+
+<!-- ══════════════════════════════════════════
+     FIREBASE – MODULE (giống ontaphk2.html)
+══════════════════════════════════════════ -->
+<script type="module">
+    import { db } from '../firebase-config.js';
+    import { collection, addDoc, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+
+    window.firebaseDB         = db;
+    window.firebaseAddDoc     = addDoc;
+    window.firebaseCollection = collection;
+
+    // Áp dụng cài đặt đảo câu hỏi toàn cục
+    getDoc(doc(db, "settings", "quizConfig")).then(snap => {
+        if (snap.exists() && snap.data().shuffle) {
+            if (typeof window.triggerGlobalShuffle === 'function') {
+                window.triggerGlobalShuffle();
+            }
+        }
+    });
+</script>
+
+<script>
+    async function submitToFirebase(score, total, answersLog) {
+        if (!window.firebaseDB) throw new Error("Firebase chưa sẵn sàng");
+        const now = new Date();
+        const submittedAt = now.toLocaleString('vi-VN', {
+            day: '2-digit', month: '2-digit', year: 'numeric',
+            hour: '2-digit', minute: '2-digit', second: '2-digit',
+            hour12: false
+        });
+        await window.firebaseAddDoc(window.firebaseCollection(window.firebaseDB, "submissions"), {
+            studentName:  studentInfo.name,
+            studentClass: studentInfo.class,
+            quizType:     "ontapk1hk2",
+            score:        score,
+            total:        total,
+            answers:      answersLog,
+            schoolId:     "tin-hoc-1",
+            submittedAt:  submittedAt,
+            createdAt:    now.toISOString()
+        });
+    }
+</script>
+
+</body>
+</html>
