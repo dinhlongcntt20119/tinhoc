@@ -529,24 +529,32 @@
 
 <script>
     async function submitToFirebase(score, total, answersLog) {
-        if (!window.firebaseDB) throw new Error("Firebase chưa sẵn sàng");
+        if (!window.firebaseDB) {
+            throw new Error("Không kết nối được Firebase. Kiểm tra đường dẫn firebase-config.js.");
+        }
         const now = new Date();
         const submittedAt = now.toLocaleString('vi-VN', {
             day: '2-digit', month: '2-digit', year: 'numeric',
             hour: '2-digit', minute: '2-digit', second: '2-digit',
             hour12: false
         });
-        await window.firebaseAddDoc(window.firebaseCollection(window.firebaseDB, "submissions"), {
-            studentName:  studentInfo.name,
-            studentClass: studentInfo.class,
-            quizType:     "ontapk1hk2",
-            score:        score,
-            total:        total,
-            answers:      answersLog,
-            schoolId:     "tin-hoc-1",
-            submittedAt:  submittedAt,
-            createdAt:    now.toISOString()
-        });
+        try {
+            await window.firebaseAddDoc(window.firebaseCollection(window.firebaseDB, "submissions"), {
+                studentName:  studentInfo.name,
+                studentClass: studentInfo.class,
+                quizType:     "ontapk1hk2",
+                score:        score,
+                total:        total,
+                answers:      answersLog,
+                schoolId:     "tin-hoc-4",
+                submittedAt:  submittedAt,
+                createdAt:    now.toISOString()
+            });
+        } catch (e) {
+            // In lỗi chi tiết ra console để dễ debug
+            console.error("[Firebase] Lỗi ghi dữ liệu:", e.code, e.message);
+            throw e;
+        }
     }
 </script>
 
