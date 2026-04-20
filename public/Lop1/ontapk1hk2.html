@@ -458,27 +458,8 @@
         document.getElementById('feedbackText').innerText = msg;
         document.getElementById('resultModal').style.display = 'flex';
 
-        // Gửi Firebase ngầm sau khi modal hiện
-        if (typeof submitToFirebase === "function") {
-            const btn = document.getElementById('submitBtn');
-            if (btn) { btn.innerText = '⏳ Đang lưu...'; btn.disabled = true; }
-            submitToFirebase(score, questions.length, answersLog)
-                .then(() => {
-                    if (btn) btn.innerText = '✅ Đã lưu kết quả';
-                })
-                .catch(e => {
-                    if (btn) {
-                        btn.innerText = '⚠️ Lưu thất bại – thử lại';
-                        btn.disabled = false;
-                        btn.onclick = () => {
-                            submitToFirebase(score, questions.length, answersLog)
-                                .then(() => { btn.innerText = '✅ Đã lưu kết quả'; btn.disabled = true; })
-                                .catch(() => {});
-                        };
-                    }
-                    console.error("Lỗi Firebase:", e);
-                });
-        }
+        // Gửi lên Firebase – giống ontaphk2.html
+        if(typeof submitToFirebase === "function") submitToFirebase(score, questions.length, answersLog);
     }
 
     function resetQuiz() {
@@ -506,62 +487,47 @@
     <div>STK: 0937438939 &nbsp;|&nbsp; Ngân hàng: Vietinbank</div>
 </footer>
 
-<!-- ══════════════════════════════════════════
-     FIREBASE – tự khởi tạo (không dùng import)
-══════════════════════════════════════════ -->
-<script type="module">
-    import { initializeApp }                        from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, doc, getDoc }
-                                                    from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+    <script type="module">
+        import { db } from '../firebase-config.js';
+        import { collection, addDoc, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
 
-    const firebaseConfig = {
-        projectId:          "gen-lang-client-0903475277",
-        appId:              "1:389483035958:web:1764fb5d0d98eea72bc797",
-        apiKey:             "AIzaSyDsmKup0Y3YmLQp6Yz2YCIqSiz9ODPspyw",
-        authDomain:         "gen-lang-client-0903475277.firebaseapp.com",
-        firestoreDatabaseId:"ai-studio-5db37e65-acf1-4257-8131-b31b840cd004"
-    };
+        window.firebaseDB = db;
+        window.firebaseAddDoc = addDoc;
+        window.firebaseCollection = collection;
 
-    const app = initializeApp(firebaseConfig);
-    const db  = getFirestore(app, firebaseConfig.firestoreDatabaseId);
-
-    window.firebaseDB         = db;
-    window.firebaseAddDoc     = addDoc;
-    window.firebaseCollection = collection;
-
-    // Áp dụng cài đặt đảo câu hỏi toàn cục
-    try {
-        const snap = await getDoc(doc(db, "settings", "quizConfig"));
-        if (snap.exists() && snap.data().shuffle) {
-            if (typeof window.triggerGlobalShuffle === 'function') {
-                window.triggerGlobalShuffle();
+        // Auto apply global shuffle setting
+        getDoc(doc(db, "settings", "quizConfig")).then(snap => {
+            if (snap.exists() && snap.data().shuffle) {
+                if (typeof window.triggerGlobalShuffle === 'function') {
+                    window.triggerGlobalShuffle();
+                }
             }
-        }
-    } catch(e) { console.warn("Không tải được cài đặt shuffle:", e.message); }
-</script>
-
-<script>
-    async function submitToFirebase(score, total, answersLog) {
-        if (!window.firebaseDB) {
-            throw new Error("Firebase chưa khởi tạo – vui lòng tải lại trang.");
-        }
-        const now = new Date();
-
-        await window.firebaseAddDoc(
-            window.firebaseCollection(window.firebaseDB, "submissions"),
-            {
-                studentName:  studentInfo.name,
-                studentClass: studentInfo.class,
-                quizType:     "ontapk1hk2",
-                score:        score,
-                total:        total,
-                answers:      answersLog,
-                schoolId:     "tin-hoc-4",
-                createdAt:    now.toISOString()
+        });
+    </script>
+    <script>
+        async function submitToFirebase(score, total, answersLog) {
+            if(!window.firebaseDB) return;
+            const btn = document.querySelector('.btn-submit');
+            const originalText = btn ? btn.innerText : '';
+            if(btn) { btn.innerText = 'Đang nộp bài...'; btn.disabled = true; }
+            try {
+                await window.firebaseAddDoc(window.firebaseCollection(window.firebaseDB, "submissions"), {
+                    studentName: studentInfo.name,
+                    studentClass: studentInfo.class,
+                    quizType: "ontapk1hk2",
+                    score: score,
+                    total: total,
+                    answers: answersLog,
+                    schoolId: "tin-hoc-4",
+                    createdAt: new Date().toISOString()
+                });
+                alert("Nộp bài thành công!");
+            } catch (e) {
+                alert("Lỗi nộp bài: " + e.message);
             }
-        );
-    }
-</script>
+            if(btn) { btn.innerText = originalText; btn.disabled = false; }
+        }
+    </script>
 
 </body>
 </html>
