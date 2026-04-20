@@ -274,6 +274,15 @@
         let currentQuizType = 'ontaphk2';
         let currentGrade = null;
 
+        // Mapping quizType trắc nghiệm theo từng khối
+        const GRADE_TRACNGHIEM_TYPE = {
+            1: 'ontapk1hk2',
+            // Khối 2-5 dùng 'ontaphk2' mặc định
+        };
+        function getTracNghiemType(grade) {
+            return GRADE_TRACNGHIEM_TYPE[grade] || 'ontaphk2';
+        }
+
         const ADMIN_EMAIL = 'dinhlongcntt20119@gmail.com';
 
         async function hashPassword(password) {
@@ -434,6 +443,10 @@
         };
 
         window.switchTab = function(tabId, quizType) {
+            // Nếu là tab trắc nghiệm, dùng quizType đúng theo khối hiện tại
+            if (tabId === 'trac-nghiem') {
+                quizType = getTracNghiemType(currentGrade);
+            }
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelector(`.tab[data-type="${quizType}"]`).classList.add('active');
             
@@ -604,9 +617,19 @@
             document.getElementById('displayGrade').innerText = grade;
             document.getElementById('grade-selection-view').style.display = 'none';
             document.getElementById('dashboard-content').style.display = 'block';
-            
-            // Highlight active grade card (optional, since it hides anyway)
-            // Load initial tab data
+
+            // Cập nhật tab trắc nghiệm đúng quizType theo khối
+            const tracNghiemType = getTracNghiemType(grade);
+            const tracNghiemTab = document.querySelector('.tab[data-type]');
+            if (tracNghiemTab) {
+                tracNghiemTab.setAttribute('data-type', tracNghiemType);
+                tracNghiemTab.setAttribute('onclick', `switchTab('trac-nghiem', '${tracNghiemType}')`);
+            }
+            // Reset về tab trắc nghiệm khi đổi khối
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            if (tracNghiemTab) tracNghiemTab.classList.add('active');
+            currentQuizType = tracNghiemType;
+
             loadQuizData(currentQuizType);
         };
 
