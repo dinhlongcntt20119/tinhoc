@@ -866,7 +866,7 @@ function startTest() {
         if (window.saveToFirebase) {
             const btn = document.querySelector('.btn-check');
             if (btn) { btn.innerText = '⏳ Đang lưu...'; btn.disabled = true; }
-            window.saveToFirebase(stdName, stdClass, Math.round((numCorrect / totalItems) * 100), 100, timeStr)
+            window.saveToFirebase(stdName, stdClass, Math.round((numCorrect / totalItems) * 100), 100)
                 .then(() => {
                     if (btn) { btn.innerText = '✅ Đã lưu kết quả'; }
                 })
@@ -936,7 +936,7 @@ function startTest() {
   window.firebaseAddDoc = addDoc;
   window.firebaseCollection = collection;
 
-  window.saveToFirebase = async function(name, cls, scoreNum, totalNum, timeTakenStr) {
+  window.saveToFirebase = async function(name, cls, scoreNum, totalNum) {
       try {
           const now = new Date();
           const submittedAt = now.toLocaleString('vi-VN', {
@@ -952,7 +952,6 @@ function startTest() {
               schoolId: 'tin-hoc-4',
               score: Number(scoreNum),
               total: 100,
-              timeTaken: timeTakenStr || '',
               submittedAt: submittedAt,
               createdAt: now.toISOString()
           });
