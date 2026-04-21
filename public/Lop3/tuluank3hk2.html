@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ôn tập Tự luận Học kì 2 - Tin học 3</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Source+Code+Pro:wght@600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <style>
+        :root {
+            --primary-color: #1565c0;
+            --accent-color:  #1976d2;
+            --bg-color:      #f0f4ff;
+            --text-color:    #1a1f36;
+            --correct:       #28a745;
+            --wrong:         #dc3545;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Roboto', sans-serif; background-color: var(--bg-color); color: var(--text-color); }
+
+        /* ── Login Screen ─────────────────────────── */
+        #loginScreen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(135deg, #1565c0, #0d47a1);
+            display: flex; justify-content: center; align-items: center; z-index: 3000;
+        }
+        .login-box {
+            background: white; padding: 40px; border-radius: 16px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.25); width: 100%; max-width: 420px; text-align: center;
+        }
+        .login-box h2 { color: var(--primary-color); margin-bottom: 8px; font-size: 1.5rem; }
+        .login-box p  { color: #666; font-size: 0.9rem; margin-bottom: 25px; }
+        .input-group  { margin-bottom: 18px; text-align: left; }
+        .input-group label { display: block; font-weight: bold; margin-bottom: 7px; color: #444; font-size: 0.95rem; }
+        .input-group input, .input-group select {
+            width: 100%; padding: 12px 14px; border: 2px solid #e0e0e0; border-radius: 8px;
+            font-size: 1rem; transition: border-color .2s;
+        }
+        .input-group input:focus, .input-group select:focus { border-color: var(--primary-color); outline: none; }
+        .btn-start {
+            width: 100%; padding: 14px; background: var(--accent-color); color: white;
+            border: none; border-radius: 30px; font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: .3s;
+        }
+        .btn-start:hover { background: #1565c0; transform: translateY(-1px); }
+
+        /* ── Header ───────────────────────────────── */
+        header {
+            display: none;
+            background: linear-gradient(135deg, #1565c0, #1976d2);
+            color: white; padding: 14px 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            border-bottom: 4px solid #90caf9;
+        }
+        .header-content {
+            max-width: 1000px; margin: 0 auto;
+            display: flex; justify-content: space-between; align-items: center;
+            flex-wrap: wrap; gap: 10px;
+        }
+        .logo-title { font-family: 'Source Code Pro', monospace; font-size: 1.5rem; font-weight: bold; }
+        .header-info { font-size: 0.9rem; opacity: .9; text-align: right; }
+        .header-info .student-name { color: #fffb70; font-weight: bold; }
+
+        /* ── Container & Cards ────────────────────── */
+        .container { max-width: 900px; margin: 30px auto; padding: 0 15px; }
+
+        .quiz-card {
+            background: white; border-radius: 12px; padding: 24px;
+            margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+            border-left: 5px solid var(--accent-color);
+        }
+        .q-title { font-weight: bold; font-size: 1.1rem; margin-bottom: 16px; color: #0d47a1; line-height: 1.5; }
+        
+        .text-input { 
+            width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px;
+            font-size: 1rem; box-sizing: border-box; font-family: inherit; margin-bottom: 10px;
+        }
+        textarea.text-input { resize: vertical; min-height: 80px; }
+
+        /* Gợi ý đáp án */
+        .show-answer-box {
+            margin-top: 15px; padding: 15px; background: #eafaf1; 
+            border: 1px solid #27ae60; color: #27ae60; 
+            border-radius: 6px; display: none; font-size: 0.95rem; line-height: 1.5;
+        }
+        .show-answer-box b { color: #1e8449; }
+
+        .missing-alert  { border: 2px solid #e74c3c !important; box-shadow: 0 0 10px rgba(231,76,60,.4) !important; }
+
+        /* Image options */
+        .opt-img { display: block; max-width: 100%; border: 1px solid #ccc; border-radius: 4px; pointer-events: none; user-select: none; }
+
+        /* ── Footer bar ───────────────────────────── */
+        .footer-bar {
+            position: fixed; bottom: 0; left: 0; width: 100%;
+            background: white; padding: 14px 20px;
+            box-shadow: 0 -3px 12px rgba(0,0,0,0.1);
+            display: flex; justify-content: center; gap: 20px; z-index: 100;
+        }
+        .btn { padding: 12px 32px; border-radius: 30px; border: none; font-weight: bold; font-size: 1rem; cursor: pointer; transition: .3s; }
+        .btn-submit { background: var(--accent-color); color: white; }
+        .btn-submit:hover:not(:disabled) { background: #1565c0; transform: translateY(-1px); }
+        .btn-submit:disabled { opacity: .6; cursor: not-allowed; }
+        .btn-reset  { background: #6c757d; color: white; }
+        .btn-reset:hover { background: #5a6268; }
+
+        /* ── Modal kết quả ────────────────────────── */
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5); justify-content: center; align-items: center; z-index: 200; }
+        .modal-content {
+            background: white; padding: 35px; border-radius: 16px; text-align: center;
+            width: 95%; max-width: 450px; animation: popUp .3s ease;
+        }
+        @keyframes popUp { from { transform: scale(.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .score-circle {
+            width: 110px; height: 110px; background: var(--correct); color: white;
+            border-radius: 50%; display: flex; justify-content: center; align-items: center;
+            font-size: 1.5rem; font-weight: bold; margin: 20px auto; text-align: center; line-height: 1.2;
+        }
+        .feedback-text { font-size: 1rem; color: #444; margin-bottom: 20px; line-height: 1.5; }
+
+        /* ── Breadcrumb ───────────────────────────── */
+        .breadcrumb { margin-bottom: 20px; font-size: 0.9rem; color: #666; }
+        .breadcrumb a { color: var(--primary-color); text-decoration: none; font-weight: bold; }
+
+        /* ── Responsive ───────────────────────────── */
+        @media (max-width: 600px) {
+            .container { margin: 12px auto; }
+            header { padding: 10px 15px !important; }
+            .header-content { flex-direction: column; text-align: center; }
+            .header-info { text-align: center !important; }
+            .login-box { padding: 28px 20px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════
+     MÀN HÌNH NHẬP THÔNG TIN
+══════════════════════════════════════════ -->
+<div id="loginScreen">
+    <div class="login-box">
+        <h2><i class="fas fa-user-graduate"></i> Học sinh Lớp 3</h2>
+        <p>Ôn tập Tự luận Học kì 2 – Tin học 3</p>
+        <div class="input-group">
+            <label for="studentName">Họ và tên:</label>
+            <input type="text" id="studentName" placeholder="Nhập họ và tên..." autocomplete="name">
+        </div>
+        <div class="input-group">
+            <label for="studentClass">Chọn lớp:</label>
+            <select id="studentClass" style="background: white; cursor: pointer;">
+                <option value="3D" selected>3D</option>
+            </select>
+        </div>
+        <button class="btn-start" onclick="startQuiz()">
+            <i class="fas fa-play-circle"></i> Vào làm bài
+        </button>
+    </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     HEADER
+══════════════════════════════════════════ -->
+<header id="mainHeader">
+    <div class="header-content">
+        <div class="logo-title">
+            <i class="fas fa-laptop-code fa-beat" style="color:#fffb70; margin-right:8px;"></i> TIN HỌC 3
+        </div>
+        <div class="header-info">
+            <div>GV – Nguyễn Đình Bạch Long</div>
+            <div style="margin-top:4px;">Học sinh: <span id="displayInfo" class="student-name"></span></div>
+        </div>
+    </div>
+</header>
+
+<!-- ══════════════════════════════════════════
+     NỘI DUNG BÀI ÔN TẬP
+══════════════════════════════════════════ -->
+<main class="container" id="mainPage" style="display:none;">
+    <div class="breadcrumb">
+        <a href="../index.html"><i class="fas fa-home"></i> Trang chủ</a>
+        <i class="fas fa-chevron-right" style="margin:0 8px; font-size:.8rem;"></i> Ôn tập Tự luận Học kì 2 – Lớp 3
+    </div>
+    
+    <div id="quiz-container">
+        <!-- Câu 1 -->
+        <div class="quiz-card" id="card-0">
+            <div class="q-title">Câu 1 (1.0 điểm): Hãy sắp xếp các việc dưới đây theo thứ tự phù hợp mà bạn nhỏ cần thực hiện vào buổi sáng để chuẩn bị đi học.</div>
+            <div style="text-align: center; margin-bottom: 15px;">
+                <img src="../Lop3/hinh1.png" alt="Các hoạt động buổi sáng" class="opt-img" style="max-width: 500px; margin: 0 auto;" onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'500\' height=\'150\'><rect width=\'500\' height=\'150\' fill=\'#f0f0f0\'/><text x=\'50%\' y=\'50%\' dominant-baseline=\'middle\' text-anchor=\'middle\' font-size=\'14\'>[Hình minh hoạ: A) Ăn sáng, B) Đeo ba lô, C) Thay quần áo, D) Vệ sinh cá nhân]</text></svg>'">
+            </div>
+            <input type="text" class="text-input" name="q0" placeholder="Thứ tự đúng là (Ví dụ: A, B, C, D)...">
+            <div class="show-answer-box"><b>Đáp án:</b> D, C, A, B</div>
+        </div>
+
+        <!-- Câu 2 -->
+        <div class="quiz-card" id="card-1">
+            <div class="q-title">Câu 2 (1.0 điểm): Em hãy chia việc lớn "Dọn dẹp góc học tập" thành ít nhất 3 việc nhỏ hơn để dễ thực hiện.</div>
+            <input type="text" class="text-input" name="q1_1" placeholder="Bước 1: ...">
+            <input type="text" class="text-input" name="q1_2" placeholder="Bước 2: ...">
+            <input type="text" class="text-input" name="q1_3" placeholder="Bước 3: ...">
+            <div class="show-answer-box">
+                <b>Gợi ý đáp án:</b><br>
+                Bước 1: Sắp xếp sách vở lên giá sách.<br>
+                Bước 2: Thu gom rác và giấy vụn trên bàn.<br>
+                Bước 3: Lau sạch mặt bàn học.
+            </div>
+        </div>
+
+        <!-- Câu 3 -->
+        <div class="quiz-card" id="card-2">
+            <div class="q-title">Câu 3 (1.0 điểm): Em hãy viết một câu thể hiện việc thực hiện công việc theo điều kiện dựa trên tình huống sau: "Em làm xong bài tập" và "Em được xem ti vi".</div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="font-weight: bold; font-size: 1.1rem;">Nếu</span>
+                <input type="text" class="text-input" name="q2" placeholder="..." style="margin-bottom: 0;">
+            </div>
+            <div class="show-answer-box"><b>Gợi ý đáp án:</b> Nếu <u>em làm xong bài tập thì em được xem ti vi</u>.</div>
+        </div>
+
+        <!-- Câu 4 -->
+        <div class="quiz-card" id="card-3">
+            <div class="q-title">Câu 4 (1.0 điểm): Hãy chỉ ra đâu là điều kiện, đâu là công việc trong câu dạng “Nếu…thì…” sau: <i>Nếu tham gia giao thông bằng xe máy thì em đội mũ bảo hiểm.</i></div>
+            <input type="text" class="text-input" name="q3_1" placeholder="Điều kiện: ...">
+            <input type="text" class="text-input" name="q3_2" placeholder="Công việc: ...">
+            <div class="show-answer-box">
+                <b>Đáp án:</b><br>
+                Điều kiện: tham gia giao thông bằng xe máy<br>
+                Công việc: em đội mũ bảo hiểm
+            </div>
+        </div>
+
+        <!-- Câu 5 -->
+        <div class="quiz-card" id="card-4">
+            <div class="q-title">Câu 5 (1.0 điểm): Hãy sắp xếp các việc dưới đây theo thứ tự phù hợp để thực hiện công việc "Rửa tay bằng xà phòng".<br><br>
+                A) Chà xát hai bàn tay vào nhau để tạo bọt xà phòng.<br>
+                B) Làm ướt tay dưới vòi nước.<br>
+                C) Rửa sạch tay lại với nước và lau khô bằng khăn sạch.<br>
+                D) Lấy một ít xà phòng vào lòng bàn tay.
+            </div>
+            <input type="text" class="text-input" name="q4" placeholder="Thứ tự đúng là (Ví dụ: A, B, C, D)...">
+            <div class="show-answer-box"><b>Đáp án:</b> B, D, A, C</div>
+        </div>
+
+        <!-- Câu 6 -->
+        <div class="quiz-card" id="card-5">
+            <div class="q-title">Câu 6 (1.0 điểm): Em hãy chia việc lớn "Chuẩn bị sách vở cho ngày mai đến trường" thành ít nhất 3 việc nhỏ hơn để dễ thực hiện.</div>
+            <input type="text" class="text-input" name="q5_1" placeholder="Bước 1: ...">
+            <input type="text" class="text-input" name="q5_2" placeholder="Bước 2: ...">
+            <input type="text" class="text-input" name="q5_3" placeholder="Bước 3: ...">
+            <div class="show-answer-box">
+                <b>Gợi ý đáp án:</b><br>
+                Bước 1: Xem thời khóa biểu ngày mai.<br>
+                Bước 2: Lấy đúng sách vở và đồ dùng học tập cần thiết.<br>
+                Bước 3: Cất gọn vào cặp và đóng cặp lại.
+            </div>
+        </div>
+
+        <!-- Câu 7 -->
+        <div class="quiz-card" id="card-6">
+            <div class="q-title">Câu 7 (1.0 điểm): Em hãy viết một câu thể hiện việc thực hiện công việc theo điều kiện dựa trên hai tình huống sau: "Trời chuyển mưa" và "Em cất quần áo đang phơi ngoài sân".</div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="font-weight: bold; font-size: 1.1rem;">Nếu</span>
+                <input type="text" class="text-input" name="q6" placeholder="..." style="margin-bottom: 0;">
+            </div>
+            <div class="show-answer-box"><b>Gợi ý đáp án:</b> Nếu <u>trời chuyển mưa thì em cất quần áo đang phơi ngoài sân</u>.</div>
+        </div>
+
+        <!-- Câu 8 -->
+        <div class="quiz-card" id="card-7">
+            <div class="q-title">Câu 8 (1.0 điểm): Hãy chỉ ra đâu là điều kiện, đâu là công việc trong câu dạng “Nếu…thì…” sau: <i>Nếu em thức khuya thì sáng mai em sẽ bị buồn ngủ.</i></div>
+            <input type="text" class="text-input" name="q7_1" placeholder="Điều kiện: ...">
+            <input type="text" class="text-input" name="q7_2" placeholder="Công việc (Kết quả): ...">
+            <div class="show-answer-box">
+                <b>Đáp án:</b><br>
+                Điều kiện: em thức khuya<br>
+                Công việc (Kết quả): sáng mai em sẽ bị buồn ngủ.
+            </div>
+        </div>
+
+        <!-- Câu 9 -->
+        <div class="quiz-card" id="card-8">
+            <div class="q-title">Câu 9 (1.0 điểm): Hãy sắp xếp các bước dưới đây theo thứ tự hợp lý để hoàn thành công việc "Trồng một cây hoa nhỏ vào chậu".<br><br>
+                A) Đặt cây hoa vào chậu và lấp đất lại cho kín rễ.<br>
+                B) Chuẩn bị một chiếc chậu trống và một ít đất trồng.<br>
+                C) Dùng bình tưới một ít nước cho cây.<br>
+                D) Cho một lớp đất lót vào dưới đáy chậu.
+            </div>
+            <input type="text" class="text-input" name="q8" placeholder="Thứ tự đúng là (Ví dụ: A, B, C, D)...">
+            <div class="show-answer-box"><b>Đáp án:</b> B, D, A, C</div>
+        </div>
+
+        <!-- Câu 10 -->
+        <div class="quiz-card" id="card-9">
+            <div class="q-title">Câu 10 (1.0 điểm): Bạn An muốn vẽ một bức tranh phong cảnh bằng bút màu. Em hãy giúp An chia nhỏ công việc này thành 3 bước nhé.</div>
+            <input type="text" class="text-input" name="q9_1" placeholder="Bước 1: ...">
+            <input type="text" class="text-input" name="q9_2" placeholder="Bước 2: ...">
+            <input type="text" class="text-input" name="q9_3" placeholder="Bước 3: ...">
+            <div class="show-answer-box">
+                <b>Gợi ý đáp án:</b><br>
+                Bước 1: Chuẩn bị giấy vẽ và bút màu.<br>
+                Bước 2: Vẽ phác thảo phong cảnh bằng bút chì.<br>
+                Bước 3: Tô màu cho bức tranh để hoàn thiện.
+            </div>
+        </div>
+    </div>
+</main>
+
+<div style="height:85px;"></div>
+
+<!-- ══════════════════════════════════════════
+     FOOTER BAR
+══════════════════════════════════════════ -->
+<div class="footer-bar">
+    <button class="btn btn-reset"  onclick="resetQuiz()"><i class="fas fa-redo"></i> Làm lại</button>
+    <button class="btn btn-submit" id="submitBtn" onclick="submitQuiz()"><i class="fas fa-check-circle"></i> Kiểm tra & Nộp bài</button>
+</div>
+
+<!-- ══════════════════════════════════════════
+     MODAL KẾT QUẢ
+══════════════════════════════════════════ -->
+<div id="resultModal" class="modal">
+    <div class="modal-content">
+        <h2 style="color:var(--primary-color);">Đã Nộp Bài</h2>
+        <div class="score-circle" id="scoreDisplay">Hoàn thành</div>
+        <p class="feedback-text" id="feedbackText">Bài làm tự luận của em đã được lưu lại. <br>Em hãy bấm "Xem lại bài" để đối chiếu với phần gợi ý đáp án nhé!</p>
+
+        <!-- Firebase submit status -->
+        <div id="firebaseStatus" style="
+            margin: 14px 0 18px;
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background: #e3f2fd;
+            color: #1565c0;
+            min-height: 46px;
+        ">
+            <span id="firebaseStatusIcon">
+                <!-- spinner SVG -->
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style="animation:spin 1s linear infinite">
+                    <circle cx="12" cy="12" r="10" stroke="#90caf9" stroke-width="3"/>
+                    <path d="M12 2a10 10 0 0 1 10 10" stroke="#1565c0" stroke-width="3" stroke-linecap="round"/>
+                </svg>
+            </span>
+            <span id="firebaseStatusText">Đang lưu kết quả lên hệ thống...</span>
+        </div>
+
+        <button class="btn btn-submit" id="closeModalBtn" onclick="closeModal()" disabled style="opacity:.5;cursor:not-allowed;">Xem lại bài</button>
+    </div>
+</div>
+
+<style>
+@keyframes spin { to { transform: rotate(360deg); } }
+</style>
+
+<!-- ══════════════════════════════════════════
+     JAVASCRIPT – BÀI LÀM
+══════════════════════════════════════════ -->
+<script>
+    let studentInfo = { name: "", class: "" };
+    let _isSubmitting = false;
+
+    function startQuiz() {
+        const name = document.getElementById('studentName').value.trim();
+        const cls  = document.getElementById('studentClass').value.trim();
+        if (!name || !cls) { alert("Vui lòng nhập đủ Họ tên và Lớp!"); return; }
+        studentInfo.name  = name;
+        studentInfo.class = cls;
+        document.getElementById('displayInfo').innerText = name + " – " + cls;
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('mainHeader').style.display  = 'flex';
+        document.getElementById('mainPage').style.display    = 'block';
+    }
+
+    /* ─── Kiểm tra câu chưa làm ─── */
+    function validateCompletion() {
+        let unanswered = [];
+        document.querySelectorAll('.quiz-card').forEach((card) => {
+            let hasEmptyInput = false;
+            card.querySelectorAll('input.text-input').forEach(inp => {
+                if (inp.value.trim() === "") hasEmptyInput = true;
+            });
+            if (hasEmptyInput) {
+                card.classList.add('missing-alert');
+                unanswered.push(card);
+            } else {
+                card.classList.remove('missing-alert');
+            }
+        });
+
+        if (unanswered.length > 0) {
+            unanswered[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+            alert("Em chưa hoàn thành tất cả các câu hỏi! Vui lòng kiểm tra các khung văn bản bị viền đỏ.");
+            return false;
+        }
+        return true;
+    }
+
+    /* ─── Nộp bài ─── */
+    function submitQuiz() {
+        if (_isSubmitting) return;
+        if (!validateCompletion()) return;
+        _isSubmitting = true;
+
+        let answersLog = "";
+
+        document.querySelectorAll('.quiz-card').forEach((card, idx) => {
+            answersLog += `Câu ${idx + 1}:\n`;
+            card.querySelectorAll('input.text-input').forEach((inp, i) => {
+                let placeholder = inp.getAttribute('placeholder') || `Ý ${i+1}`;
+                // strip out "..."
+                placeholder = placeholder.replace('...', '').trim();
+                answersLog += `- ${placeholder} ${inp.value.trim()}\n`;
+            });
+            answersLog += `\n`;
+        });
+
+        document.getElementById('resultModal').style.display = 'flex';
+
+        // Lấy toàn bộ khung đáp án
+        document.querySelectorAll('.show-answer-box').forEach(box => {
+            box.style.display = 'block';
+        });
+
+        // Điểm ở tệp tự luận k quan trọng, để tự trưng 0.
+        // Nộp lên Firebase với format `score: 0, total: 10`
+        if(typeof submitToFirebase === "function") submitToFirebase(0, 10, answersLog);
+        else enableCloseBtn();
+    }
+
+    function resetQuiz() {
+        if (confirm("Làm lại từ đầu?")) location.reload();
+    }
+
+    function closeModal() {
+        document.getElementById('resultModal').style.display = 'none';
+        document.getElementById('submitBtn').style.display = 'none'; 
+    }
+
+    function enableCloseBtn() {
+        const btn = document.getElementById('closeModalBtn');
+        if (btn) { btn.disabled = false; btn.style.opacity = '1'; btn.style.cursor = 'pointer'; }
+    }
+
+    function setFirebaseStatus(type, text) {
+        const box  = document.getElementById('firebaseStatus');
+        const icon = document.getElementById('firebaseStatusIcon');
+        const txt  = document.getElementById('firebaseStatusText');
+        if (!box) return;
+        txt.innerText = text;
+        if (type === "loading") {
+            box.style.background = "#e3f2fd"; box.style.color = "#1565c0";
+            icon.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" style="animation:spin 1s linear infinite">
+                <circle cx="12" cy="12" r="10" stroke="#90caf9" stroke-width="3"/>
+                <path d="M12 2a10 10 0 0 1 10 10" stroke="#1565c0" stroke-width="3" stroke-linecap="round"/>
+            </svg>`;
+        } else if (type === "success") {
+            box.style.background = "#d4edda"; box.style.color = "#155724";
+            icon.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="12" r="10" fill="#28a745"/>
+                <path d="M7 12.5l3.5 3.5 6.5-7" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>`;
+        } else if (type === "error") {
+            box.style.background = "#f8d7da"; box.style.color = "#721c24";
+            icon.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="12" r="10" fill="#dc3545"/>
+                <path d="M8 8l8 8M16 8l-8 8" stroke="white" stroke-width="2.2" stroke-linecap="round"/>
+            </svg>`;
+        }
+    }
+</script>
+
+<!-- ══════════════════════════════════════════
+     FOOTER
+══════════════════════════════════════════ -->
+<footer style="background:#2c3e50; color:white; text-align:center; padding:20px; margin-top:40px; font-size:.9rem;">
+    &copy; 2025 – Website hỗ trợ học tập Tin học 3 | GV Nguyễn Đình Bạch Long
+    <div>Email: dinhlongcntt20119@gmail.com &nbsp;|&nbsp; SĐT: 0937438939</div>
+    <div>STK: 0937438939 &nbsp;|&nbsp; Ngân hàng: Vietinbank</div>
+</footer>
+
+<script type="module">
+    import { db } from '../firebase-config.js';
+    import { collection, addDoc } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+
+    window.firebaseDB = db;
+    window.firebaseAddDoc = addDoc;
+    window.firebaseCollection = collection;
+</script>
+<script>
+    async function submitToFirebase(score, total, answersLog) {
+        if(!window.firebaseDB) return;
+        const btn = document.querySelector('.btn-submit');
+        const originalText = btn ? btn.innerText : '';
+        if(btn) { btn.innerText = 'Đang nộp bài...'; btn.disabled = true; }
+        setFirebaseStatus("loading", "Đang lưu kết quả lên hệ thống...");
+        document.getElementById('closeModalBtn').disabled = true;
+        document.getElementById('closeModalBtn').style.opacity = '.5';
+        document.getElementById('closeModalBtn').style.cursor = 'not-allowed';
+        try {
+            await window.firebaseAddDoc(window.firebaseCollection(window.firebaseDB, "submissions"), {
+                studentName:  studentInfo.name,
+                studentClass: studentInfo.class,
+                quizType:     "tuluank3hk2",
+                score:        score,
+                total:        total,
+                answers:      answersLog,
+                schoolId:     "tin-hoc-4",
+                createdAt:    new Date().toISOString()
+            });
+            setFirebaseStatus("success", "Nộp bài thành công! Em hãy xem lại gợi ý đáp án.");
+        } catch (e) {
+            setFirebaseStatus("error", "Lỗi nộp bài: " + e.message);
+        }
+        if(btn) { btn.innerText = originalText; btn.disabled = false; }
+        enableCloseBtn();
+    }
+</script>
+
+</body>
+</html>
