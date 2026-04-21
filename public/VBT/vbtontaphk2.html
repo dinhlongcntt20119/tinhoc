@@ -127,7 +127,16 @@ function closeCustomAlert() {
         </div>
         <div style="margin-bottom: 20px;">
              <label style="font-weight: bold; display: block; margin-bottom: 5px;">Lớp:</label>
-             <input type="text" id="studentClass" placeholder="Ví dụ: 4A" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; font-size: 16px;">
+             <select id="studentClass" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; font-size: 16px;">
+                <option value="" disabled selected>Chọn lớp...</option>
+                <option value="4A">4A</option>
+                <option value="4B">4B</option>
+                <option value="4C">4C</option>
+                <option value="4D">4D</option>
+                <option value="4E">4E</option>
+                <option value="4G">4G</option>
+                <option value="4H">4H</option>
+            </select>
         </div>
         <button onclick="startTest()" style="width: 100%; padding: 12px; background: #f0f0f0; color: #333; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; transition: background 0.3s; font-size: 16px;">Vào làm bài</button>
     </div>

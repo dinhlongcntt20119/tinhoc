@@ -71,7 +71,19 @@
         <div class="login-box">
             <h2 style="color: #0056b3; margin-bottom:20px;"><i class="fas fa-user-graduate"></i> Học sinh Lớp 4</h2>
             <div class="input-group"><label>Họ và tên:</label><input type="text" id="studentName" placeholder="Nhập họ tên..."></div>
-            <div class="input-group"><label>Lớp:</label><input type="text" id="studentClass" placeholder="Ví dụ: 4A"></div>
+            <div class="input-group">
+                <label>Lớp:</label>
+                <select id="studentClass">
+                    <option value="" disabled selected>Chọn lớp...</option>
+                    <option value="4A">4A</option>
+                    <option value="4B">4B</option>
+                    <option value="4C">4C</option>
+                    <option value="4D">4D</option>
+                    <option value="4E">4E</option>
+                    <option value="4G">4G</option>
+                    <option value="4H">4H</option>
+                </select>
+            </div>
             <button class="btn btn-submit" style="width: 100%; margin: 0;" onclick="startPractice()">Bắt đầu thực hành</button>
         </div>
     </div>
