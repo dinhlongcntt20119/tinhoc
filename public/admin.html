@@ -247,6 +247,18 @@
         </div>
     </div>
 
+    <!-- Details Modal -->
+    <div id="detailsModal" class="modal">
+        <div class="modal-content" style="max-width: 600px; max-height: 85vh; display: flex; flex-direction: column;">
+            <span class="close-modal" onclick="closeDetailsModal()">&times;</span>
+            <div class="modal-header" id="detailsModalTitle" style="margin-bottom: 15px; font-size: 1.3rem;">Chi tiết bài làm</div>
+            <div id="detailsModalContent" style="flex: 1; overflow-y: auto; text-align: left; background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #dee2e6; font-family: monospace; font-size: 0.95rem; line-height: 1.5; white-space: pre-wrap; margin-bottom: 15px;">
+                Đang tải...
+            </div>
+            <button class="btn btn-full" onclick="closeDetailsModal()">Đóng</button>
+        </div>
+    </div>
+
     <!-- Password Modal -->
     <div id="passwordModal" class="modal">
         <div class="modal-content">
@@ -261,20 +273,6 @@
                 <input type="password" id="confirmPassword" placeholder="Nhập lại mật khẩu mới">
             </div>
             <button class="btn btn-full" onclick="updatePassword()">Cập nhật mật khẩu</button>
-        </div>
-    </div>
-
-    <!-- Student Details Modal -->
-    <div id="studentDetailsModal" class="modal">
-        <div class="modal-content" style="max-width: 600px;">
-            <span class="close-modal" onclick="closeStudentDetailsModal()">&times;</span>
-            <div class="modal-header" style="text-align: left; margin-bottom: 15px;">Chi tiết bài làm</div>
-            <div id="studentDetailsContent" style="max-height: 450px; overflow-y: auto; text-align: left; font-size: 0.95rem; line-height: 1.5; padding-right: 5px;">
-                <!-- Details will be populated here -->
-            </div>
-            <div style="text-align: right; margin-top: 15px;">
-                <button class="btn" style="background-color: #6c757d;" onclick="closeStudentDetailsModal()">Đóng</button>
-            </div>
         </div>
     </div>
 
@@ -444,9 +442,9 @@
 
             filteredSubmissions.forEach(s => {
                 const tr = document.createElement('tr');
-                const resultText = (s.quizType === 'thuchanhhk2' || s.quizType === 'thuchanhk5hk2') ? '<span style="color:#27ae60; font-weight:bold;">Đã xem/Hoàn thành</span>' : (s.total === 100 ? ` <b style="color:#c0392b">${s.score}%</b>` : `<b>${s.score}/${s.total}</b>`);
+                const resultText = s.quizType === 'thuchanhhk2' ? '<span style="color:#27ae60; font-weight:bold;">Đã xem/Hoàn thành</span>' : (s.total === 100 ? `<b style="color:#c0392b">${s.score}%</b>` : `<b>${s.score}/${s.total}</b>`);
                 tr.innerHTML = `
-                     <td style="cursor: pointer; color: #0056b3; font-weight: 500; text-decoration: underline;" onclick="viewStudentDetails('${s.id}')">${s.studentName}</td>
+                    <td><span style="color:#0056b3; cursor:pointer; font-weight:500; text-decoration:underline;" onclick="viewDetails('${s.id}')">${s.studentName}</span></td>
                     <td>${s.studentClass}</td>
                     <td>${resultText}</td>
                     <td>${new Date(s.createdAt).toLocaleString('vi-VN')}${s.timeTaken ? `<br><small style="color:#e67e22; font-weight: 500;">⏱ ${s.timeTaken}</small>` : ''}</td>
@@ -456,59 +454,47 @@
             });
         }
 
-        window.viewStudentDetails = function(id) {
-            const student = allSubmissions.find(s => s.id === id);
-            if (!student) return;
+        window.viewDetails = function(id) {
+            const s = allSubmissions.find(x => x.id === id);
+            if (!s) return;
+            const contentDiv = document.getElementById('detailsModalContent');
+            const titleDiv = document.getElementById('detailsModalTitle');
             
-            let html = `
-                <p><strong>Họ và tên:</strong> ${student.studentName}</p>
-                <p><strong>Lớp:</strong> ${student.studentClass}</p>
-                <p><strong>Mã/Loại bài tập:</strong> ${student.quizType}</p>
-                <p><strong>Thời gian nộp:</strong> ${new Date(student.createdAt).toLocaleString('vi-VN')}</p>
-            `;
+            titleDiv.innerText = `Chi tiết bài làm: ${s.studentName} - ${s.studentClass}`;
             
-            if (student.quizType === 'thuchanhhk2' || student.quizType === 'thuchanhk5hk2') {
-                html += `<p><strong>Trạng thái:</strong> <span style="color:#27ae60; font-weight:bold;">Đã xem/Hoàn thành</span></p>`;
-            } else if (student.total === 100) {
-                html += `<p><strong>Điểm số:</strong> <b style="color:#c0392b">${student.score}%</b></p>`;
+            if (!s.answers) {
+                contentDiv.innerHTML = '<div class="text-center" style="color: #666; font-style: italic;">Không có thông tin chi tiết các câu trả lời.</div>';
             } else {
-                html += `<p><strong>Điểm số:</strong> <b style="color:#c0392b">${student.score}/${student.total}</b></p>`;
-            }
-            
-            if (student.timeTaken) {
-                html += `<p><strong>Thời gian làm bài:</strong> ${student.timeTaken}</p>`;
-            }
-            
-            if (student.answers) {
-                html += `<hr style="margin: 15px 0; border: none; border-top: 1px solid #eee;"><h4 style="margin-bottom: 15px; color: #0056b3;">Chi tiết phần làm bài:</h4>`;
                 try {
-                    const parsed = JSON.parse(student.answers);
-                    if (typeof parsed === 'object') {
-                        html += `<div style="white-space: pre-wrap; background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #dee2e6; font-family: monospace; font-size: 0.9rem;">${JSON.stringify(parsed, null, 2)}</div>`;
+                    const data = JSON.parse(s.answers);
+                    if (Array.isArray(data)) {
+                        let html = '<table style="width:100%; border-collapse: collapse; font-size: 0.9rem; margin-top: 10px;">';
+                        html += '<thead><tr><th style="border:1px solid #ccc; padding:8px; background:#e9ecef;">Câu</th><th style="border:1px solid #ccc; padding:8px; background:#e9ecef;">H/s Chọn</th><th style="border:1px solid #ccc; padding:8px; background:#e9ecef;">Đáp án đúng</th><th style="border:1px solid #ccc; padding:8px; background:#e9ecef;">Kq</th></tr></thead><tbody>';
+                        data.forEach(item => {
+                            const icon = item.isRight ? '<i class="fas fa-check" style="color:#28a745;"></i>' : '<i class="fas fa-times" style="color:#dc3545;"></i>';
+                            html += `<tr>
+                                <td style="border:1px solid #ccc; padding:8px;">${item.q}</td>
+                                <td style="border:1px solid #ccc; padding:8px; text-align:center;">${item.userChoice}</td>
+                                <td style="border:1px solid #ccc; padding:8px; text-align:center;">${item.correct}</td>
+                                <td style="border:1px solid #ccc; padding:8px; text-align:center;">${icon}</td>
+                            </tr>`;
+                        });
+                        html += '</tbody></table>';
+                        contentDiv.innerHTML = html;
                     } else {
-                        html += `<div style="white-space: pre-wrap; background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #dee2e6;">${student.answers}</div>`;
+                        contentDiv.innerText = s.answers;
                     }
-                } catch (e) {
-                     html += `<div style="white-space: pre-wrap; background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #dee2e6;">${student.answers}</div>`;
+                } catch(e) {
+                    contentDiv.innerText = s.answers;
                 }
-            } else if (student.quizType !== 'thuchanhhk2' && student.quizType !== 'thuchanhk5hk2') {
-                 html += `<hr style="margin: 15px 0; border: none; border-top: 1px solid #eee;"><h4 style="margin-bottom: 15px; color: #555; text-align: center;">Không có dữ liệu văn bản bài làm</h4>`;
             }
-
-            document.getElementById('studentDetailsContent').innerHTML = html;
-            document.getElementById('studentDetailsModal').style.display = 'flex';
+            
+            document.getElementById('detailsModal').style.display = 'flex';
         };
 
-        window.closeStudentDetailsModal = function() {
-            document.getElementById('studentDetailsModal').style.display = 'none';
+        window.closeDetailsModal = function() {
+            document.getElementById('detailsModal').style.display = 'none';
         };
-
-        window.confirmDelete = async function(id) {? `<br><small style="color:#e67e22; font-weight: 500;">⏱ ${s.timeTaken}</small>` : ''}</td>
-                    <td><button class="btn btn-delete" onclick="confirmDelete('${s.id}')"><i class="fas fa-trash"></i> Xóa</button></td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
 
         window.confirmDelete = async function(id) {
             if (confirm("Bạn có chắc chắn muốn xóa bài làm này không? Hành động này không thể hoàn tác.")) {
