@@ -230,10 +230,13 @@
 ══════════════════════════════════════════ -->
 <div id="resultModal" class="modal">
     <div class="modal-content">
-        <h2 style="color:var(--primary-color);">Kết quả Bài thi</h2>
-        <div class="score-circle" id="scoreDisplay">0/10</div>
-        <p class="feedback-text" id="feedbackText"></p>
-        <button class="btn btn-submit" onclick="closeModal()">Xem lại bài</button>
+        <div style="font-size: 3.5rem; color: var(--accent-color); margin-bottom: 15px;">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <h2 style="color:var(--primary-color); margin-bottom: 10px;">Nộp bài thành công!</h2>
+        <div class="score-circle" id="scoreDisplay" style="margin: 15px auto;">0/10</div>
+        <p class="feedback-text" id="feedbackText">Bài làm của em đã được ghi nhận. Chúc mừng em đã hoàn thành bài thi!</p>
+        <button class="btn btn-submit" style="background:#d32f2f" onclick="window.close(); alert('Em có thể đóng tab này để kết thúc!');">Thoát trang bài thi</button>
     </div>
 </div>
 
@@ -384,34 +387,24 @@
 
         questions.forEach((q, idx) => {
             const selected = document.querySelector(`input[name="q${idx}"]:checked`);
-            document.getElementById(`card-${idx}`).querySelectorAll('.option-label')
-                .forEach(el => el.classList.remove('correct-answer', 'wrong-answer'));
+            
+            // Vô hiệu hoá các lựa chọn sau khi nộp
+            document.getElementsByName(`q${idx}`).forEach(radio => radio.disabled = true);
 
             if (selected) {
                 const val = parseInt(selected.value);
                 const ok  = val === q.correct;
                 answersLog += `Câu ${idx + 1}: Chọn đáp án ${LETTER[val]} - ${ok ? "ĐÚNG" : "SAI"}\n`;
-                if (ok) {
-                    score++;
-                    document.getElementById(`opt-${idx}-${val}`).classList.add('correct-answer');
-                } else {
-                    document.getElementById(`opt-${idx}-${val}`).classList.add('wrong-answer');
-                    document.getElementById(`opt-${idx}-${q.correct}`).classList.add('correct-answer');
-                }
+                if (ok) score++;
             } else {
                 answersLog += `Câu ${idx + 1}: Không chọn - SAI\n`;
-                document.getElementById(`opt-${idx}-${q.correct}`).classList.add('correct-answer');
             }
         });
 
-        // Cập nhật modal kết quả
+        // Cập nhật điểm số vào modal (nhưng không tô màu đúng sai trên bài làm)
         document.getElementById('scoreDisplay').innerText = `${score}/${questions.length}`;
-        let msg = "";
-        if (score === 10) msg = "🌟 Xuất sắc! Chúc mừng em đạt điểm tuyệt đối!";
-        else if (score >= 8) msg = "👍 Giỏi lắm! Em nắm rất chắc kiến thức.";
-        else if (score >= 5) msg = "📚 Khá tốt! Em cần cố gắng hơn chút nữa nhé.";
-        else msg = "💪 Cố gắng lên! Em hãy ôn tập kỹ hơn cho lần sau nhé!";
-        document.getElementById('feedbackText').innerText = msg;
+        
+        // Hiển thị modal thông báo thành công
         document.getElementById('resultModal').style.display = 'flex';
 
         // Gửi lên Firebase
