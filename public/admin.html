@@ -677,7 +677,19 @@
 
                 const inputHash = await hashPassword(p);
 
-                if (u === 'Admin' && inputHash === storedHash) {
+                if (u.trim().toLowerCase() === 'admin' && inputHash === storedHash) {
+                    // Cấp quyền trên Firestore cho tài khoản ẩn danh
+                    if (auth.currentUser && auth.currentUser.isAnonymous) {
+                        try {
+                            await setDoc(doc(db, "admins", auth.currentUser.uid), {
+                                role: "admin",
+                                loginAt: new Date().toISOString()
+                            }, { merge: true });
+                        } catch (e) {
+                            console.error("Error setting admin role:", e);
+                        }
+                    }
+
                     sessionStorage.setItem('isAdmin', 'true');
                     showDashboard();
                     window.loadQuizData(currentQuizType);
@@ -759,9 +771,19 @@
         };
 
         // Initial load
-        onAuthStateChanged(auth, (user) => {
+        onAuthStateChanged(auth, async (user) => {
             if (user && (user.email === ADMIN_EMAIL || user.isAnonymous)) {
                 if (sessionStorage.getItem('isAdmin') === 'true') {
+                    if (user.isAnonymous) {
+                        try {
+                            await setDoc(doc(db, "admins", user.uid), {
+                                role: "admin",
+                                lastActive: new Date().toISOString()
+                            }, { merge: true });
+                        } catch (e) {
+                            console.error("Error updating admin role on reload:", e);
+                        }
+                    }
                     showDashboard();
                     // We don't auto-load quiz data here because user needs to select grade first
                 }
