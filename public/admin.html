@@ -249,41 +249,37 @@
 
     <!-- Details Modal -->
     <div id="detailsModal" class="modal">
-        <div class="modal-content" style="max-width: 560px; max-height: 90vh; display: flex; flex-direction: column; padding: 0; overflow: hidden; border-radius: 16px;">
+        <div class="modal-content" style="max-width:820px; width:96vw; max-height:92vh; display:flex; flex-direction:column; padding:0; overflow:hidden; border-radius:16px;">
 
-            <!-- Header: tên + lớp + điểm -->
-            <div id="detailsModalHeader" style="padding: 22px 24px 16px; border-bottom: 1px solid #eee; position: relative; flex-shrink: 0;">
-                <span class="close-modal" onclick="closeDetailsModal()" style="top: 14px; right: 18px;">&times;</span>
-                <div id="detailsStudentName" style="font-size: 1.3rem; font-weight: 700; color: #1a1a2e; margin-bottom: 5px;"></div>
-                <div id="detailsStudentMeta" style="font-size: 0.82rem; color: #777; margin-bottom: 14px;"></div>
-                <!-- Kết quả tổng quát -->
-                <div id="detailsScoreBox" style="
-                    background: #fff3f3;
-                    border-radius: 12px;
-                    padding: 12px 16px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: space-between;
-                ">
+            <!-- Header -->
+            <div id="detailsModalHeader" style="padding:20px 24px 14px; border-bottom:1px solid #eee; position:relative; flex-shrink:0; background:#fff;">
+                <span class="close-modal" onclick="closeDetailsModal()" style="top:14px;right:18px;">&times;</span>
+                <div id="detailsStudentName" style="font-size:1.25rem;font-weight:700;color:#1a1a2e;margin-bottom:4px;padding-right:30px;"></div>
+                <div id="detailsStudentMeta" style="font-size:0.8rem;color:#888;margin-bottom:14px;"></div>
+                <div id="detailsScoreBox" style="background:#fff3f3;border-radius:12px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;">
                     <div>
-                        <div style="font-size: 0.7rem; font-weight: 700; color: #c0392b; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 4px;">KẾT QUẢ TỔNG QUÁT</div>
-                        <div id="detailsScoreText" style="font-size: 1.6rem; font-weight: 800; color: #c0392b;"></div>
+                        <div id="detailsScoreLabel" style="font-size:0.68rem;font-weight:700;color:#c0392b;letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px;">KẾT QUẢ TỔNG QUÁT</div>
+                        <div id="detailsScoreText" style="font-size:1.55rem;font-weight:800;color:#c0392b;"></div>
                     </div>
-                    <div style="font-size: 2.4rem;">📚</div>
+                    <div style="font-size:2.3rem;">📚</div>
                 </div>
             </div>
 
-            <!-- Body: danh sách câu hỏi -->
-            <div id="detailsModalContent" style="flex: 1; overflow-y: auto; padding: 16px 20px 8px;">
-                <div style="text-align:center; color:#999;">Đang tải...</div>
-            </div>
+            <!-- Body -->
+            <div id="detailsModalContent" style="flex:1;overflow-y:auto;padding:16px 18px 8px;background:#f8f9fb;"></div>
 
             <!-- Footer -->
-            <div style="padding: 12px 20px; border-top: 1px solid #eee; flex-shrink: 0;">
-                <button class="btn btn-full" onclick="closeDetailsModal()">Đóng</button>
+            <div style="padding:12px 18px;border-top:1px solid #eee;background:#fff;display:flex;gap:10px;flex-shrink:0;">
+                <button class="btn" id="btnPdfDetail" onclick="exportDetailPDF()" style="background:#e53935;flex:1;">
+                    <i class="fas fa-file-pdf"></i> Tải PDF
+                </button>
+                <button class="btn btn-full" onclick="closeDetailsModal()" style="flex:2;">Đóng</button>
             </div>
         </div>
     </div>
+
+    <!-- PDF print frame (hidden) -->
+    <iframe id="pdfFrame" style="display:none;"></iframe>
 
     <!-- Password Modal -->
     <div id="passwordModal" class="modal">
@@ -305,7 +301,7 @@
     <script type="module">
         import { db, auth } from './firebase-config.js';
         import { collection, query, where, getDocs, doc, setDoc, getDoc, deleteDoc, orderBy } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
-        import { signInAnonymously, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
+        import { GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
 
         window.db = db;
         window.auth = auth;
@@ -480,102 +476,249 @@
             });
         }
 
+        // ─── QUIZ DATA (câu hỏi nhúng sẵn để render chi tiết) ───────────────
+        const QUIZ_DATA = {"ontapk1hk2":[{"q":"Câu 1: Thiết bị nào sau đây dùng để nhập chữ và số vào máy tính?","a":["Chuột máy tính","Bàn phím máy tính","Màn hình","Loa"],"correct":1},{"q":"Câu 2: Trên bàn phím, phím <b><i>A</i></b> và phím <b><i>S</i></b> nằm ở hàng phím nào?","a":["Hàng phím số","Hàng phím trên","Hàng phím cơ sở","Hàng phím dưới"],"correct":2},{"q":"Câu 3: Hai phím nào trên hàng phím cơ sở có gai (gờ nổi) để làm mốc cho việc đặt ngón tay?","a":["Phím <b>A</b> và <b>L</b>","Phím <b>D</b> và <b>K</b>","Phím <b>F</b> và <b>J</b>","Phím <b>S</b> và <b>G</b>"],"correct":2},{"q":"Câu 4: Để mở phần mềm vẽ Paint, em tìm biểu tượng nào trên màn hình máy tính?","a":["<img src='paint.png' class='opt-img' alt='Paint'>","<img src='word.png'  class='opt-img' alt='Word'>","<img src='chrome.png' class='opt-img' alt='Chrome'>","<img src='Recycle bin.png' class='opt-img' alt='Recycle Bin'>"],"img":true,"correct":0},{"q":"Câu 5: Khi muốn thoát khỏi phần mềm Paint, em nhấn vào nút có biểu tượng hình gì ở góc trên bên phải màn hình?","a":["<img src='minimine.png'    class='opt-img' alt='Minimize'>","<img src='maximine.png'    class='opt-img' alt='Maximize'>","<img src='Close.png'       class='opt-img' alt='Close'>","<img src='restoredown.png' class='opt-img' alt='Restore Down'>"],"img":true,"correct":2},{"q":"Câu 6: Để chọn một hình vẽ và di chuyển sang vị trí khác trong Paint, em sử dụng công cụ nào?","a":["Công cụ bút vẽ (Pencil)","Công cụ chọn (Select)","Công cụ tẩy (Eraser)","Công cụ tô màu (Fill with color)"],"correct":1},{"q":"Câu 7: Biểu tượng của công cụ dùng để tô màu cho hình vẽ là:","a":["<img src='pen.png'   class='opt-img' alt='Bút vẽ'>","<img src='tay.png'   class='opt-img' alt='Tay'>","<img src='tomau.png' class='opt-img' alt='Tô màu'>","<img src='len.png'   class='opt-img' alt='Len'>"],"img":true,"correct":2},{"q":"Câu 8: Để vẽ được một hình tròn thật tròn (không bị méo), em cần nhấn giữ phím nào trong khi kéo chuột?","a":["Phím <b>Enter</b>","Phím <b>Shift</b>","Phím <b>Ctrl</b>","Phím <b>Space</b> (cách)"],"correct":1},{"q":"Câu 9: Khi gõ phím <b><i>L</i></b> trên phần mềm Teach Typing, em sử dụng ngón tay nào của bàn tay phải?","a":["Ngón trỏ","Ngón giữa","Ngón áp út","Ngón út"],"correct":2},{"q":"Câu 10: Để vẽ dây cho chùm bóng bay trong bài vẽ mẫu, em nên sử dụng công cụ nào là phù hợp nhất?","a":["Công cụ vẽ hình chữ nhật","Công cụ vẽ đường thẳng hoặc đường cong","Công cụ vẽ hình tròn","Công cụ tẩy"],"correct":1},{"q":"Câu 11: Khi vẽ \"Chùm bóng bay\", em nên sử dụng kết hợp những công cụ nào?","a":["Hình vuông và Đường thẳng","Hình Oval và Đường cong","Hình tam giác và Hình thoi","Hình sao và Hình chữ nhật"],"correct":1},{"q":"Câu 12: Để vẽ \"Cột cờ Tổ quốc\", bước đầu tiên em cần chọn công cụ nào để vẽ thân cột cờ?","a":["Công cụ vẽ hình chữ nhật","Công cụ vẽ hình tròn","Công cụ vẽ ngôi sao","Công cụ vẽ đường cong"],"correct":0},{"q":"Câu 13: Trên bàn phím máy tính, phím nào thường là phím dài nhất?","a":["Phím <b>Enter</b>","Phím cách <b>Spacebar</b>","Phím <b>Shift</b>","Phím <b>Ctrl</b>"],"correct":1},{"q":"Câu 14: Để xuống dòng khi đang gõ văn bản, em sử dụng phím nào?","a":["Phím <b>Enter</b>","Phím <b>Esc</b>","Phím <b>Alt</b>","Phím <b>Tab</b>"],"correct":0},{"q":"Câu 15: Trong cửa sổ phần mềm Paint, khu vực nào dùng để em chọn màu vẽ?","a":["Trang vẽ","Hộp màu (Color box)","Thanh thực đơn","Thanh trạng thái"],"correct":1},{"q":"Câu 16: Để vẽ một chiếc tủ quần áo đơn giản, em nên sử dụng công cụ hình học nào là chính?","a":["Hình Oval","Hình chữ nhật (Rectangle)","Hình tam giác","Hình trái tim"],"correct":1},{"q":"Câu 17: Khi vẽ cột cờ Tổ quốc, em sẽ dùng màu gì để tô cho lá cờ?","a":["Màu xanh lá","Màu vàng","Màu đỏ","Màu tím"],"correct":2},{"q":"Câu 18: Hàng phím chứa các phím <b>A, S, D, F, G, H, J, K, L</b> được gọi là:","a":["Hàng phím trên","Hàng phím dưới","Hàng phím cơ sở","Hàng phím số"],"correct":2},{"q":"Câu 19: Khi đặt tay trên hàng cơ sở, ngón trỏ của tay trái sẽ đặt lên phím nào?","a":["Phím <b>F</b>","Phím <b>J</b>","Phím <b>G</b>","Phím <b>H</b>"],"correct":0},{"q":"Câu 20: Sau khi hoàn thành bức vẽ trong Paint, để lưu lại kết quả vào máy tính, em chọn lệnh nào?","a":["Open","New","Exit","Save"],"correct":3}],"ontapk2hk2":[{"q":"Câu 1: Trên bàn phím máy tính, hai phím có gai nằm ở hàng phím nào?","a":["Hàng phím trên","Hàng phím dưới","Hàng phím cơ sở","Hàng phím số"],"correct":2},{"q":"Câu 2: Trên bàn phím máy tính, phím nào là phím dài nhất?","a":["<img src='image1.png' class='opt-img' alt='Enter'>","<img src='image2.png' class='opt-img' alt='Space'>","<img src='image3.png' class='opt-img' alt='Shift'>","<img src='image4.png' class='opt-img' alt='CapsLock'>"],"img":true,"correct":1},{"q":"Câu 3: Ở hàng phím cơ sở, hai phím nào có gai để làm mốc cho việc đặt các ngón tay?","a":["<div style='display:flex;gap:6px;align-items:center;justify-content:center'><img src='image5.png' class='opt-img-sm' alt='A'><span style='font-weight:bold'>và</span><img src='image6.png' class='opt-img-sm' alt='L'></div>","<div style='display:flex;gap:6px;align-items:center;justify-content:center'><img src='image7.png' class='opt-img-sm' alt='G'><span style='font-weight:bold'>và</span><img src='image8.png' class='opt-img-sm' alt='H'></div>","<div style='display:flex;gap:6px;align-items:center;justify-content:center'><img src='image9.png' class='opt-img-sm' alt='F'><span style='font-weight:bold'>và</span><img src='image10.png' class='opt-img-sm' alt='J'></div>","<div style='display:flex;gap:6px;align-items:center;justify-content:center'><img src='image11.png' class='opt-img-sm' alt='S'><span style='font-weight:bold'>và</span><img src='image12.png' class='opt-img-sm' alt='K'></div>"],"img":true,"correct":2},{"q":"Câu 4: Khi gõ phím, ngón tay trỏ của bàn tay trái đặt lên phím nào có gai?","a":["<img src='image10.png' class='opt-img' alt='J'>","<img src='image9.png'  class='opt-img' alt='F'>","<img src='image7.png'  class='opt-img' alt='G'>","<img src='image8.png'  class='opt-img' alt='H'>"],"img":true,"correct":1},{"q":"Câu 5: Trên bàn phím máy tính, phím nào sau đây thuộc hàng phím trên?","a":["<img src='image13.png' class='opt-img' alt='R'>","<img src='image9.png'  class='opt-img' alt='F'>","<img src='image14.png' class='opt-img' alt='V'>","<img src='image5.png'  class='opt-img' alt='A'>"],"img":true,"correct":0},{"q":"Câu 6: Khi gõ hàng phím dưới, ngón trỏ của bàn tay trái sẽ phụ trách gõ các phím nào?","a":["<img src='image15.png' class='opt-img' alt='Z,X'>","<img src='image16.png' class='opt-img' alt='C,V'>","<img src='image17.png' class='opt-img' alt='V,B'>","<img src='image18.png' class='opt-img' alt='N,M'>"],"img":true,"correct":1},{"q":"Câu 7: Trong phần mềm RapidTyping, các phím <span class='key-group'>A &nbsp;S &nbsp;D &nbsp;F</span> thuộc hàng phím nào?","a":["Hàng phím cơ sở","Hàng phím trên","Hàng phím dưới","Hàng phím số"],"correct":0},{"q":"Câu 8: Ngón tay nào phụ trách gõ phím Cách (Space bar)?","a":["Ngón trỏ","Ngón út","Ngón cái","Ngón giữa"],"correct":2},{"q":"Câu 9: Các phím <span class='key-group'>Q &nbsp;W &nbsp;E &nbsp;R &nbsp;T</span> nằm ở hàng phím nào?","a":["Hàng phím dưới","Hàng phím trên","Hàng phím cơ sở","Hàng phím số"],"correct":1},{"q":"Câu 10: Để gõ phím <span class='key-group'>R</span>, em sử dụng ngón tay nào của bàn tay trái?","a":["Ngón út","Ngón áp út","Ngón giữa","Ngón trỏ"],"correct":3},{"q":"Câu 11: Các phím <span class='key-group'>Z &nbsp;X &nbsp;C &nbsp;V &nbsp;B</span> nằm ở hàng phím nào?","a":["Hàng phím trên","Hàng phím cơ sở","Hàng phím dưới","Hàng phím số"],"correct":2},{"q":"Câu 12: Biểu tượng nào dưới đây là biểu tượng của phần mềm soạn thảo văn bản Microsoft Word?","a":["<img src='word.png'    class='opt-img' alt='Word'>","<img src='paint.png'   class='opt-img' alt='Paint'>","<img src='chrome.png'  class='opt-img' alt='Chrome'>","<img src='Explore.jpg' class='opt-img' alt='Explorer'>"],"img":true,"correct":0},{"q":"Câu 13: Để lưu văn bản vào máy tính trong Microsoft Word, em nháy chuột vào biểu tượng nào trên thanh công cụ?","a":["<img src='save.png'  class='opt-img' alt='Save'>","<img src='open.png'  class='opt-img' alt='Open'>","<img src='new.png'   class='opt-img' alt='New'>","<img src='print.jpg' class='opt-img' alt='Print'>"],"img":true,"correct":0},{"q":"Câu 14: Để xuống dòng khi đang soạn thảo trong Microsoft Word, em nhấn phím nào?","a":["Phím <b>Shift</b>","Phím <b>Enter</b>","Phím <b>Ctrl</b>","Phím <b>Alt</b>"],"correct":1},{"q":"Câu 15: Trong kiểu gõ Telex, để gõ chữ \"ă\" em nhấn phím nào?","a":["<img src='image30.png' class='opt-img' alt='aa'>","<img src='image31.png' class='opt-img' alt='aw'>","<img src='image32.png' class='opt-img' alt='ee'>","<img src='image33.png' class='opt-img' alt='oo'>"],"img":true,"correct":1},{"q":"Câu 16: Trong kiểu gõ Telex, để gõ dấu huyền em sử dụng phím nào?","a":["<img src='image34.png' class='opt-img' alt='s'>","<img src='image35.png' class='opt-img' alt='f'>","<img src='image36.png' class='opt-img' alt='r'>","<img src='image37.png' class='opt-img' alt='x'>"],"img":true,"correct":1},{"q":"Câu 17: Để sao chép một đoạn văn bản đã chọn, em sử dụng tổ hợp phím nào trên bàn phím?","a":["<img src='image38.png' class='opt-img' alt='Ctrl+S'>","<img src='image39.png' class='opt-img' alt='Ctrl+C'>","<img src='image40.png' class='opt-img' alt='Ctrl+V'>","<img src='image41.png' class='opt-img' alt='Ctrl+N'>"],"img":true,"correct":1},{"q":"Câu 18: Trong Microsoft Word, biểu tượng chữ <b>B</b> dùng để làm gì?","a":["Chữ in đậm","Chữ in nghiêng","Chữ gạch chân","Đổi màu chữ"],"correct":0},{"q":"Câu 19: Để thay đổi kích thước của chữ (cỡ chữ), em sử dụng ô lệnh nào trong nhóm Font?","a":["<img src='font.png'            class='opt-img' alt='Font Name'>","<img src='size.png'            class='opt-img' alt='Font Size'>","<img src='font color w.png'    class='opt-img' alt='Font Color'>","<img src='A.png'               class='opt-img' alt='A'>"],"img":true,"correct":1},{"q":"Câu 20: Để gõ từ \"Trường\", em cần gõ các phím nào theo kiểu Telex?","a":["Truwowngf","Truongf","Truongs","Truowngs"],"correct":0},{"q":"Câu 21: Quan sát hình dưới đây, biểu tượng nào dùng để canh lề giữa cho đoạn văn bản?","a":["<img src='Align Left.png'  class='opt-img' alt='Căn trái'>","<img src='Align mid.png'   class='opt-img' alt='Căn giữa'>","<img src='Align right.png' class='opt-img' alt='Căn phải'>","<img src='jutifly.png'     class='opt-img' alt='Căn đều'>"],"img":true,"correct":1},{"q":"Câu 22: Để xóa ký tự bên trái con trỏ soạn thảo, em dùng phím nào?","a":["Delete","Backspace","End","Home"],"correct":1},{"q":"Câu 23: Để mở một văn bản đã có trên máy tính trong MS Word, em chọn lệnh nào?","a":["Save","Open","New","Print"],"correct":1},{"q":"Câu 24: Nút lệnh có chữ <b>B</b> trong Microsoft Word dùng để làm gì?","a":["Chữ nghiêng","Chữ gạch chân","Chữ đậm","Đổi màu chữ"],"correct":2},{"q":"Câu 25: Để định dạng chữ nghiêng, em chọn nút lệnh nào?","a":["<b>B</b>","<i>I</i>","<u>U</u>","<b>A</b>"],"correct":1},{"q":"Câu 26: Khi muốn gõ dấu hỏi trong kiểu gõ Telex, em dùng phím nào?","a":["<img src='image34.png' class='opt-img' alt='s'>","<img src='image35.png' class='opt-img' alt='f'>","<img src='image36.png' class='opt-img' alt='r'>","<img src='image50.png' class='opt-img' alt='j'>"],"img":true,"correct":2},{"q":"Câu 27: Để gõ chữ \"đ\" trong kiểu gõ Telex, em gõ:","a":["<img src='image51.png' class='opt-img' alt='d'>","<img src='image52.png' class='opt-img' alt='dd'>","<img src='image53.png' class='opt-img' alt='dw'>","<img src='image54.png' class='opt-img' alt='ds'>"],"img":true,"correct":1},{"q":"Câu 28: Phím dài nhất trên bàn phím là phím nào?","a":["Enter","Shift","Space bar","Caps Lock"],"correct":2},{"q":"Câu 29: Nút lệnh <b>U</b> dùng để định dạng kiểu chữ gì?","a":["Chữ đậm","Chữ nghiêng","Chữ gạch chân","Chữ màu xanh"],"correct":2},{"q":"Câu 30: Để gõ từ \"Học tập\" theo kiểu Telex, em gõ như thế nào?","a":["Hocj tapj","Hoc s tap s","Hoc r tap r","Hoc f tap f"],"correct":0}],"ontapk3hk2":[{"q":"Câu 1: Thông tin nào sau đây em KHÔNG nên chia sẻ cho người lạ trên môi trường mạng?","a":["Tên trường học của em.","Mật khẩu hòm thư điện tử của gia đình.","Màu sắc yêu thích của em.","Tên một bài hát em thích."],"correct":1},{"q":"Câu 2: Khi có một người lạ nhắn tin trên mạng hỏi địa chỉ nhà và số điện thoại của bố mẹ, em nên làm gì?","a":["Nhắn tin trả lời đầy đủ ngay lập tức.","Chỉ cung cấp số điện thoại, không cung cấp địa chỉ nhà.","Giữ bí mật và báo ngay cho bố mẹ hoặc thầy cô giáo biết.","Rủ bạn cùng cung cấp thông tin để nhận quà."],"correct":2},{"q":"Câu 3: Cách đặt mật khẩu nào sau đây được coi là an toàn nhất để bảo vệ thông tin?","a":["12345678","abcdefgh","Tên của em","Kết hợp chữ hoa, chữ thường, chữ số và ký tự đặc biệt"],"correct":3},{"q":"Câu 4: Đâu là biểu tượng của phần mềm trình chiếu PowerPoint?","a":["<img src='word.png' class='opt-img' alt='Word'>","<img src='ppt.png' class='opt-img' alt='PowerPoint'>","<img src='chrome.png' class='opt-img' alt='Chrome'>","<img src='Recycle bin.png' class='opt-img' alt='Recycle Bin'>"],"img":true,"correct":1},{"q":"Câu 5: Trong hệ Mặt Trời, Trái Đất là hành tinh thứ mấy tính từ Mặt Trời ra xa?","a":["Thứ nhất.","Thứ hai.","Thứ ba.","Thứ tư."],"correct":2},{"q":"Câu 6: Thành phần nào nằm ở trung tâm của hệ Mặt Trời và cung cấp ánh sáng, nhiệt độ cho các hành tinh?","a":["Trái Đất.","Mặt Trăng.","Mặt Trời.","Sao Hỏa."],"correct":2},{"q":"Câu 7: Để thực hiện việc \"Đánh răng\", bước nào dưới đây thường được thực hiện đầu tiên?","a":["Súc miệng với nước sạch.","Lấy kem đánh răng vào bàn chải.","Rửa sạch bàn chải.","Chải răng theo chiều dọc."],"correct":1},{"q":"Câu 8: Tại sao chúng ta nên chia một việc lớn thành những việc nhỏ hơn để giải quyết?","a":["Để làm cho công việc trở nên phức tạp hơn.","Để dễ dàng thực hiện và quản lý công việc hiệu quả hơn.","Để tốn nhiều thời gian hơn khi làm việc.","Để máy tính không thể giúp đỡ được chúng ta."],"correct":1},{"q":"Câu 9: Trong các tình huống sau, tình huống nào thể hiện việc thực hiện công việc theo điều kiện?","a":["Em đi học đúng giờ mỗi ngày.","Nếu trời mưa thì em sẽ mang theo ô (dù).","Em quét nhà vào mỗi buổi chiều.","Em nghe nhạc sau khi ăn cơm."],"correct":1},{"q":"Câu 10: Máy tính có thể hỗ trợ em thực hiện nhiệm vụ nào sau đây hiệu quả nhất?","a":["Ăn cơm trưa.","Tập thể dục buổi sáng.","Tìm kiếm thông tin về các hành tinh trong hệ Mặt Trời.","Quét dọn nhà cửa bằng chổi tre."],"correct":2},{"q":"Câu 11: Để xem tin tức và giải trí trên Internet, máy tính của em cần phải có kết nối gì?","a":["Kết nối loa.","Kết nối Internet.","Kết nối máy in.","Kết nối chuột không dây."],"correct":1},{"q":"Câu 12: Khi truy cập Internet, em có thể thực hiện hoạt động nào sau đây?","a":["Quét nhà giúp mẹ.","Nghe nhạc và xem hoạt hình trực tuyến.","Tưới cây trong vườn.","Rửa bát đĩa."],"correct":1},{"q":"Câu 13: Để bảo vệ bản thân khi sử dụng Internet, em nên làm gì?","a":["Cung cấp mật khẩu máy tính cho người lạ trên mạng.","Chia sẻ địa chỉ nhà và số điện thoại cho bất kỳ ai hỏi.","Chỉ truy cập vào các trang web phù hợp với lứa tuổi và có sự đồng ý của bố mẹ.","Gặp gỡ người lạ quen qua mạng một mình."],"correct":2},{"q":"Câu 14: Để truy cập vào một trang web, em cần nhập nội dung gì vào thanh địa chỉ của trình duyệt?","a":["Tên của em.","Địa chỉ trang web (URL).","Số điện thoại của cô giáo.","Mật khẩu máy tính."],"correct":1},{"q":"Câu 15: Phần mềm nào sau đây được dùng để tạo các bài thuyết trình, trình chiếu?","a":["Microsoft Word.","Microsoft PowerPoint.","Microsoft Excel.","Windows Media Player."],"correct":1},{"q":"Câu 16: Trong phần mềm trình chiếu, để thêm một trang chiếu mới, em chọn nút lệnh nào?","a":["New Slide.","Open.","Save.","Print."],"correct":0},{"q":"Câu 17: Để trình chiếu toàn màn hình từ trang đầu tiên, em nhấn phím nào trên bàn phím?","a":["Phím F1.","Phím F5.","Phím Enter.","Phím Esc."],"correct":1},{"q":"Câu 18: Việc thực hiện một công việc theo các bước có lợi ích gì?","a":["Làm cho công việc trở nên khó khăn hơn.","Giúp công việc được thực hiện tuần tự, chính xác và hiệu quả.","Làm mất nhiều thời gian hơn.","Không có lợi ích gì."],"correct":1},{"q":"Câu 19: Trong câu: \"Nếu đèn tín hiệu giao thông màu đỏ thì các phương tiện phải dừng lại\", điều kiện ở đây là gì?","a":["Các phương tiện phải dừng lại.","Đèn tín hiệu giao thông màu đỏ.","Các phương tiện được đi tiếp.","Đèn tín hiệu màu xanh."],"correct":1},{"q":"Câu 20: Bạn An tự nhủ: \"Nếu làm xong bài tập sớm, mình sẽ được xem phim hoạt hình\". Thực tế An đã làm xong bài tập sớm. Vậy kết quả là gì?","a":["An không được xem phim.","An đi ngủ sớm.","An được xem phim hoạt hình.","An phải làm thêm bài tập khác."],"correct":2}],"ontaphk2":[{"q":"Câu 1: Để chèn hình ảnh vào văn bản trong phần mềm soạn thảo, em chọn thẻ nào sau đây?","a":["Home","Insert","Design","View"],"correct":1},{"q":"Câu 2: Phím nào trên bàn phím thường được dùng để xóa phần văn bản đang được chọn?","a":["Enter","Shift","Delete","Ctrl"],"correct":2},{"q":"Câu 3: Để di chuyển một đoạn văn bản từ vị trí này sang vị trí khác, em thực hiện thứ tự các thao tác nào?","a":["Chọn văn bản -> Copy -> Paste","Chọn văn bản -> Cut -> Paste","Chọn văn bản -> Delete -> Paste","Chọn văn bản -> Insert -> Paste"],"correct":1},{"q":"Câu 4: Phần mềm nào sau đây được dùng để tạo bài trình chiếu?","a":["Microsoft Word","Microsoft PowerPoint","Scratch","Windows Media Player"],"correct":1},{"q":"Câu 5: Trong phần mềm trình chiếu, nút lệnh nào dùng để thêm một trang chiếu mới?","a":["New Slide","Layout","Reset","Section"],"correct":0},{"q":"Câu 6: Khi xem video về lịch sử, văn hóa trên Internet, em nên lưu ý điều gì để đảm bảo an toàn và hiệu quả?","a":["Chỉ xem các video từ nguồn tin cậy, chính thống.","Xem tất cả các video hiện lên trên màn hình.","Chia sẻ thông tin cá nhân dưới phần bình luận của video.","Tải tất cả các tệp đính kèm không rõ nguồn gốc dưới video."],"correct":0},{"q":"Câu 7: Trong cửa sổ Scratch, khu vực nào là nơi hiển thị kết quả hoạt động của nhân vật?","a":["Khu vực lệnh","Khu vực lập trình","Sân khấu","Danh sách nhân vật"],"correct":2},{"q":"Câu 8: Để ghép các lệnh lại với nhau trong Scratch, em thực hiện thao tác nào?","a":["Nháy đúp chuột vào lệnh.","Kéo thả các lệnh từ khu vực lệnh sang khu vực lập trình và gắn chúng lại với nhau.","Nháy chuột phải vào lệnh và chọn 'Gắn'.","Nhấn phím Enter trên bàn phím."],"correct":1},{"q":"Câu 9: Nhóm lệnh nào trong Scratch chứa lệnh giúp nhân vật hiển thị bóng nói (ví dụ: 'Say Hello!')?","a":["Motion (Chuyển động)","Looks (Hiển thị)","Sound (Âm thanh)","Events (Sự kiện)"],"correct":1},{"q":"Câu 10: Lệnh nào sau đây giúp nhân vật di chuyển về phía trước một khoảng nhất định?","a":["<span style='background:#4C97FF;color:#fff;padding:6px 12px;border-radius:4px;font-weight:bold;'>xoay &#8635; <span style='background:#fff;color:#000;padding:2px 8px;border-radius:10px;'>15</span> độ</span>","<span style='background:#CF63CF;color:#fff;padding:6px 12px;border-radius:4px;font-weight:bold;'>bắt đầu âm thanh <span style='background:#d38bdf;color:#fff;padding:2px 8px;border-radius:10px;'>Meow &#9660;</span></span>","<span style='background:#4C97FF;color:#fff;padding:6px 12px;border-radius:4px;font-weight:bold;'>di chuyển <span style='background:#fff;color:#000;padding:2px 8px;border-radius:10px;'>10</span> bước</span>","<span style='background:#9966FF;color:#fff;padding:6px 12px;border-radius:4px;font-weight:bold;'>nói <span style='background:#fff;color:#000;padding:2px 8px;border-radius:10px;'>Xin chào!</span></span>"],"correct":2},{"q":"Câu 11: Trong phần mềm soạn thảo, phím tắt nào dùng để DÁN (Paste) văn bản?","a":["Ctrl + C","Ctrl + V","Ctrl + X","Ctrl + Z"],"correct":1},{"q":"Câu 12: Tác dụng của lệnh Copy trong thẻ Home là gì?","a":["Xóa đoạn văn bản","In đậm văn bản","Sao chép đoạn văn bản được chọn","Cắt đoạn văn bản"],"correct":2},{"q":"Câu 13: Trong PowerPoint, nhóm lệnh Font nằm ở thẻ nào?","a":["Home","Insert","Design","Transitions"],"correct":0},{"q":"Câu 14: Để căn giữa đoạn văn bản trong trang chiếu, em dùng nút lệnh nào?","a":["Align Left","Center","Align Right","Justify"],"correct":1},{"q":"Câu 15: Thẻ Animations trong PowerPoint dùng để làm gì?","a":["Thay đổi màu nền trang chiếu","Tạo hiệu ứng xuất hiện cho đối tượng","Thêm trang chiếu mới","Lưu bài trình chiếu"],"correct":1},{"q":"Câu 16: Thẻ Transitions dùng để làm gì?","a":["Tạo hiệu ứng chuyển trang chiếu","Thêm hình ảnh","Đổi phông chữ","Viết chữ nghệ thuật"],"correct":0},{"q":"Câu 17: Phím tắt nào dùng để bắt đầu trình chiếu ngay từ ban đầu?","a":["F1","F3","F5","Esc"],"correct":2},{"q":"Câu 18: Đuôi mở rộng mặc định của một tệp trình chiếu PowerPoint là gì?","a":[".docx",".xlsx",".pptx",".txt"],"correct":2},{"q":"Câu 19: Khi thực hành gõ bàn phím bằng 10 ngón, hai phím có gai (gờ nổi) là:","a":["F và J","G và H","A và S","K và L"],"correct":0},{"q":"Câu 20: Việc đặt tay đúng vị trí khi gõ bàn phím mang lại lợi ích gì?","a":["Giúp chơi game giỏi hơn","Máy tính chạy nhanh hơn","Giúp gõ nhanh, chính xác và đỡ mỏi tay","Tăng tuổi thọ của bàn phím"],"correct":2},{"q":"Câu 21: Phần mềm Scratch là gì?","a":["Phần mềm soạn thảo văn bản","Phần mềm tạo bài trình chiếu","Phần mềm lập trình trực quan, tạo hoạt hình","Phần mềm diệt virus"],"correct":2},{"q":"Câu 22: Biểu tượng mặc định của nhân vật (Sprite) trong Scratch là con vật nào?","a":["Con chó","Chú mèo","Con khỉ","Con rùa"],"correct":1},{"q":"Câu 23: Làm thế nào để xóa một khối lệnh em đã lỡ kéo nhầm vào khu vực lập trình?","a":["Kéo khối lệnh trả lại về khu vực nhóm lệnh","Bấm nút nguồn máy tính","Không thể xóa được","Nháy đúp chuột vào màn hình"],"correct":0},{"q":"Câu 24: Khối lệnh màu Cam (Control - Điều khiển) thường chứa lệnh nào?","a":["lặp lại 10 lần","di chuyển 10 bước","nói Xin chào","đổi phông nền"],"correct":0},{"q":"Câu 25: Lệnh 'đợi 1 giây' nằm trong nhóm lệnh nào của Scratch?","a":["Motion (Chuyển động)","Events (Sự kiện)","Control (Điều khiển)","Operators (Phép toán)"],"correct":2},{"q":"Câu 26: Để thêm một hình nền mới cho Sân khấu, em chọn công cụ nào?","a":["Choose a Sprite","Choose a Backdrop","Costumes","Sounds"],"correct":1},{"q":"Câu 27: Đâu là lệnh có tác dụng làm quay nhân vật một góc nhất định?","a":["đi tới điểm x, y","hiện","xoay 15 độ","nói Xin chào"],"correct":2},{"q":"Câu 28: Nhóm lệnh Sự kiện (Events) màu Vàng thường chứa khối lệnh khởi động nào để bắt đầu chạy kịch bản?","a":["Khi bấm vào lá cờ xanh","Lặp lại liên tục","Nếu - thì","Ẩn nhân vật"],"correct":0},{"q":"Câu 29: Làm thế nào để nhân vật tự động quay vào trong khi đi đụng vào mép sân khấu?","a":["Dùng lệnh 'Ẩn'","Dùng lệnh 'Bật lại nếu chạm cạnh'","Chỉnh kích thước nhỏ lại","Xóa nhân vật"],"correct":1},{"q":"Câu 30: Một bài trình chiếu có chữ quá nhỏ và nhiều màu sắc sặc sỡ sẽ gây ra hậu quả gì?","a":["Làm bài chiếu đẹp hơn","Trang chiếu hiển thị nhanh hơn","Rất dễ theo dõi","Gây rối mắt và khó đọc cho người xem"],"correct":3}],"ontapk5hk2":[{"q":"Câu 1: Cách gõ Telex nào sẽ cho ra dòng chữ “Có công mài sắt có ngày nên kim!” ?","a":["Coo coong maif sawt cos ngayf neen kim!","Cos coong maif sawt co ngayf neen kim!","Cos coong maif sawt cos ngayf nenn kim!","Cos coong maif sawt cos ngayf neen kim!"],"correct":3},{"q":"Câu 2: Trong Word, muốn đưa hình ra phía sau chữ, em chọn kiểu trình bày nào sau đây?","a":["Square","Behind Text","Top and Bottom","In front of Text"],"correct":1},{"q":"Câu 3: Trong Scratch, em dùng cấu trúc nào để một hành động được thực hiện nhiều lần giống nhau?","a":["Cấu trúc tuần tự","Cấu trúc rẽ nhánh","Cấu trúc lặp","Cả 3 câu trên đều sai"],"correct":2},{"q":"Câu 4: Cấu trúc lặp nào dưới đây có số lần lặp chưa biết trước?","a":["Lặp lại 10 lần","Lặp lại 20 lần","Lặp lại cho đến khi bấm phím bất kỳ","A và B đúng"],"correct":2},{"q":"Câu 5: Để lấy tương tác “chạm” cho nhân vật trong Scratch, em vào nhóm lệnh nào?","a":["Vào “Cảm biến”","Vào “Hiển thị”","Vào “Chuyển động”","Vào “Sự kiện”"],"correct":0},{"q":"Câu 6: Để tính tiền mua vé xem phim có giá vé khác nhau với các ngày trong tuần và cuối tuần, em sẽ sử dụng cấu trúc rẽ nhánh nào? (chỉ sử dụng cấu trúc đó 1 lần trong chương trình)","a":["Nếu…thì…không thì…","Nếu…thì…","Nếu không thì…","Cả 3 câu trên đều sai"],"correct":0},{"q":"Câu 7: Cho a = 5, b = 1. Biểu thức so sánh nào dưới đây cho kết quả là “False”?","a":["a > b","b < a","a < b","Tất cả đều False"],"correct":2},{"q":"Câu 8: Sử dụng “Kết hợp táo-chuối” trong Scratch có tác dụng gì?","a":["Kết hợp giá trị với một biến","Kết hợp lời văn với phép tính","Kết hợp trang phục cho nhân vật","Kết hợp phông nền cho sân khấu"],"correct":1},{"q":"Câu 9: Cho biến a có giá trị lấy ngẫu nhiên từ 7 đến 77, điều nào dưới đây là không thể xảy ra?","a":["a = 7","a < 77","a > 7","a > 77"],"correct":3},{"q":"Câu 10: Trong Scratch, muốn nhân vật Cá bơi tự do và khi nào chạm vào nhân vật Ốc thì dừng lại rồi nói “Xin chào”, em sẽ thiết kế chương trình như thế nào là hợp lý nhất?","a":["Cho Cá lặp lại hành động bơi đến vị trí ngẫu nhiên 10 lần rồi nói “Xin chào”.","Cho Ốc lặp lại hành động bơi đến vị trí ngẫu nhiên cho đến khi chạm vào Cá thì chào.","Cho Cá lặp lại hành động bơi đến vị trí ngẫu nhiên cho đến khi chạm vào Ốc thì chào.","Cho Ốc lặp lại hành động bơi đến vị trí ngẫu nhiên 10 lần rồi nói “Xin chào”."],"correct":2},{"q":"Câu 11: Khi tạo thiệp chúc mừng, việc chèn thêm hình ảnh minh họa có tác dụng gì?","a":["Làm cho thiệp đẹp và sinh động hơn.","Làm cho máy tính chạy nhanh hơn.","Để thay thế hoàn toàn nội dung chữ.","Không có tác dụng gì."],"correct":0},{"q":"Câu 12: Để chèn một hình ảnh vào trang soạn thảo thiệp, em vào thẻ nào?","a":["Home.","Insert.","Design.","View."],"correct":1},{"q":"Câu 13: Trong các bước tạo thiệp chúc mừng, bước \"Trình bày nội dung lời chúc\" thường thực hiện khi nào?","a":["Trước khi mở phần mềm.","Sau khi đã chọn mẫu hoặc trang trí nền.","Sau khi đã in thiệp ra giấy.","Khi đã tắt máy tính."],"correct":1},{"q":"Câu 14: Khi xem video hướng dẫn làm sản phẩm thủ công, em nên làm gì để theo kịp các bước?","a":["Xem hết video một lần rồi mới làm.","Vừa xem vừa làm, có thể tạm dừng video ở mỗi bước.","Chỉ xem, không cần làm theo.","Tua nhanh video đến đoạn cuối."],"correct":1},{"q":"Câu 15: Lợi ích của việc học làm sản phẩm thủ công qua video là gì?","a":["Có thể quan sát trực quan các thao tác thực hiện.","Video tự động làm thay cho em.","Không cần chuẩn bị nguyên vật liệu.","Làm xong sản phẩm sẽ có ngay trên màn hình."],"correct":0},{"q":"Câu 16: Cấu trúc tuần tự trong lập trình được hiểu là:","a":["Các lệnh được thực hiện lặp đi lặp lại.","Các lệnh được thực hiện lần lượt từ trên xuống dưới.","Chỉ thực hiện lệnh khi thỏa mãn điều kiện.","Các lệnh được thực hiện ngẫu nhiên."],"correct":1},{"q":"Câu 17: Trong sơ đồ khối của cấu trúc tuần tự, các bước được nối với nhau bằng:","a":["Hình thoi.","Hình tròn.","Mũi tên chỉ hướng thực hiện.","Hình tam giác."],"correct":2},{"q":"Câu 18: Ví dụ nào sau đây mô tả một cấu trúc tuần tự?","a":["Nếu trời mưa thì nghỉ học.","Đánh răng, rửa mặt, rồi đi học.","Ăn cơm cho đến khi no thì dừng.","Quay kim đồng hồ liên tục."],"correct":1},{"q":"Câu 19: Trong Scratch, các khối lệnh gắn chặt nối tiếp nhau từ trên xuống thể hiện cấu trúc gì?","a":["Cấu trúc rẽ nhánh.","Cấu trúc lặp.","Cấu trúc tuần tự.","Cấu trúc điều kiện."],"correct":2},{"q":"Câu 20: Để nhân vật di chuyển 10 bước rồi nói \"Xin chào\", em cần sắp xếp các khối lệnh như thế nào?","a":["Khối \"Nói\" trước, khối \"Di chuyển\" sau.","Khối \"Di chuyển\" trước, khối \"Nói\" sau.","Hai khối đặt song song.","Chỉ cần dùng một khối."],"correct":1},{"q":"Câu 21: Điều kiện trong cấu trúc rẽ nhánh thường trả về kết quả là:","a":["Một con số.","Một đoạn văn bản.","Đúng hoặc Sai.","Một hình ảnh."],"correct":2},{"q":"Câu 22: Cấu trúc lặp được sử dụng để làm gì?","a":["Thực hiện một công việc duy nhất một lần.","Thực hiện lặp lại một hoặc một nhóm lệnh nhiều lần.","Kiểm tra điều kiện đúng hay sai.","Sắp xếp các lệnh theo thứ tự."],"correct":1},{"q":"Câu 23: Trong Scratch, khối lệnh \"Lặp lại 10\" thuộc loại cấu trúc lặp nào?","a":["Lặp với số lần biết trước.","Lặp với số lần chưa biết trước.","Lặp vô hạn.","Không phải cấu trúc lặp."],"correct":0},{"q":"Câu 24: Để nhân vật vẽ một hình vuông, em cần lặp lại thao tác \"Di chuyển và Xoay 90 độ\" bao nhiêu lần?","a":["2 lần.","3 lần.","4 lần.","5 lần."],"correct":2},{"q":"Câu 25: Biểu thức toán học (10 + 5) x 2 được viết trong ngôn ngữ lập trình (như Scratch) bằng cách:","a":["Sử dụng một khối lệnh duy nhất.","Kết hợp khối lệnh cộng lồng bên trong khối lệnh nhân.","Kết hợp khối lệnh nhân lồng bên trong khối lệnh cộng.","Viết thẳng như trên giấy."],"correct":1},{"q":"Câu 26: Chạy thử chương trình là công việc nhằm mục đích gì?","a":["Để xem chương trình có hoạt động đúng như mong muốn không.","Để máy tính tự động viết nốt phần còn lại.","Để xóa bỏ chương trình.","Để thay đổi màu sắc của nhân vật."],"correct":0},{"q":"Câu 27: Khi chạy thử, nếu kết quả không đúng (ví dụ: 1 + 1 = 3), em cần làm gì?","a":["Tắt máy tính và đi ngủ.","Kiểm tra lại các khối lệnh để tìm và sửa lỗi.","Cứ để nguyên vì máy tính không bao giờ sai.","Xóa toàn bộ chương trình và làm lại từ đầu."],"correct":1},{"q":"Câu 28: Một chương trình yêu cầu nhân vật di chuyển khi nhấn phím Trắng, nhưng khi nhấn phím nhân vật không cử động. Đây gọi là:","a":["Tính năng của chương trình.","Lỗi chương trình.","Sự cố điện lưới.","Do nhân vật đang ngủ."],"correct":1},{"q":"Câu 29: Khi chạy thử chương trình vẽ hình tam giác đều, nhân vật lại vẽ ra hình vuông. Nguyên nhân có thể là do:","a":["Chọn sai màu bút.","Đặt sai số lần lặp hoặc góc xoay.","Máy tính bị nóng.","Do nhân vật di chuyển quá nhanh."],"correct":1},{"q":"Câu 30: Bước cuối cùng sau khi chạy thử và sửa lỗi chương trình là:","a":["Lưu chương trình và chia sẻ (nếu cần).","Xóa chương trình.","Rút phích cắm máy tính.","Thay đổi tên người lập trình."],"correct":0}]};
+
+        const QUIZ_LABEL = {
+            'ontapk1hk2': 'Ôn tập HK2 · Lớp 1',
+            'ontapk2hk2': 'Ôn tập HK2 · Lớp 2',
+            'ontapk3hk2': 'Ôn tập HK2 · Lớp 3',
+            'ontaphk2':   'Ôn tập HK2 · Lớp 4',
+            'ontapk5hk2': 'Ôn tập HK2 · Lớp 5',
+            'vbtontaphk2':  'VBT Ôn tập HK2',
+            'tuluank3hk2':  'Tự luận K3 HK2',
+            'thuchanhhk2':  'Thực hành HK2',
+            'thuchanhk5hk2':'Thực hành K5 HK2',
+        };
+        const LETTER = ['A','B','C','D'];
+
+        // Lưu bài đang xem để export PDF
+        let _currentDetailSub = null;
+
+        function parseAnswers(answersStr) {
+            // Parse "Câu 1: Chọn đáp án D - ĐÚNG\nCâu 2: ..."
+            const map = {};
+            if (!answersStr) return map;
+            const lines = answersStr.split('\n');
+            lines.forEach(line => {
+                const m = line.match(/Câu\s*(\d+):\s*(?:Chọn đáp án\s*([A-D]))\s*-\s*(ĐÚNG|SAI)/i);
+                if (m) {
+                    map[parseInt(m[1])] = { letter: m[2], isRight: m[3] === 'ĐÚNG' };
+                } else {
+                    const m2 = line.match(/Câu\s*(\d+):\s*Không chọn\s*-\s*(SAI)/i);
+                    if (m2) map[parseInt(m2[1])] = { letter: null, isRight: false };
+                }
+            });
+            return map;
+        }
+
+        function buildDetailHTML(s, forPrint = false) {
+            const questions = QUIZ_DATA[s.quizType];
+            const ansMap = parseAnswers(s.answers);
+            let html = '';
+
+            if (!questions) {
+                // Fallback: text cũ
+                html = `<pre style="white-space:pre-wrap;font-size:.85rem;color:#444;padding:8px;">${s.answers || 'Không có dữ liệu.'}</pre>`;
+                return html;
+            }
+
+            questions.forEach((q, idx) => {
+                const qNum = idx + 1;
+                const ans = ansMap[qNum];
+                const userLetterIdx = ans?.letter ? LETTER.indexOf(ans.letter) : -1;
+                const correctIdx = q.correct;
+                const isRight = ans?.isRight ?? false;
+
+                const borderColor = isRight ? '#b7ebc8' : '#fcc8c8';
+                const bgColor     = isRight ? '#f0fff4' : '#fff5f5';
+                const borderLeft  = isRight ? '4px solid #28a745' : '4px solid #e53935';
+
+                let optionsHTML = '';
+                const grid = q.a.length === 4 ? 'grid-template-columns:1fr 1fr;' : 'grid-template-columns:1fr;';
+                q.a.forEach((opt, oi) => {
+                    const letter = LETTER[oi];
+                    const isCorrect  = oi === correctIdx;
+                    const isSelected = oi === userLetterIdx;
+                    
+                    let optBg = '#fff', optBorder = '#dde2e8', optColor = '#333';
+                    let badge = '', radioStyle = 'border:2px solid #aaa;';
+                    
+                    if (isCorrect && isSelected) {
+                        // Chọn đúng
+                        optBg = '#e8f8ee'; optBorder = '#28a745'; optColor = '#1b5e20';
+                        radioStyle = 'border:2px solid #28a745; background:#28a745;';
+                        badge = `<span style="background:#28a745;color:#fff;font-size:.65rem;padding:1px 6px;border-radius:10px;font-weight:700;margin-left:6px;">✓ ĐÚNG</span>`;
+                    } else if (isCorrect && !isSelected) {
+                        // Đáp án đúng nhưng không chọn
+                        optBg = '#e8f8ee'; optBorder = '#28a745'; optColor = '#1b5e20';
+                        radioStyle = 'border:2px solid #28a745;';
+                        badge = `<span style="background:#28a745;color:#fff;font-size:.65rem;padding:1px 6px;border-radius:10px;font-weight:700;margin-left:6px;">✓ Đáp án</span>`;
+                    } else if (!isCorrect && isSelected) {
+                        // Chọn sai
+                        optBg = '#fff0f0'; optBorder = '#e53935'; optColor = '#b71c1c';
+                        radioStyle = 'border:2px solid #e53935; background:#e53935;';
+                        badge = `<span style="background:#e53935;color:#fff;font-size:.65rem;padding:1px 6px;border-radius:10px;font-weight:700;margin-left:6px;">✗ SAI</span>`;
+                    }
+
+                    const hasImg = q.img && opt.includes('<img');
+                    const optContent = hasImg ? opt : `<span style="color:#1565c0;font-weight:700;font-size:.85rem;min-width:22px;height:22px;background:#e3f2fd;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;">${letter}</span> <span>${opt}</span>`;
+
+                    optionsHTML += `
+                    <div style="
+                        display:flex;align-items:center;gap:8px;
+                        background:${optBg};border:1.5px solid ${optBorder};
+                        border-radius:8px;padding:8px 10px;cursor:default;
+                        color:${optColor};font-size:.88rem;
+                        ${forPrint ? 'break-inside:avoid;' : ''}
+                    ">
+                        <div style="width:14px;height:14px;border-radius:50%;flex-shrink:0;${radioStyle}"></div>
+                        ${optContent}
+                        ${badge}
+                    </div>`;
+                });
+
+                html += `
+                <div style="
+                    background:${bgColor};
+                    border:1px solid ${borderColor};
+                    border-left:${borderLeft};
+                    border-radius:10px;
+                    padding:12px 14px;
+                    margin-bottom:${forPrint ? '10px' : '12px'};
+                    ${forPrint ? 'break-inside:avoid;page-break-inside:avoid;' : ''}
+                ">
+                    <div style="font-weight:600;color:#1565c0;font-size:.92rem;margin-bottom:10px;line-height:1.45;">
+                        ${q.q}
+                    </div>
+                    <div style="display:grid;${grid}gap:6px;">
+                        ${optionsHTML}
+                    </div>
+                </div>`;
+            });
+            return html;
+        }
+
         window.viewDetails = function(id) {
             const s = allSubmissions.find(x => x.id === id);
             if (!s) return;
+            _currentDetailSub = s;
 
-            // --- Tiêu đề & meta ---
+            // Header
             document.getElementById('detailsStudentName').innerText = s.studentName;
-
-            // Lấy tên bài từ quizType
-            const quizLabel = {
-                'ontapk1hk2': 'Ôn tập HK2 - Lớp 1',
-                'ontapk2hk2': 'Ôn tập HK2 - Lớp 2',
-                'ontapk3hk2': 'Ôn tập HK2 - Lớp 3',
-                'ontaphk2':   'Ôn tập HK2 - Lớp 4',
-                'ontapk5hk2': 'Ôn tập HK2 - Lớp 5',
-                'vbtontaphk2': 'VBT Ôn tập HK2',
-                'tuluank3hk2': 'Tự luận K3 HK2',
-                'thuchanhhk2': 'Thực hành HK2',
-                'thuchanhk5hk2': 'Thực hành K5 HK2',
-            }[s.quizType] || s.quizType;
-
             const timeStr = s.createdAt ? new Date(s.createdAt).toLocaleString('vi-VN') : '';
             document.getElementById('detailsStudentMeta').innerText =
-                `Lớp ${s.studentClass} | ${quizLabel}${timeStr ? ' | ' + timeStr : ''}`;
+                `Lớp ${s.studentClass} | ${QUIZ_LABEL[s.quizType] || s.quizType}${timeStr ? ' | ' + timeStr : ''}`;
 
-            // --- Kết quả tổng quát ---
-            const scoreBox  = document.getElementById('detailsScoreBox');
-            const scoreTxt  = document.getElementById('detailsScoreText');
-            if (s.quizType === 'thuchanhhk2' || s.quizType === 'thuchanhk5hk2') {
+            // Score box
+            const scoreBox   = document.getElementById('detailsScoreBox');
+            const scoreTxt   = document.getElementById('detailsScoreText');
+            const scoreLabel = document.getElementById('detailsScoreLabel');
+            const isThucHanh = s.quizType === 'thuchanhhk2' || s.quizType === 'thuchanhk5hk2';
+            if (isThucHanh) {
                 scoreTxt.innerText = 'Hoàn thành';
                 scoreBox.style.background = '#e8f5e9';
                 scoreTxt.style.color = '#2e7d32';
-                scoreBox.querySelector('div div:first-child').style.color = '#2e7d32';
+                scoreLabel.style.color = '#2e7d32';
             } else {
                 const pct = s.total ? Math.round(s.score / s.total * 100) : 0;
                 scoreTxt.innerText = `${s.score} / ${s.total} (${pct}%)`;
-                const isGood = pct >= 70;
-                scoreBox.style.background = isGood ? '#e8f5e9' : '#fff3f3';
-                scoreTxt.style.color = isGood ? '#2e7d32' : '#c0392b';
-                scoreBox.querySelector('div div:first-child').style.color = isGood ? '#2e7d32' : '#c0392b';
+                const good = pct >= 70;
+                scoreBox.style.background  = good ? '#e8f5e9' : '#fff3f3';
+                scoreTxt.style.color       = good ? '#2e7d32' : '#c0392b';
+                scoreLabel.style.color     = good ? '#2e7d32' : '#c0392b';
             }
 
-            // --- Chi tiết câu hỏi ---
-            const contentDiv = document.getElementById('detailsModalContent');
-            if (!s.answers) {
-                contentDiv.innerHTML = '<div style="text-align:center; color:#999; font-style:italic; padding: 30px 0;">Không có thông tin chi tiết các câu trả lời.</div>';
-            } else {
-                try {
-                    const data = JSON.parse(s.answers);
-                    if (Array.isArray(data)) {
-                        let html = '';
-                        data.forEach((item, i) => {
-                            const isRight = item.isRight;
-                            const bg     = isRight ? '#f0fff4' : '#fff5f5';
-                            const border = isRight ? '#b7ebc8' : '#fcc8c8';
-                            const iconHtml = isRight
-                                ? `<span style="background:#28a745;color:white;border-radius:50%;width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;font-size:13px;">✓</span>`
-                                : `<span style="background:#dc3545;color:white;border-radius:50%;width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;font-size:13px;">✗</span>`;
-                            const userChoice = item.userChoice || '—';
-                            const correct    = item.correct    || '—';
-                            html += `
-                            <div style="
-                                background: ${bg};
-                                border: 1px solid ${border};
-                                border-radius: 10px;
-                                padding: 10px 14px;
-                                margin-bottom: 8px;
-                                display: flex;
-                                align-items: center;
-                                gap: 12px;
-                                font-size: 0.88rem;
-                            ">
-                                ${iconHtml}
-                                <div style="flex:1; min-width:0;">
-                                    <div style="font-weight:600; color:#333; margin-bottom:3px;">Câu ${i + 1}</div>
-                                    <div style="color:#555;">
-                                        Đã chọn: <b style="color:${isRight ? '#2e7d32' : '#c0392b'}">${userChoice}</b>
-                                        ${!isRight ? ` &nbsp;·&nbsp; Đáp án: <b style="color:#2e7d32">${correct}</b>` : ''}
-                                    </div>
-                                </div>
-                            </div>`;
-                        });
-                        contentDiv.innerHTML = html;
-                    } else {
-                        // Fallback: text cũ (answers là string)
-                        contentDiv.innerHTML = `<pre style="white-space:pre-wrap; font-size:0.85rem; color:#444;">${s.answers}</pre>`;
-                    }
-                } catch(e) {
-                    contentDiv.innerHTML = `<pre style="white-space:pre-wrap; font-size:0.85rem; color:#444;">${s.answers}</pre>`;
-                }
-            }
-
+            // Body
+            document.getElementById('detailsModalContent').innerHTML = buildDetailHTML(s, false);
             document.getElementById('detailsModal').style.display = 'flex';
         };
 
         window.closeDetailsModal = function() {
             document.getElementById('detailsModal').style.display = 'none';
+        };
+
+        window.exportDetailPDF = function() {
+            const s = _currentDetailSub;
+            if (!s) return;
+
+            const timeStr = s.createdAt ? new Date(s.createdAt).toLocaleString('vi-VN') : '';
+            const pct = s.total ? Math.round(s.score / s.total * 100) : 0;
+            const quizLabel = QUIZ_LABEL[s.quizType] || s.quizType;
+
+            const bodyHTML = buildDetailHTML(s, true);
+
+            const printHTML = `<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>Bài làm - ${s.studentName}</title>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:'Roboto',sans-serif; color:#222; background:#fff; padding:0; }
+    
+    .cover {
+        padding: 32px 40px 24px;
+        border-bottom: 3px solid #1565c0;
+        background: #f8faff;
+        margin-bottom: 24px;
+    }
+    .student-name { font-size:1.5rem; font-weight:700; color:#1a1a2e; margin-bottom:6px; }
+    .student-meta { font-size:.85rem; color:#666; margin-bottom:16px; }
+    .score-box {
+        display:inline-flex; align-items:center; gap:20px;
+        background:#fff3f3; border-radius:12px; padding:12px 20px;
+    }
+    .score-label { font-size:.65rem; font-weight:700; color:#c0392b; text-transform:uppercase; letter-spacing:.08em; margin-bottom:4px; }
+    .score-val   { font-size:1.5rem; font-weight:800; color:#c0392b; }
+    .score-emoji { font-size:2rem; }
+
+    .questions { padding: 0 40px 40px; }
+    .q-block { break-inside:avoid; page-break-inside:avoid; margin-bottom:12px; }
+    
+    @media print {
+        @page { size: A4; margin: 15mm 15mm 15mm 15mm; }
+        body { -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+        .cover { margin-bottom:18px; }
+    }
+</style>
+</head>
+<body>
+    <div class="cover">
+        <div class="student-name">${s.studentName}</div>
+        <div class="student-meta">Lớp ${s.studentClass} | ${quizLabel}${timeStr ? ' | ' + timeStr : ''}</div>
+        <div class="score-box">
+            <div>
+                <div class="score-label">KẾT QUẢ TỔNG QUÁT</div>
+                <div class="score-val">${s.score} / ${s.total} (${pct}%)</div>
+            </div>
+            <div class="score-emoji">📚</div>
+        </div>
+    </div>
+    <div class="questions">${bodyHTML}</div>
+</body>
+</html>`;
+
+            const frame = document.getElementById('pdfFrame');
+            frame.style.display = 'block';
+            frame.style.position = 'fixed';
+            frame.style.left = '-9999px';
+            frame.style.width = '794px'; // A4 width px
+            frame.style.height = '1px';
+
+            frame.onload = function() {
+                setTimeout(() => {
+                    frame.contentWindow.focus();
+                    frame.contentWindow.print();
+                    setTimeout(() => { frame.style.display = 'none'; }, 1000);
+                }, 400);
+            };
+
+            const doc = frame.contentDocument || frame.contentWindow.document;
+            doc.open();
+            doc.write(printHTML);
+            doc.close();
         };
 
         window.confirmDelete = async function(id) {
@@ -651,7 +794,7 @@
         };
 
         window.checkLogin = async function() {
-            const u = document.getElementById('username').value;
+            const u = document.getElementById('username').value.trim();
             const p = document.getElementById('password').value;
             
             const btn = document.querySelector('.btn-full');
@@ -662,34 +805,25 @@
             document.getElementById('auth-guide').style.display = 'none';
 
             try {
-                // First ensure anonymous auth works
-                await signInAnonymously(auth);
-                
-                // Get stored password hash
+                // Đọc Firestore trực tiếp (không cần anonymous auth)
                 let storedHash = null;
-                const snap = await getDoc(doc(db, "settings", "adminAuth"));
-                if (snap.exists()) {
-                    storedHash = snap.data().password;
-                } else {
-                    // Default if not set yet
+                try {
+                    const snap = await getDoc(doc(db, "settings", "adminAuth"));
+                    if (snap.exists()) {
+                        storedHash = snap.data().password;
+                    }
+                } catch (firestoreErr) {
+                    console.warn("Không đọc được Firestore, dùng mật khẩu mặc định:", firestoreErr.message);
+                }
+
+                // Fallback mật khẩu mặc định nếu chưa thiết lập
+                if (!storedHash) {
                     storedHash = await hashPassword('thaylongtinhoc');
                 }
 
                 const inputHash = await hashPassword(p);
 
-                if (u.trim().toLowerCase() === 'admin' && inputHash === storedHash) {
-                    // Cấp quyền trên Firestore cho tài khoản ẩn danh
-                    if (auth.currentUser && auth.currentUser.isAnonymous) {
-                        try {
-                            await setDoc(doc(db, "admins", auth.currentUser.uid), {
-                                role: "admin",
-                                loginAt: new Date().toISOString()
-                            }, { merge: true });
-                        } catch (e) {
-                            console.error("Error setting admin role:", e);
-                        }
-                    }
-
+                if (u === 'Admin' && inputHash === storedHash) {
                     sessionStorage.setItem('isAdmin', 'true');
                     showDashboard();
                     window.loadQuizData(currentQuizType);
@@ -698,11 +832,7 @@
                 }
             } catch (e) {
                 console.error("Login detail error:", e);
-                if (e.code === 'auth/admin-restricted-operation' || e.code === 'auth/operation-not-allowed') {
-                    document.getElementById('auth-guide').style.display = 'block';
-                } else {
-                    alert("Lỗi đăng nhập: " + e.message + " (Code: " + e.code + ")");
-                }
+                alert("Lỗi đăng nhập: " + e.message + " (Code: " + (e.code || 'unknown') + ")");
             } finally {
                 btn.innerText = origText;
                 btn.disabled = false;
@@ -771,19 +901,9 @@
         };
 
         // Initial load
-        onAuthStateChanged(auth, async (user) => {
+        onAuthStateChanged(auth, (user) => {
             if (user && (user.email === ADMIN_EMAIL || user.isAnonymous)) {
                 if (sessionStorage.getItem('isAdmin') === 'true') {
-                    if (user.isAnonymous) {
-                        try {
-                            await setDoc(doc(db, "admins", user.uid), {
-                                role: "admin",
-                                lastActive: new Date().toISOString()
-                            }, { merge: true });
-                        } catch (e) {
-                            console.error("Error updating admin role on reload:", e);
-                        }
-                    }
                     showDashboard();
                     // We don't auto-load quiz data here because user needs to select grade first
                 }
