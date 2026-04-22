@@ -110,6 +110,43 @@
         .divider-container:not(:empty)::before { margin-right: .5em; }
         .divider-container:not(:empty)::after { margin-left: .5em; }
         .divider-text { color: #888; font-size: 0.9rem; }
+
+        /* Quiz Detail Image Styles */
+        .opt-img {
+            display: block;
+            max-width: 140px;
+            max-height: 110px;
+            object-fit: contain;
+            margin: 5px auto;
+            border-radius: 4px;
+        }
+        .opt-img-sm {
+            height: 22px;
+            object-fit: contain;
+            vertical-align: middle;
+        }
+        /* Generic images in question text */
+        .quiz-detail-q-img {
+            display: block;
+            max-width: 100%;
+            max-height: 250px;
+            margin: 10px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        /* Catch-all for any images in the detail view */
+        [id^="detail-"] img {
+            max-width: 100%;
+            height: auto;
+        }
+        
+        /* Specific constraint for option images if they don't have the class */
+        .options-grid img {
+            max-width: 140px;
+            max-height: 110px;
+            object-fit: contain;
+        }
     </style>
 </head>
 <body>
@@ -758,10 +795,27 @@
             let html = '';
 
             if (!questions) {
-                // Fallback: text cũ
                 html = `<pre style="white-space:pre-wrap;font-size:.85rem;color:#444;padding:8px;">${s.answers || 'Không có dữ liệu.'}</pre>`;
                 return html;
             }
+
+            // Xác định thư mục dựa trên quizType để fix lỗi đường dẫn ảnh
+            let folderPrefix = "";
+            if (s.quizType.includes("k1")) folderPrefix = "Lop1/";
+            else if (s.quizType.includes("k2") && s.quizType !== "ontapk2hk2" && s.quizType !== "thik2hk2") {
+                // Đây là logic đặc biệt: nếu mã đề có k2 nhưng là của lớp 2
+                // Tuy nhiên, mã đề ontapk2hk2, thik2hk2 là của Lớp 2.
+                // ontapk1hk2 -> Lớp 1, ontapk2hk2 -> Lớp 2...
+            }
+            
+            // Cách làm an toàn hơn: Kiểm tra mã đề chính xác
+            if (s.quizType.includes("k1")) folderPrefix = "Lop1/";
+            else if (s.quizType.includes("k2") && !s.quizType.startsWith("ontap")) folderPrefix = "Lop2/"; // thik2hk2
+            else if (s.quizType === "ontapk2hk2") folderPrefix = "Lop2/";
+            else if (s.quizType.includes("k3")) folderPrefix = "Lop3/";
+            else if (s.quizType.includes("k5")) folderPrefix = "Lop5/";
+            // Lớp 4 (ontaphk2, thihk2) thường nằm ở thư mục gốc hoặc có thư mục riêng
+            // Nếu ảnh lớp 4 bị lỗi, ta sẽ check lại vị trí ảnh của lớp 4.
 
             questions.forEach((q, idx) => {
                 const qNum = idx + 1;
@@ -785,24 +839,31 @@
                     let badge = '', radioStyle = 'border:2px solid #aaa;';
                     
                     if (isCorrect && isSelected) {
-                        // Chọn đúng
                         optBg = '#e8f8ee'; optBorder = '#28a745'; optColor = '#1b5e20';
                         radioStyle = 'border:2px solid #28a745; background:#28a745;';
                         badge = `<span style="background:#28a745;color:#fff;font-size:.65rem;padding:1px 6px;border-radius:10px;font-weight:700;margin-left:6px;">✓ ĐÚNG</span>`;
                     } else if (isCorrect && !isSelected) {
-                        // Đáp án đúng nhưng không chọn
                         optBg = '#e8f8ee'; optBorder = '#28a745'; optColor = '#1b5e20';
                         radioStyle = 'border:2px solid #28a745;';
                         badge = `<span style="background:#28a745;color:#fff;font-size:.65rem;padding:1px 6px;border-radius:10px;font-weight:700;margin-left:6px;">✓ Đáp án</span>`;
                     } else if (!isCorrect && isSelected) {
-                        // Chọn sai
                         optBg = '#fff0f0'; optBorder = '#e53935'; optColor = '#b71c1c';
                         radioStyle = 'border:2px solid #e53935; background:#e53935;';
                         badge = `<span style="background:#e53935;color:#fff;font-size:.65rem;padding:1px 6px;border-radius:10px;font-weight:700;margin-left:6px;">✗ SAI</span>`;
                     }
 
-                    const hasImg = q.img && opt.includes('<img');
-                    const optContent = hasImg ? opt : `<span style="color:#1565c0;font-weight:700;font-size:.85rem;min-width:22px;height:22px;background:#e3f2fd;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;">${letter}</span> <span>${opt}</span>`;
+                    // FIX PATH ẢNH TRONG OPTION
+                    let displayOpt = opt;
+                    if (q.img && displayOpt.includes('<img')) {
+                        // Tìm src='...' và thay bằng src='LopX/...'
+                        displayOpt = displayOpt.replace(/src=['"]([^'"]+)['"]/g, (match, p1) => {
+                            if (p1.startsWith('http') || p1.startsWith('/') || p1.startsWith('data:')) return match;
+                            return `src="${folderPrefix}${p1}"`;
+                        });
+                    }
+
+                    const hasImg = q.img && displayOpt.includes('<img');
+                    const optContent = hasImg ? displayOpt : `<span style="color:#1565c0;font-weight:700;font-size:.85rem;min-width:22px;height:22px;background:#e3f2fd;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;">${letter}</span> <span>${displayOpt}</span>`;
 
                     optionsHTML += `
                     <div style="
@@ -818,6 +879,16 @@
                     </div>`;
                 });
 
+                // FIX PATH ẢNH TRONG CÂU HỎI (nếu có)
+                let displayQ = q.q;
+                if (displayQ.includes('<img')) {
+                    displayQ = displayQ.replace(/<img/g, '<img class="quiz-detail-q-img"');
+                    displayQ = displayQ.replace(/src=['"]([^'"]+)['"]/g, (match, p1) => {
+                        if (p1.startsWith('http') || p1.startsWith('/') || p1.startsWith('data:')) return match;
+                        return `src="${folderPrefix}${p1}"`;
+                    });
+                }
+
                 html += `
                 <div style="
                     background:${bgColor};
@@ -829,7 +900,7 @@
                     ${forPrint ? 'break-inside:avoid;page-break-inside:avoid;' : ''}
                 ">
                     <div style="font-weight:600;color:#1565c0;font-size:.92rem;margin-bottom:10px;line-height:1.45;">
-                        ${q.q}
+                        ${displayQ}
                     </div>
                     <div style="display:grid;${grid}gap:6px;">
                         ${optionsHTML}
