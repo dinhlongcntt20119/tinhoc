@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bài thi cuối kì 2 - Tin học 1</title>
+    <title>Bài thi cuối kì 2 - Tin học 2</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Source+Code+Pro:wght@600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
@@ -167,8 +167,8 @@
 ══════════════════════════════════════════ -->
 <div id="loginScreen">
     <div class="login-box">
-        <h2><i class="fas fa-user-graduate"></i> Học sinh Lớp 1</h2>
-        <p>Bài thi cuối kì 2 – Tin học 1</p>
+        <h2><i class="fas fa-user-graduate"></i> Học sinh Lớp 2</h2>
+        <p>Bài thi cuối kì 2 – Tin học 2</p>
         <div class="input-group">
             <label for="studentName">Họ và tên:</label>
             <input type="text" id="studentName" placeholder="Nhập họ và tên..." autocomplete="name">
@@ -177,10 +177,11 @@
             <label for="studentClass">Lớp:</label>
             <select id="studentClass">
                 <option value="" disabled selected>Chọn lớp...</option>
-                <option value="1A">1A</option>
-                <option value="1B">1B</option>
-                <option value="1C">1C</option>
-                <option value="1D">1D</option>
+                <option value="2A">2A</option>
+                <option value="2B">2B</option>
+                <option value="2C">2C</option>
+                <option value="2D">2D</option>
+                <option value="2E">2E</option>
             </select>
         </div>
         <button class="btn-start" onclick="startQuiz()">
@@ -195,7 +196,7 @@
 <header id="mainHeader">
     <div class="header-content">
         <div class="logo-title">
-            <i class="fas fa-laptop-code fa-beat" style="color:#fffb70; margin-right:8px;"></i> TIN HỌC 1
+            <i class="fas fa-laptop-code fa-beat" style="color:#fffb70; margin-right:8px;"></i> TIN HỌC 2
         </div>
         <div class="header-info">
             <div>GV – Nguyễn Đình Bạch Long</div>
@@ -210,7 +211,7 @@
 <main class="container" id="mainPage" style="display:none;">
     <div class="breadcrumb">
         <a href="../index.html"><i class="fas fa-home"></i> Trang chủ</a>
-        <i class="fas fa-chevron-right" style="margin:0 8px; font-size:.8rem;"></i> Bài thi cuối kì 2 – Lớp 1
+        <i class="fas fa-chevron-right" style="margin:0 8px; font-size:.8rem;"></i> Bài thi cuối kì 2 – Lớp 2
     </div>
     <div id="quiz-container"></div>
 </main>
@@ -259,72 +260,79 @@
     /* ─── Danh sách câu hỏi (10 câu đầu) ─── */
     const questions = [
         {
-            q: "Câu 1: Thiết bị nào sau đây dùng để nhập chữ và số vào máy tính?",
-            a: ["Chuột máy tính", "Bàn phím máy tính", "Màn hình", "Loa"],
-            correct: 1
-        },
-        {
-            q: "Câu 2: Trên bàn phím, phím <b><i>A</i></b> và phím <b><i>S</i></b> nằm ở hàng phím nào?",
-            a: ["Hàng phím số", "Hàng phím trên", "Hàng phím cơ sở", "Hàng phím dưới"],
+            q: "Câu 1: Trên bàn phím máy tính, hai phím có gai nằm ở hàng phím nào?",
+            a: ["Hàng phím trên", "Hàng phím dưới", "Hàng phím cơ sở", "Hàng phím số"],
             correct: 2
         },
         {
-            q: "Câu 3: Hai phím nào trên hàng phím cơ sở có gai (gờ nổi) để làm mốc cho việc đặt ngón tay?",
-            a: ["Phím <b>A</b> và <b>L</b>", "Phím <b>D</b> và <b>K</b>", "Phím <b>F</b> và <b>J</b>", "Phím <b>S</b> và <b>G</b>"],
-            correct: 2
-        },
-        {
-            q: "Câu 4: Để mở phần mềm vẽ Paint, em tìm biểu tượng nào trên màn hình máy tính?",
+            q: "Câu 2: Trên bàn phím máy tính, phím nào là phím dài nhất?",
             a: [
-                "<img src='paint.png' class='opt-img' alt='Paint'>",
-                "<img src='word.png'  class='opt-img' alt='Word'>",
-                "<img src='chrome.png' class='opt-img' alt='Chrome'>",
-                "<img src='Recycle bin.png' class='opt-img' alt='Recycle Bin'>"
+                "<img src='image1.png' class='opt-img' alt='Enter'>",
+                "<img src='image2.png' class='opt-img' alt='Space'>",
+                "<img src='image3.png' class='opt-img' alt='Shift'>",
+                "<img src='image4.png' class='opt-img' alt='CapsLock'>"
             ],
-            img: true,
+            img: true, correct: 1
+        },
+        {
+            q: "Câu 3: Ở hàng phím cơ sở, hai phím nào có gai để làm mốc cho việc đặt các ngón tay?",
+            a: [
+                "<div style='display:flex;gap:6px;align-items:center;justify-content:center'><img src='image5.png' class='opt-img-sm' alt='A'><span style='font-weight:bold'>và</span><img src='image6.png' class='opt-img-sm' alt='L'></div>",
+                "<div style='display:flex;gap:6px;align-items:center;justify-content:center'><img src='image7.png' class='opt-img-sm' alt='G'><span style='font-weight:bold'>và</span><img src='image8.png' class='opt-img-sm' alt='H'></div>",
+                "<div style='display:flex;gap:6px;align-items:center;justify-content:center'><img src='image9.png' class='opt-img-sm' alt='F'><span style='font-weight:bold'>và</span><img src='image10.png' class='opt-img-sm' alt='J'></div>",
+                "<div style='display:flex;gap:6px;align-items:center;justify-content:center'><img src='image11.png' class='opt-img-sm' alt='S'><span style='font-weight:bold'>và</span><img src='image12.png' class='opt-img-sm' alt='K'></div>"
+            ],
+            img: true, correct: 2
+        },
+        {
+            q: "Câu 4: Khi gõ phím, ngón tay trỏ của bàn tay trái đặt lên phím nào có gai?",
+            a: [
+                "<img src='image10.png' class='opt-img' alt='J'>",
+                "<img src='image9.png'  class='opt-img' alt='F'>",
+                "<img src='image7.png'  class='opt-img' alt='G'>",
+                "<img src='image8.png'  class='opt-img' alt='H'>"
+            ],
+            img: true, correct: 1
+        },
+        {
+            q: "Câu 5: Trên bàn phím máy tính, phím nào sau đây thuộc hàng phím trên?",
+            a: [
+                "<img src='image13.png' class='opt-img' alt='R'>",
+                "<img src='image9.png'  class='opt-img' alt='F'>",
+                "<img src='image14.png' class='opt-img' alt='V'>",
+                "<img src='image5.png'  class='opt-img' alt='A'>"
+            ],
+            img: true, correct: 0
+        },
+        {
+            q: "Câu 6: Khi gõ hàng phím dưới, ngón trỏ của bàn tay trái sẽ phụ trách gõ các phím nào?",
+            a: [
+                "<img src='image15.png' class='opt-img' alt='Z,X'>",
+                "<img src='image16.png' class='opt-img' alt='C,V'>",
+                "<img src='image17.png' class='opt-img' alt='V,B'>",
+                "<img src='image18.png' class='opt-img' alt='N,M'>"
+            ],
+            img: true, correct: 1
+        },
+        {
+            q: "Câu 7: Trong phần mềm RapidTyping, các phím <span class='key-group'>A &nbsp;S &nbsp;D &nbsp;F</span> thuộc hàng phím nào?",
+            a: ["Hàng phím cơ sở", "Hàng phím trên", "Hàng phím dưới", "Hàng phím số"],
             correct: 0
         },
         {
-            q: "Câu 5: Khi muốn thoát khỏi phần mềm Paint, em nhấn vào nút có biểu tượng hình gì ở góc trên bên phải màn hình?",
-            a: [
-                "<img src='minimine.png'    class='opt-img' alt='Minimize'>",
-                "<img src='maximine.png'    class='opt-img' alt='Maximize'>",
-                "<img src='Close.png'       class='opt-img' alt='Close'>",
-                "<img src='restoredown.png' class='opt-img' alt='Restore Down'>"
-            ],
-            img: true,
+            q: "Câu 8: Ngón tay nào phụ trách gõ phím Cách (Space bar)?",
+            a: ["Ngón trỏ", "Ngón út", "Ngón cái", "Ngón giữa"],
             correct: 2
         },
         {
-            q: "Câu 6: Để chọn một hình vẽ và di chuyển sang vị trí khác trong Paint, em sử dụng công cụ nào?",
-            a: ["Công cụ bút vẽ (Pencil)", "Công cụ chọn (Select)", "Công cụ tẩy (Eraser)", "Công cụ tô màu (Fill with color)"],
+            q: "Câu 9: Các phím <span class='key-group'>Q &nbsp;W &nbsp;E &nbsp;R &nbsp;T</span> nằm ở hàng phím nào?",
+            a: ["Hàng phím dưới", "Hàng phím trên", "Hàng phím cơ sở", "Hàng phím số"],
             correct: 1
         },
         {
-            q: "Câu 7: Biểu tượng của công cụ dùng để tô màu cho hình vẽ là:",
-            a: [
-                "<img src='pen.png'   class='opt-img' alt='Bút vẽ'>",
-                "<img src='tay.png'   class='opt-img' alt='Tay'>",
-                "<img src='tomau.png' class='opt-img' alt='Tô màu'>",
-                "<img src='len.png'   class='opt-img' alt='Len'>"
-            ],
-            img: true,
-            correct: 2
-        },
-        {
-            q: "Câu 8: Để vẽ được một hình tròn thật tròn (không bị méo), em cần nhấn giữ phím nào trong khi kéo chuột?",
-            a: ["Phím <b>Enter</b>", "Phím <b>Shift</b>", "Phím <b>Ctrl</b>", "Phím <b>Space</b> (cách)"],
-            correct: 1
-        },
-        {
-            q: "Câu 9: Khi gõ phím <b><i>L</i></b> trên phần mềm Teach Typing, em sử dụng ngón tay nào của bàn tay phải?",
-            a: ["Ngón trỏ", "Ngón giữa", "Ngón áp út", "Ngón út"],
-            correct: 2
-        },
-        {
-            q: "Câu 10: Để vẽ dây cho chùm bóng bay trong bài vẽ mẫu, em nên sử dụng công cụ nào là phù hợp nhất?",
-            a: ["Công cụ vẽ hình chữ nhật", "Công cụ vẽ đường thẳng hoặc đường cong", "Công cụ vẽ hình tròn", "Công cụ tẩy"],
-            correct: 1
+            q: "Câu 10: Để gõ phím <span class='key-group'>R</span>, em sử dụng ngón tay nào của bàn tay trái?",
+            a: ["Ngón út", "Ngón áp út", "Ngón giữa", "Ngón trỏ"],
+            correct: 3
         }
     ];
 
@@ -438,7 +446,7 @@
      FOOTER
 ══════════════════════════════════════════ -->
 <footer style="background:#2c3e50; color:white; text-align:center; padding:20px; margin-top:40px; font-size:.9rem;">
-    &copy; 2025 – Website hỗ trợ học tập Tin học 1 | GV Nguyễn Đình Bạch Long
+    &copy; 2025 – Website hỗ trợ học tập Tin học 2 | GV Nguyễn Đình Bạch Long
     <div>Email: dinhlongcntt20119@gmail.com &nbsp;|&nbsp; SĐT: 0937438939</div>
     <div>STK: 0937438939 &nbsp;|&nbsp; Ngân hàng: Vietinbank</div>
 </footer>
@@ -470,7 +478,7 @@
                 await window.firebaseAddDoc(window.firebaseCollection(window.firebaseDB, "submissions"), {
                     studentName: studentInfo.name,
                     studentClass: studentInfo.class,
-                    quizType: "thik1hk2",
+                    quizType: "thik2hk2",
                     score: score,
                     total: total,
                     answers: answersLog,
