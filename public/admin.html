@@ -738,16 +738,22 @@
             }
 
             // Xác định thư mục dựa trên quizType để fix lỗi đường dẫn ảnh
-            const baseUrl = window.location.origin;
             let folderPrefix = "";
-            let qType = s.quizType || "";
-
-            if (qType.startsWith('vbt')) folderPrefix = "VBT/";
-            else if (qType === 'ontaphk1' || qType === 'ontaphk2' || qType === 'thuchanhhk2' || qType === 'thihk2' || qType.startsWith('bai')) folderPrefix = "SGK/";
-            else if (qType.includes("k1")) folderPrefix = "Lop1/";
-            else if (qType.includes("k2")) folderPrefix = "Lop2/";
-            else if (qType.includes("k3")) folderPrefix = "Lop3/";
-            else if (qType.includes("k5")) folderPrefix = "Lop5/";
+            if (s.quizType.includes("k1")) folderPrefix = "Lop1/";
+            else if (s.quizType.includes("k2") && s.quizType !== "ontapk2hk2" && s.quizType !== "thik2hk2") {
+                // Đây là logic đặc biệt: nếu mã đề có k2 nhưng là của lớp 2
+                // Tuy nhiên, mã đề ontapk2hk2, thik2hk2 là của Lớp 2.
+                // ontapk1hk2 -> Lớp 1, ontapk2hk2 -> Lớp 2...
+            }
+            
+            // Cách làm an toàn hơn: Kiểm tra mã đề chính xác
+            if (s.quizType.includes("k1")) folderPrefix = "Lop1/";
+            else if (s.quizType.includes("k2") && !s.quizType.startsWith("ontap")) folderPrefix = "Lop2/"; // thik2hk2
+            else if (s.quizType === "ontapk2hk2") folderPrefix = "Lop2/";
+            else if (s.quizType.includes("k3")) folderPrefix = "Lop3/";
+            else if (s.quizType.includes("k5")) folderPrefix = "Lop5/";
+            // Lớp 4 (ontaphk2, thihk2) thường nằm ở thư mục gốc hoặc có thư mục riêng
+            // Nếu ảnh lớp 4 bị lỗi, ta sẽ check lại vị trí ảnh của lớp 4.
 
             questions.forEach((q, idx) => {
                 const qNum = idx + 1;
@@ -784,13 +790,13 @@
                         badge = `<span style="background:#e53935;color:#fff;font-size:.65rem;padding:1px 6px;border-radius:10px;font-weight:700;margin-left:6px;">✗ SAI</span>`;
                     }
 
-                    // FIX PATH ẢNH TRONG OPTION (Sử dụng URL tuyệt đối)
+                    // FIX PATH ẢNH TRONG OPTION
                     let displayOpt = opt;
                     if (q.img && displayOpt.includes('<img')) {
+                        // Tìm src='...' và thay bằng src='LopX/...'
                         displayOpt = displayOpt.replace(/src=['"]([^'"]+)['"]/g, (match, p1) => {
-                            if (p1.startsWith('http') || p1.startsWith('data:')) return match;
-                            const path = p1.startsWith('/') ? p1.substring(1) : p1;
-                            return `src="${baseUrl}/${folderPrefix}${path}"`;
+                            if (p1.startsWith('http') || p1.startsWith('/') || p1.startsWith('data:')) return match;
+                            return `src="${folderPrefix}${p1}"`;
                         });
                     }
 
@@ -816,9 +822,8 @@
                 if (displayQ.includes('<img')) {
                     displayQ = displayQ.replace(/<img/g, '<img class="quiz-detail-q-img"');
                     displayQ = displayQ.replace(/src=['"]([^'"]+)['"]/g, (match, p1) => {
-                        if (p1.startsWith('http') || p1.startsWith('data:')) return match;
-                        const path = p1.startsWith('/') ? p1.substring(1) : p1;
-                        return `src="${baseUrl}/${folderPrefix}${path}"`;
+                        if (p1.startsWith('http') || p1.startsWith('/') || p1.startsWith('data:')) return match;
+                        return `src="${folderPrefix}${p1}"`;
                     });
                 }
 
@@ -898,15 +903,16 @@
             const quizLabel = QUIZ_LABEL[s.quizType] || s.quizType;
             const body      = buildDetailHTML(s, true);
 
+            // Base URL: lấy thư mục chứa file admin.html để ảnh tương đối hiển thị đúng
+            const baseHref  = window.location.href.replace(/\/[^\/]*$/, '/');
+
             return `<!DOCTYPE html>
 <html lang="vi"><head><meta charset="UTF-8">
-<base href="${window.location.origin}/">
+<base href="${baseHref}">
 <title>${s.studentName} – ${s.studentClass}</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#222;background:#fff;}
-
-/* ── Cover ── */
 .cover{padding:16px 20px 14px;background:#f8faff;border-bottom:3px solid #1565c0;margin-bottom:14px;}
 .s-name{font-size:17px;font-weight:700;color:#1a1a2e;margin-bottom:3px;}
 .s-meta{font-size:11px;color:#666;margin-bottom:10px;}
@@ -914,8 +920,6 @@ body{font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#222;background
 .score-label{font-size:9px;font-weight:700;color:${sc};text-transform:uppercase;letter-spacing:.07em;margin-bottom:2px;}
 .score-val{font-size:17px;font-weight:800;color:${sc};}
 .verdict{font-size:14px;font-weight:800;color:${sc};border-left:2px solid ${sc};padding-left:14px;}
-
-/* ── Questions ── */
 .qs{padding:0 20px 20px;}
 .q-wrap{border-radius:7px;padding:9px 11px;margin-bottom:8px;break-inside:avoid;page-break-inside:avoid;}
 .q-text{font-weight:600;color:#1565c0;font-size:12px;margin-bottom:8px;line-height:1.4;}
@@ -924,18 +928,36 @@ body{font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#222;background
 .radio{width:11px;height:11px;border-radius:50%;flex-shrink:0;}
 .ltr{color:#1565c0;font-weight:700;font-size:10px;min-width:18px;height:18px;background:#e3f2fd;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;}
 .badge{font-size:9px;padding:1px 5px;border-radius:8px;font-weight:700;margin-left:3px;white-space:nowrap;}
-.opt-img { display: block; max-width: 140px; max-height: 110px; object-fit: contain; margin: 4px auto; border-radius: 4px; }
-.opt-img-sm { height: 18px; object-fit: contain; vertical-align: middle; }
-.quiz-detail-q-img { display: block; max-width: 100%; max-height: 250px; margin: 8px 0; border-radius: 6px; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
-.qs img { max-width: 100%; height: auto; }
-
+img.opt-img{max-height:60px;max-width:120px;object-fit:contain;vertical-align:middle;}
+img.opt-img-sm{max-height:44px;max-width:80px;object-fit:contain;vertical-align:middle;}
 @media print{
   @page{size:A4;margin:11mm 11mm 11mm 11mm;}
   body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
   .q-wrap{break-inside:avoid;page-break-inside:avoid;}
+  .no-print{display:none!important;}
 }
-</style></head>
+@media screen{
+  body{max-width:820px;margin:0 auto;padding:10px;}
+  .print-bar{position:sticky;top:0;z-index:99;background:#1565c0;color:#fff;
+    padding:10px 20px;display:flex;align-items:center;justify-content:space-between;
+    border-radius:0 0 8px 8px;margin-bottom:12px;font-family:Arial,sans-serif;}
+  .print-bar button{background:#fff;color:#1565c0;border:none;padding:7px 18px;
+    border-radius:6px;font-weight:700;font-size:13px;cursor:pointer;}
+  .print-bar button:hover{background:#e3f2fd;}
+}
+</style>
+<script>
+// Tự động in khi trang load xong (được gọi từ openPrintTab)
+window.addEventListener('load', function() {
+  setTimeout(function() { window.print(); }, 600);
+});
+<\/script>
+</head>
 <body>
+<div class="print-bar no-print">
+  <span>📄 ${s.studentName} — ${s.studentClass}</span>
+  <button onclick="window.print()">🖨️ In / Lưu PDF</button>
+</div>
 <div class="cover">
   <div class="s-name">${s.studentName}</div>
   <div class="s-meta">Lớp ${s.studentClass} | ${quizLabel}${timeStr ? ' | ' + timeStr : ''}</div>
@@ -951,28 +973,45 @@ body{font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#222;background
 </body></html>`;
         }
 
-        // Open Blob URL in new tab → auto-print → close
-        function downloadBlobHTML(html, filename) {
-            const blob = new Blob([html], {type:'text/html;charset=utf-8'});
+        // Mở tab mới với Blob URL → tự động trigger print dialog (Ctrl+P / Save as PDF)
+        function openPrintTab(html, filename) {
+            // Inject ?print=1 vào URL để script trong tab tự gọi window.print()
+            const blob = new Blob([html], {type: 'text/html;charset=utf-8'});
             const url  = URL.createObjectURL(blob);
-            const a    = document.createElement('a');
-            a.href     = url;
-            a.download = filename + '.html';
-            document.body.appendChild(a);
-            a.click();
-            setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 1000);
+            const win  = window.open(url + '?print=1', '_blank');
+            if (!win) {
+                // Popup bị chặn → fallback tải file HTML
+                const a    = document.createElement('a');
+                a.href     = url;
+                a.download = filename + '.html';
+                document.body.appendChild(a); a.click();
+                setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 1000);
+                alert('Popup bị chặn — đã tải file HTML. Mở file rồi nhấn Ctrl+P để lưu PDF.');
+                return;
+            }
+            win.addEventListener('load', () => {
+                setTimeout(() => {
+                    win.document.title = filename;
+                    win.print();
+                    // Revoke sau khi print dialog đóng
+                    setTimeout(() => URL.revokeObjectURL(url), 30000);
+                }, 500);
+            });
         }
 
         window.exportDetailPDF = function() {
             const s = _currentDetailSub;
             if (!s) return;
             const btn = document.getElementById('btnPdfDetail');
-            if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; }
+            if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang tạo...'; }
             setTimeout(() => {
                 try {
-                    downloadBlobHTML(buildPrintHTML(s), `${s.studentName}_${s.studentClass}`);
+                    const safeName = `${s.studentName}_${s.studentClass}`.replace(/\s+/g,'_').replace(/[^\w\-_.]/g,'');
+                    openPrintTab(buildPrintHTML(s), safeName);
+                } catch(e) {
+                    alert('Lỗi: ' + e.message);
                 } finally {
-                    if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-download"></i> Tải HTML'; }
+                    if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-file-pdf"></i> Tải PDF'; }
                 }
             }, 50);
         };
