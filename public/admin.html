@@ -7,6 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <style>
         /* ... existing styles ... */
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -344,7 +345,6 @@
     </div>
 
     <!-- PDF print frame (hidden) -->
-    <iframe id="pdfFrame" style="display:none;"></iframe>
 
     <!-- Password Modal -->
     <div id="passwordModal" class="modal">
@@ -664,68 +664,6 @@
             return Array.from(document.querySelectorAll('.row-check:checked')).map(cb => cb.dataset.id);
         }
 
-        window.exportSinglePDF = function(id) {
-            const s = allSubmissions.find(x => x.id === id);
-            if (!s) return;
-            _currentDetailSub = s;
-            exportDetailPDF();
-        };
-
-        window.bulkExportPDF = function() {
-            const ids = getSelectedIds();
-            if (ids.length === 0) return;
-            if (ids.length === 1) { exportSinglePDF(ids[0]); return; }
-            const subs = ids.map(id => allSubmissions.find(x => x.id === id)).filter(Boolean);
-            let allBody = '';
-            subs.forEach((s, i) => {
-                const pct = s.total ? Math.round(s.score / s.total * 100) : 0;
-                const quizLabel = QUIZ_LABEL[s.quizType] || s.quizType;
-                const timeStr = s.createdAt ? new Date(s.createdAt).toLocaleString('vi-VN') : '';
-                const good = pct >= 70;
-                allBody += `<div style="${i > 0 ? 'page-break-before:always;' : ''}padding:28px 36px 20px;">
-                    <div style="background:#f8faff;border-radius:10px;padding:20px 24px;margin-bottom:18px;">
-                        <div style="font-size:1.4rem;font-weight:700;color:#1a1a2e;margin-bottom:4px;">${s.studentName}</div>
-                        <div style="font-size:.82rem;color:#666;margin-bottom:14px;">Lớp ${s.studentClass} | ${quizLabel}${timeStr ? ' | ' + timeStr : ''}</div>
-                        <div style="display:inline-flex;align-items:center;gap:20px;background:${good?'#e8f5e9':'#fff3f3'};border-radius:10px;padding:10px 18px;">
-                            <div>
-                                <div style="font-size:.65rem;font-weight:700;color:${good?'#2e7d32':'#c0392b'};text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px;">KẾT QUẢ TỔNG QUÁT</div>
-                                <div style="font-size:1.4rem;font-weight:800;color:${good?'#2e7d32':'#c0392b'};">${s.score} / ${s.total} (${pct}%)</div>
-                            </div>
-                            <div style="font-size:2rem;">📚</div>
-                        </div>
-                    </div>
-                    ${buildDetailHTML(s, true)}
-                </div>`;
-            });
-            const printHTML = `<!DOCTYPE html><html lang="vi"><head><meta charset="UTF-8"><title>Bài làm</title>
-            <style>*{box-sizing:border-box;margin:0;padding:0;}body{font-family:Arial,sans-serif;color:#222;}
-            @media print{@page{size:A4;margin:12mm;}body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}}
-            </style></head><body>${allBody}</body></html>`;
-            const frame = document.getElementById('pdfFrame');
-            frame.style.cssText = 'display:block;position:fixed;left:-9999px;width:794px;height:1px;';
-            frame.onload = function() {
-                setTimeout(() => { frame.contentWindow.focus(); frame.contentWindow.print();
-                    setTimeout(() => { frame.style.display = 'none'; }, 1000); }, 400);
-            };
-            const d = frame.contentDocument || frame.contentWindow.document;
-            d.open(); d.write(printHTML); d.close();
-        };
-
-        window.bulkDelete = function() {
-            const ids = getSelectedIds();
-            if (ids.length === 0) return;
-            if (!confirm('Xóa ' + ids.length + ' bài làm đã chọn?')) return;
-            Promise.all(ids.map(id => deleteDoc(doc(db, "submissions", id))))
-                .then(() => {
-                    allSubmissions = allSubmissions.filter(s => !ids.includes(s.id));
-                    filteredSubmissions = filteredSubmissions.filter(s => !ids.includes(s.id));
-                    renderStudentTable();
-                    clearSelection();
-                    alert('Đã xóa ' + ids.length + ' bài làm.');
-                })
-                .catch(e => alert('Lỗi xóa: ' + e.message));
-        };
-
         // ─── QUIZ DATA (câu hỏi nhúng sẵn để render chi tiết) ───────────────
         const QUIZ_DATA = {"ontapk1hk2":[{"q":"Câu 1: Thiết bị nào sau đây dùng để nhập chữ và số vào máy tính?","a":["Chuột máy tính","Bàn phím máy tính","Màn hình","Loa"],"correct":1},{"q":"Câu 2: Trên bàn phím, phím <b><i>A</i></b> và phím <b><i>S</i></b> nằm ở hàng phím nào?","a":["Hàng phím số","Hàng phím trên","Hàng phím cơ sở","Hàng phím dưới"],"correct":2},{"q":"Câu 3: Hai phím nào trên hàng phím cơ sở có gai (gờ nổi) để làm mốc cho việc đặt ngón tay?","a":["Phím <b>A</b> và <b>L</b>","Phím <b>D</b> và <b>K</b>","Phím <b>F</b> và <b>J</b>","Phím <b>S</b> và <b>G</b>"],"correct":2},{"q":"Câu 4: Để mở phần mềm vẽ Paint, em tìm biểu tượng nào trên màn hình máy tính?","a":["<img src='paint.png' class='opt-img' alt='Paint'>","<img src='word.png'  class='opt-img' alt='Word'>","<img src='chrome.png' class='opt-img' alt='Chrome'>","<img src='Recycle bin.png' class='opt-img' alt='Recycle Bin'>"],"img":true,"correct":0},{"q":"Câu 5: Khi muốn thoát khỏi phần mềm Paint, em nhấn vào nút có biểu tượng hình gì ở góc trên bên phải màn hình?","a":["<img src='minimine.png'    class='opt-img' alt='Minimize'>","<img src='maximine.png'    class='opt-img' alt='Maximize'>","<img src='Close.png'       class='opt-img' alt='Close'>","<img src='restoredown.png' class='opt-img' alt='Restore Down'>"],"img":true,"correct":2},{"q":"Câu 6: Để chọn một hình vẽ và di chuyển sang vị trí khác trong Paint, em sử dụng công cụ nào?","a":["Công cụ bút vẽ (Pencil)","Công cụ chọn (Select)","Công cụ tẩy (Eraser)","Công cụ tô màu (Fill with color)"],"correct":1},{"q":"Câu 7: Biểu tượng của công cụ dùng để tô màu cho hình vẽ là:","a":["<img src='pen.png'   class='opt-img' alt='Bút vẽ'>","<img src='tay.png'   class='opt-img' alt='Tay'>","<img src='tomau.png' class='opt-img' alt='Tô màu'>","<img src='len.png'   class='opt-img' alt='Len'>"],"img":true,"correct":2},{"q":"Câu 8: Để vẽ được một hình tròn thật tròn (không bị méo), em cần nhấn giữ phím nào trong khi kéo chuột?","a":["Phím <b>Enter</b>","Phím <b>Shift</b>","Phím <b>Ctrl</b>","Phím <b>Space</b> (cách)"],"correct":1},{"q":"Câu 9: Khi gõ phím <b><i>L</i></b> trên phần mềm Teach Typing, em sử dụng ngón tay nào của bàn tay phải?","a":["Ngón trỏ","Ngón giữa","Ngón áp út","Ngón út"],"correct":2},{"q":"Câu 10: Để vẽ dây cho chùm bóng bay trong bài vẽ mẫu, em nên sử dụng công cụ nào là phù hợp nhất?","a":["Công cụ vẽ hình chữ nhật","Công cụ vẽ đường thẳng hoặc đường cong","Công cụ vẽ hình tròn","Công cụ tẩy"],"correct":1},{"q":"Câu 11: Khi vẽ \"Chùm bóng bay\", em nên sử dụng kết hợp những công cụ nào?","a":["Hình vuông và Đường thẳng","Hình Oval và Đường cong","Hình tam giác và Hình thoi","Hình sao và Hình chữ nhật"],"correct":1},{"q":"Câu 12: Để vẽ \"Cột cờ Tổ quốc\", bước đầu tiên em cần chọn công cụ nào để vẽ thân cột cờ?","a":["Công cụ vẽ hình chữ nhật","Công cụ vẽ hình tròn","Công cụ vẽ ngôi sao","Công cụ vẽ đường cong"],"correct":0},{"q":"Câu 13: Trên bàn phím máy tính, phím nào thường là phím dài nhất?","a":["Phím <b>Enter</b>","Phím cách <b>Spacebar</b>","Phím <b>Shift</b>","Phím <b>Ctrl</b>"],"correct":1},{"q":"Câu 14: Để xuống dòng khi đang gõ văn bản, em sử dụng phím nào?","a":["Phím <b>Enter</b>","Phím <b>Esc</b>","Phím <b>Alt</b>","Phím <b>Tab</b>"],"correct":0},{"q":"Câu 15: Trong cửa sổ phần mềm Paint, khu vực nào dùng để em chọn màu vẽ?","a":["Trang vẽ","Hộp màu (Color box)","Thanh thực đơn","Thanh trạng thái"],"correct":1},{"q":"Câu 16: Để vẽ một chiếc tủ quần áo đơn giản, em nên sử dụng công cụ hình học nào là chính?","a":["Hình Oval","Hình chữ nhật (Rectangle)","Hình tam giác","Hình trái tim"],"correct":1},{"q":"Câu 17: Khi vẽ cột cờ Tổ quốc, em sẽ dùng màu gì để tô cho lá cờ?","a":["Màu xanh lá","Màu vàng","Màu đỏ","Màu tím"],"correct":2},{"q":"Câu 18: Hàng phím chứa các phím <b>A, S, D, F, G, H, J, K, L</b> được gọi là:","a":["Hàng phím trên","Hàng phím dưới","Hàng phím cơ sở","Hàng phím số"],"correct":2},{"q":"Câu 19: Khi đặt tay trên hàng cơ sở, ngón trỏ của tay trái sẽ đặt lên phím nào?","a":["Phím <b>F</b>","Phím <b>J</b>","Phím <b>G</b>","Phím <b>H</b>"],"correct":0},{"q":"Câu 20: Sau khi hoàn thành bức vẽ trong Paint, để lưu lại kết quả vào máy tính, em chọn lệnh nào?","a":["Open","New","Exit","Save"],"correct":3}],"ontapk2hk2":[{"q":"Câu 1: Trên bàn phím máy tính, hai phím có gai nằm ở hàng phím nào?","a":["Hàng phím trên","Hàng phím dưới","Hàng phím cơ sở","Hàng phím số"],"correct":2},{"q":"Câu 2: Trên bàn phím máy tính, phím nào là phím dài nhất?","a":["<img src='image1.png' class='opt-img' alt='Enter'>","<img src='image2.png' class='opt-img' alt='Space'>","<img src='image3.png' class='opt-img' alt='Shift'>","<img src='image4.png' class='opt-img' alt='CapsLock'>"],"img":true,"correct":1},{"q":"Câu 3: Ở hàng phím cơ sở, hai phím nào có gai để làm mốc cho việc đặt các ngón tay?","a":["<div style='display:flex;gap:6px;align-items:center;justify-content:center'><img src='image5.png' class='opt-img-sm' alt='A'><span style='font-weight:bold'>và</span><img src='image6.png' class='opt-img-sm' alt='L'></div>","<div style='display:flex;gap:6px;align-items:center;justify-content:center'><img src='image7.png' class='opt-img-sm' alt='G'><span style='font-weight:bold'>và</span><img src='image8.png' class='opt-img-sm' alt='H'></div>","<div style='display:flex;gap:6px;align-items:center;justify-content:center'><img src='image9.png' class='opt-img-sm' alt='F'><span style='font-weight:bold'>và</span><img src='image10.png' class='opt-img-sm' alt='J'></div>","<div style='display:flex;gap:6px;align-items:center;justify-content:center'><img src='image11.png' class='opt-img-sm' alt='S'><span style='font-weight:bold'>và</span><img src='image12.png' class='opt-img-sm' alt='K'></div>"],"img":true,"correct":2},{"q":"Câu 4: Khi gõ phím, ngón tay trỏ của bàn tay trái đặt lên phím nào có gai?","a":["<img src='image10.png' class='opt-img' alt='J'>","<img src='image9.png'  class='opt-img' alt='F'>","<img src='image7.png'  class='opt-img' alt='G'>","<img src='image8.png'  class='opt-img' alt='H'>"],"img":true,"correct":1},{"q":"Câu 5: Trên bàn phím máy tính, phím nào sau đây thuộc hàng phím trên?","a":["<img src='image13.png' class='opt-img' alt='R'>","<img src='image9.png'  class='opt-img' alt='F'>","<img src='image14.png' class='opt-img' alt='V'>","<img src='image5.png'  class='opt-img' alt='A'>"],"img":true,"correct":0},{"q":"Câu 6: Khi gõ hàng phím dưới, ngón trỏ của bàn tay trái sẽ phụ trách gõ các phím nào?","a":["<img src='image15.png' class='opt-img' alt='Z,X'>","<img src='image16.png' class='opt-img' alt='C,V'>","<img src='image17.png' class='opt-img' alt='V,B'>","<img src='image18.png' class='opt-img' alt='N,M'>"],"img":true,"correct":1},{"q":"Câu 7: Trong phần mềm RapidTyping, các phím <span class='key-group'>A &nbsp;S &nbsp;D &nbsp;F</span> thuộc hàng phím nào?","a":["Hàng phím cơ sở","Hàng phím trên","Hàng phím dưới","Hàng phím số"],"correct":0},{"q":"Câu 8: Ngón tay nào phụ trách gõ phím Cách (Space bar)?","a":["Ngón trỏ","Ngón út","Ngón cái","Ngón giữa"],"correct":2},{"q":"Câu 9: Các phím <span class='key-group'>Q &nbsp;W &nbsp;E &nbsp;R &nbsp;T</span> nằm ở hàng phím nào?","a":["Hàng phím dưới","Hàng phím trên","Hàng phím cơ sở","Hàng phím số"],"correct":1},{"q":"Câu 10: Để gõ phím <span class='key-group'>R</span>, em sử dụng ngón tay nào của bàn tay trái?","a":["Ngón út","Ngón áp út","Ngón giữa","Ngón trỏ"],"correct":3},{"q":"Câu 11: Các phím <span class='key-group'>Z &nbsp;X &nbsp;C &nbsp;V &nbsp;B</span> nằm ở hàng phím nào?","a":["Hàng phím trên","Hàng phím cơ sở","Hàng phím dưới","Hàng phím số"],"correct":2},{"q":"Câu 12: Biểu tượng nào dưới đây là biểu tượng của phần mềm soạn thảo văn bản Microsoft Word?","a":["<img src='word.png'    class='opt-img' alt='Word'>","<img src='paint.png'   class='opt-img' alt='Paint'>","<img src='chrome.png'  class='opt-img' alt='Chrome'>","<img src='Explore.jpg' class='opt-img' alt='Explorer'>"],"img":true,"correct":0},{"q":"Câu 13: Để lưu văn bản vào máy tính trong Microsoft Word, em nháy chuột vào biểu tượng nào trên thanh công cụ?","a":["<img src='save.png'  class='opt-img' alt='Save'>","<img src='open.png'  class='opt-img' alt='Open'>","<img src='new.png'   class='opt-img' alt='New'>","<img src='print.jpg' class='opt-img' alt='Print'>"],"img":true,"correct":0},{"q":"Câu 14: Để xuống dòng khi đang soạn thảo trong Microsoft Word, em nhấn phím nào?","a":["Phím <b>Shift</b>","Phím <b>Enter</b>","Phím <b>Ctrl</b>","Phím <b>Alt</b>"],"correct":1},{"q":"Câu 15: Trong kiểu gõ Telex, để gõ chữ \"ă\" em nhấn phím nào?","a":["<img src='image30.png' class='opt-img' alt='aa'>","<img src='image31.png' class='opt-img' alt='aw'>","<img src='image32.png' class='opt-img' alt='ee'>","<img src='image33.png' class='opt-img' alt='oo'>"],"img":true,"correct":1},{"q":"Câu 16: Trong kiểu gõ Telex, để gõ dấu huyền em sử dụng phím nào?","a":["<img src='image34.png' class='opt-img' alt='s'>","<img src='image35.png' class='opt-img' alt='f'>","<img src='image36.png' class='opt-img' alt='r'>","<img src='image37.png' class='opt-img' alt='x'>"],"img":true,"correct":1},{"q":"Câu 17: Để sao chép một đoạn văn bản đã chọn, em sử dụng tổ hợp phím nào trên bàn phím?","a":["<img src='image38.png' class='opt-img' alt='Ctrl+S'>","<img src='image39.png' class='opt-img' alt='Ctrl+C'>","<img src='image40.png' class='opt-img' alt='Ctrl+V'>","<img src='image41.png' class='opt-img' alt='Ctrl+N'>"],"img":true,"correct":1},{"q":"Câu 18: Trong Microsoft Word, biểu tượng chữ <b>B</b> dùng để làm gì?","a":["Chữ in đậm","Chữ in nghiêng","Chữ gạch chân","Đổi màu chữ"],"correct":0},{"q":"Câu 19: Để thay đổi kích thước của chữ (cỡ chữ), em sử dụng ô lệnh nào trong nhóm Font?","a":["<img src='font.png'            class='opt-img' alt='Font Name'>","<img src='size.png'            class='opt-img' alt='Font Size'>","<img src='font color w.png'    class='opt-img' alt='Font Color'>","<img src='A.png'               class='opt-img' alt='A'>"],"img":true,"correct":1},{"q":"Câu 20: Để gõ từ \"Trường\", em cần gõ các phím nào theo kiểu Telex?","a":["Truwowngf","Truongf","Truongs","Truowngs"],"correct":0},{"q":"Câu 21: Quan sát hình dưới đây, biểu tượng nào dùng để canh lề giữa cho đoạn văn bản?","a":["<img src='Align Left.png'  class='opt-img' alt='Căn trái'>","<img src='Align mid.png'   class='opt-img' alt='Căn giữa'>","<img src='Align right.png' class='opt-img' alt='Căn phải'>","<img src='jutifly.png'     class='opt-img' alt='Căn đều'>"],"img":true,"correct":1},{"q":"Câu 22: Để xóa ký tự bên trái con trỏ soạn thảo, em dùng phím nào?","a":["Delete","Backspace","End","Home"],"correct":1},{"q":"Câu 23: Để mở một văn bản đã có trên máy tính trong MS Word, em chọn lệnh nào?","a":["Save","Open","New","Print"],"correct":1},{"q":"Câu 24: Nút lệnh có chữ <b>B</b> trong Microsoft Word dùng để làm gì?","a":["Chữ nghiêng","Chữ gạch chân","Chữ đậm","Đổi màu chữ"],"correct":2},{"q":"Câu 25: Để định dạng chữ nghiêng, em chọn nút lệnh nào?","a":["<b>B</b>","<i>I</i>","<u>U</u>","<b>A</b>"],"correct":1},{"q":"Câu 26: Khi muốn gõ dấu hỏi trong kiểu gõ Telex, em dùng phím nào?","a":["<img src='image34.png' class='opt-img' alt='s'>","<img src='image35.png' class='opt-img' alt='f'>","<img src='image36.png' class='opt-img' alt='r'>","<img src='image50.png' class='opt-img' alt='j'>"],"img":true,"correct":2},{"q":"Câu 27: Để gõ chữ \"đ\" trong kiểu gõ Telex, em gõ:","a":["<img src='image51.png' class='opt-img' alt='d'>","<img src='image52.png' class='opt-img' alt='dd'>","<img src='image53.png' class='opt-img' alt='dw'>","<img src='image54.png' class='opt-img' alt='ds'>"],"img":true,"correct":1},{"q":"Câu 28: Phím dài nhất trên bàn phím là phím nào?","a":["Enter","Shift","Space bar","Caps Lock"],"correct":2},{"q":"Câu 29: Nút lệnh <b>U</b> dùng để định dạng kiểu chữ gì?","a":["Chữ đậm","Chữ nghiêng","Chữ gạch chân","Chữ màu xanh"],"correct":2},{"q":"Câu 30: Để gõ từ \"Học tập\" theo kiểu Telex, em gõ như thế nào?","a":["Hocj tapj","Hoc s tap s","Hoc r tap r","Hoc f tap f"],"correct":0}],"ontapk3hk2":[{"q":"Câu 1: Thông tin nào sau đây em KHÔNG nên chia sẻ cho người lạ trên môi trường mạng?","a":["Tên trường học của em.","Mật khẩu hòm thư điện tử của gia đình.","Màu sắc yêu thích của em.","Tên một bài hát em thích."],"correct":1},{"q":"Câu 2: Khi có một người lạ nhắn tin trên mạng hỏi địa chỉ nhà và số điện thoại của bố mẹ, em nên làm gì?","a":["Nhắn tin trả lời đầy đủ ngay lập tức.","Chỉ cung cấp số điện thoại, không cung cấp địa chỉ nhà.","Giữ bí mật và báo ngay cho bố mẹ hoặc thầy cô giáo biết.","Rủ bạn cùng cung cấp thông tin để nhận quà."],"correct":2},{"q":"Câu 3: Cách đặt mật khẩu nào sau đây được coi là an toàn nhất để bảo vệ thông tin?","a":["12345678","abcdefgh","Tên của em","Kết hợp chữ hoa, chữ thường, chữ số và ký tự đặc biệt"],"correct":3},{"q":"Câu 4: Đâu là biểu tượng của phần mềm trình chiếu PowerPoint?","a":["<img src='word.png' class='opt-img' alt='Word'>","<img src='ppt.png' class='opt-img' alt='PowerPoint'>","<img src='chrome.png' class='opt-img' alt='Chrome'>","<img src='Recycle bin.png' class='opt-img' alt='Recycle Bin'>"],"img":true,"correct":1},{"q":"Câu 5: Trong hệ Mặt Trời, Trái Đất là hành tinh thứ mấy tính từ Mặt Trời ra xa?","a":["Thứ nhất.","Thứ hai.","Thứ ba.","Thứ tư."],"correct":2},{"q":"Câu 6: Thành phần nào nằm ở trung tâm của hệ Mặt Trời và cung cấp ánh sáng, nhiệt độ cho các hành tinh?","a":["Trái Đất.","Mặt Trăng.","Mặt Trời.","Sao Hỏa."],"correct":2},{"q":"Câu 7: Để thực hiện việc \"Đánh răng\", bước nào dưới đây thường được thực hiện đầu tiên?","a":["Súc miệng với nước sạch.","Lấy kem đánh răng vào bàn chải.","Rửa sạch bàn chải.","Chải răng theo chiều dọc."],"correct":1},{"q":"Câu 8: Tại sao chúng ta nên chia một việc lớn thành những việc nhỏ hơn để giải quyết?","a":["Để làm cho công việc trở nên phức tạp hơn.","Để dễ dàng thực hiện và quản lý công việc hiệu quả hơn.","Để tốn nhiều thời gian hơn khi làm việc.","Để máy tính không thể giúp đỡ được chúng ta."],"correct":1},{"q":"Câu 9: Trong các tình huống sau, tình huống nào thể hiện việc thực hiện công việc theo điều kiện?","a":["Em đi học đúng giờ mỗi ngày.","Nếu trời mưa thì em sẽ mang theo ô (dù).","Em quét nhà vào mỗi buổi chiều.","Em nghe nhạc sau khi ăn cơm."],"correct":1},{"q":"Câu 10: Máy tính có thể hỗ trợ em thực hiện nhiệm vụ nào sau đây hiệu quả nhất?","a":["Ăn cơm trưa.","Tập thể dục buổi sáng.","Tìm kiếm thông tin về các hành tinh trong hệ Mặt Trời.","Quét dọn nhà cửa bằng chổi tre."],"correct":2},{"q":"Câu 11: Để xem tin tức và giải trí trên Internet, máy tính của em cần phải có kết nối gì?","a":["Kết nối loa.","Kết nối Internet.","Kết nối máy in.","Kết nối chuột không dây."],"correct":1},{"q":"Câu 12: Khi truy cập Internet, em có thể thực hiện hoạt động nào sau đây?","a":["Quét nhà giúp mẹ.","Nghe nhạc và xem hoạt hình trực tuyến.","Tưới cây trong vườn.","Rửa bát đĩa."],"correct":1},{"q":"Câu 13: Để bảo vệ bản thân khi sử dụng Internet, em nên làm gì?","a":["Cung cấp mật khẩu máy tính cho người lạ trên mạng.","Chia sẻ địa chỉ nhà và số điện thoại cho bất kỳ ai hỏi.","Chỉ truy cập vào các trang web phù hợp với lứa tuổi và có sự đồng ý của bố mẹ.","Gặp gỡ người lạ quen qua mạng một mình."],"correct":2},{"q":"Câu 14: Để truy cập vào một trang web, em cần nhập nội dung gì vào thanh địa chỉ của trình duyệt?","a":["Tên của em.","Địa chỉ trang web (URL).","Số điện thoại của cô giáo.","Mật khẩu máy tính."],"correct":1},{"q":"Câu 15: Phần mềm nào sau đây được dùng để tạo các bài thuyết trình, trình chiếu?","a":["Microsoft Word.","Microsoft PowerPoint.","Microsoft Excel.","Windows Media Player."],"correct":1},{"q":"Câu 16: Trong phần mềm trình chiếu, để thêm một trang chiếu mới, em chọn nút lệnh nào?","a":["New Slide.","Open.","Save.","Print."],"correct":0},{"q":"Câu 17: Để trình chiếu toàn màn hình từ trang đầu tiên, em nhấn phím nào trên bàn phím?","a":["Phím F1.","Phím F5.","Phím Enter.","Phím Esc."],"correct":1},{"q":"Câu 18: Việc thực hiện một công việc theo các bước có lợi ích gì?","a":["Làm cho công việc trở nên khó khăn hơn.","Giúp công việc được thực hiện tuần tự, chính xác và hiệu quả.","Làm mất nhiều thời gian hơn.","Không có lợi ích gì."],"correct":1},{"q":"Câu 19: Trong câu: \"Nếu đèn tín hiệu giao thông màu đỏ thì các phương tiện phải dừng lại\", điều kiện ở đây là gì?","a":["Các phương tiện phải dừng lại.","Đèn tín hiệu giao thông màu đỏ.","Các phương tiện được đi tiếp.","Đèn tín hiệu màu xanh."],"correct":1},{"q":"Câu 20: Bạn An tự nhủ: \"Nếu làm xong bài tập sớm, mình sẽ được xem phim hoạt hình\". Thực tế An đã làm xong bài tập sớm. Vậy kết quả là gì?","a":["An không được xem phim.","An đi ngủ sớm.","An được xem phim hoạt hình.","An phải làm thêm bài tập khác."],"correct":2}],"ontaphk2":[{"q":"Câu 1: Để chèn hình ảnh vào văn bản trong phần mềm soạn thảo, em chọn thẻ nào sau đây?","a":["Home","Insert","Design","View"],"correct":1},{"q":"Câu 2: Phím nào trên bàn phím thường được dùng để xóa phần văn bản đang được chọn?","a":["Enter","Shift","Delete","Ctrl"],"correct":2},{"q":"Câu 3: Để di chuyển một đoạn văn bản từ vị trí này sang vị trí khác, em thực hiện thứ tự các thao tác nào?","a":["Chọn văn bản -> Copy -> Paste","Chọn văn bản -> Cut -> Paste","Chọn văn bản -> Delete -> Paste","Chọn văn bản -> Insert -> Paste"],"correct":1},{"q":"Câu 4: Phần mềm nào sau đây được dùng để tạo bài trình chiếu?","a":["Microsoft Word","Microsoft PowerPoint","Scratch","Windows Media Player"],"correct":1},{"q":"Câu 5: Trong phần mềm trình chiếu, nút lệnh nào dùng để thêm một trang chiếu mới?","a":["New Slide","Layout","Reset","Section"],"correct":0},{"q":"Câu 6: Khi xem video về lịch sử, văn hóa trên Internet, em nên lưu ý điều gì để đảm bảo an toàn và hiệu quả?","a":["Chỉ xem các video từ nguồn tin cậy, chính thống.","Xem tất cả các video hiện lên trên màn hình.","Chia sẻ thông tin cá nhân dưới phần bình luận của video.","Tải tất cả các tệp đính kèm không rõ nguồn gốc dưới video."],"correct":0},{"q":"Câu 7: Trong cửa sổ Scratch, khu vực nào là nơi hiển thị kết quả hoạt động của nhân vật?","a":["Khu vực lệnh","Khu vực lập trình","Sân khấu","Danh sách nhân vật"],"correct":2},{"q":"Câu 8: Để ghép các lệnh lại với nhau trong Scratch, em thực hiện thao tác nào?","a":["Nháy đúp chuột vào lệnh.","Kéo thả các lệnh từ khu vực lệnh sang khu vực lập trình và gắn chúng lại với nhau.","Nháy chuột phải vào lệnh và chọn 'Gắn'.","Nhấn phím Enter trên bàn phím."],"correct":1},{"q":"Câu 9: Nhóm lệnh nào trong Scratch chứa lệnh giúp nhân vật hiển thị bóng nói (ví dụ: 'Say Hello!')?","a":["Motion (Chuyển động)","Looks (Hiển thị)","Sound (Âm thanh)","Events (Sự kiện)"],"correct":1},{"q":"Câu 10: Lệnh nào sau đây giúp nhân vật di chuyển về phía trước một khoảng nhất định?","a":["<span style='background:#4C97FF;color:#fff;padding:6px 12px;border-radius:4px;font-weight:bold;'>xoay &#8635; <span style='background:#fff;color:#000;padding:2px 8px;border-radius:10px;'>15</span> độ</span>","<span style='background:#CF63CF;color:#fff;padding:6px 12px;border-radius:4px;font-weight:bold;'>bắt đầu âm thanh <span style='background:#d38bdf;color:#fff;padding:2px 8px;border-radius:10px;'>Meow &#9660;</span></span>","<span style='background:#4C97FF;color:#fff;padding:6px 12px;border-radius:4px;font-weight:bold;'>di chuyển <span style='background:#fff;color:#000;padding:2px 8px;border-radius:10px;'>10</span> bước</span>","<span style='background:#9966FF;color:#fff;padding:6px 12px;border-radius:4px;font-weight:bold;'>nói <span style='background:#fff;color:#000;padding:2px 8px;border-radius:10px;'>Xin chào!</span></span>"],"correct":2},{"q":"Câu 11: Trong phần mềm soạn thảo, phím tắt nào dùng để DÁN (Paste) văn bản?","a":["Ctrl + C","Ctrl + V","Ctrl + X","Ctrl + Z"],"correct":1},{"q":"Câu 12: Tác dụng của lệnh Copy trong thẻ Home là gì?","a":["Xóa đoạn văn bản","In đậm văn bản","Sao chép đoạn văn bản được chọn","Cắt đoạn văn bản"],"correct":2},{"q":"Câu 13: Trong PowerPoint, nhóm lệnh Font nằm ở thẻ nào?","a":["Home","Insert","Design","Transitions"],"correct":0},{"q":"Câu 14: Để căn giữa đoạn văn bản trong trang chiếu, em dùng nút lệnh nào?","a":["Align Left","Center","Align Right","Justify"],"correct":1},{"q":"Câu 15: Thẻ Animations trong PowerPoint dùng để làm gì?","a":["Thay đổi màu nền trang chiếu","Tạo hiệu ứng xuất hiện cho đối tượng","Thêm trang chiếu mới","Lưu bài trình chiếu"],"correct":1},{"q":"Câu 16: Thẻ Transitions dùng để làm gì?","a":["Tạo hiệu ứng chuyển trang chiếu","Thêm hình ảnh","Đổi phông chữ","Viết chữ nghệ thuật"],"correct":0},{"q":"Câu 17: Phím tắt nào dùng để bắt đầu trình chiếu ngay từ ban đầu?","a":["F1","F3","F5","Esc"],"correct":2},{"q":"Câu 18: Đuôi mở rộng mặc định của một tệp trình chiếu PowerPoint là gì?","a":[".docx",".xlsx",".pptx",".txt"],"correct":2},{"q":"Câu 19: Khi thực hành gõ bàn phím bằng 10 ngón, hai phím có gai (gờ nổi) là:","a":["F và J","G và H","A và S","K và L"],"correct":0},{"q":"Câu 20: Việc đặt tay đúng vị trí khi gõ bàn phím mang lại lợi ích gì?","a":["Giúp chơi game giỏi hơn","Máy tính chạy nhanh hơn","Giúp gõ nhanh, chính xác và đỡ mỏi tay","Tăng tuổi thọ của bàn phím"],"correct":2},{"q":"Câu 21: Phần mềm Scratch là gì?","a":["Phần mềm soạn thảo văn bản","Phần mềm tạo bài trình chiếu","Phần mềm lập trình trực quan, tạo hoạt hình","Phần mềm diệt virus"],"correct":2},{"q":"Câu 22: Biểu tượng mặc định của nhân vật (Sprite) trong Scratch là con vật nào?","a":["Con chó","Chú mèo","Con khỉ","Con rùa"],"correct":1},{"q":"Câu 23: Làm thế nào để xóa một khối lệnh em đã lỡ kéo nhầm vào khu vực lập trình?","a":["Kéo khối lệnh trả lại về khu vực nhóm lệnh","Bấm nút nguồn máy tính","Không thể xóa được","Nháy đúp chuột vào màn hình"],"correct":0},{"q":"Câu 24: Khối lệnh màu Cam (Control - Điều khiển) thường chứa lệnh nào?","a":["lặp lại 10 lần","di chuyển 10 bước","nói Xin chào","đổi phông nền"],"correct":0},{"q":"Câu 25: Lệnh 'đợi 1 giây' nằm trong nhóm lệnh nào của Scratch?","a":["Motion (Chuyển động)","Events (Sự kiện)","Control (Điều khiển)","Operators (Phép toán)"],"correct":2},{"q":"Câu 26: Để thêm một hình nền mới cho Sân khấu, em chọn công cụ nào?","a":["Choose a Sprite","Choose a Backdrop","Costumes","Sounds"],"correct":1},{"q":"Câu 27: Đâu là lệnh có tác dụng làm quay nhân vật một góc nhất định?","a":["đi tới điểm x, y","hiện","xoay 15 độ","nói Xin chào"],"correct":2},{"q":"Câu 28: Nhóm lệnh Sự kiện (Events) màu Vàng thường chứa khối lệnh khởi động nào để bắt đầu chạy kịch bản?","a":["Khi bấm vào lá cờ xanh","Lặp lại liên tục","Nếu - thì","Ẩn nhân vật"],"correct":0},{"q":"Câu 29: Làm thế nào để nhân vật tự động quay vào trong khi đi đụng vào mép sân khấu?","a":["Dùng lệnh 'Ẩn'","Dùng lệnh 'Bật lại nếu chạm cạnh'","Chỉnh kích thước nhỏ lại","Xóa nhân vật"],"correct":1},{"q":"Câu 30: Một bài trình chiếu có chữ quá nhỏ và nhiều màu sắc sặc sỡ sẽ gây ra hậu quả gì?","a":["Làm bài chiếu đẹp hơn","Trang chiếu hiển thị nhanh hơn","Rất dễ theo dõi","Gây rối mắt và khó đọc cho người xem"],"correct":3}],"ontapk5hk2":[{"q":"Câu 1: Cách gõ Telex nào sẽ cho ra dòng chữ “Có công mài sắt có ngày nên kim!” ?","a":["Coo coong maif sawt cos ngayf neen kim!","Cos coong maif sawt co ngayf neen kim!","Cos coong maif sawt cos ngayf nenn kim!","Cos coong maif sawt cos ngayf neen kim!"],"correct":3},{"q":"Câu 2: Trong Word, muốn đưa hình ra phía sau chữ, em chọn kiểu trình bày nào sau đây?","a":["Square","Behind Text","Top and Bottom","In front of Text"],"correct":1},{"q":"Câu 3: Trong Scratch, em dùng cấu trúc nào để một hành động được thực hiện nhiều lần giống nhau?","a":["Cấu trúc tuần tự","Cấu trúc rẽ nhánh","Cấu trúc lặp","Cả 3 câu trên đều sai"],"correct":2},{"q":"Câu 4: Cấu trúc lặp nào dưới đây có số lần lặp chưa biết trước?","a":["Lặp lại 10 lần","Lặp lại 20 lần","Lặp lại cho đến khi bấm phím bất kỳ","A và B đúng"],"correct":2},{"q":"Câu 5: Để lấy tương tác “chạm” cho nhân vật trong Scratch, em vào nhóm lệnh nào?","a":["Vào “Cảm biến”","Vào “Hiển thị”","Vào “Chuyển động”","Vào “Sự kiện”"],"correct":0},{"q":"Câu 6: Để tính tiền mua vé xem phim có giá vé khác nhau với các ngày trong tuần và cuối tuần, em sẽ sử dụng cấu trúc rẽ nhánh nào? (chỉ sử dụng cấu trúc đó 1 lần trong chương trình)","a":["Nếu…thì…không thì…","Nếu…thì…","Nếu không thì…","Cả 3 câu trên đều sai"],"correct":0},{"q":"Câu 7: Cho a = 5, b = 1. Biểu thức so sánh nào dưới đây cho kết quả là “False”?","a":["a > b","b < a","a < b","Tất cả đều False"],"correct":2},{"q":"Câu 8: Sử dụng “Kết hợp táo-chuối” trong Scratch có tác dụng gì?","a":["Kết hợp giá trị với một biến","Kết hợp lời văn với phép tính","Kết hợp trang phục cho nhân vật","Kết hợp phông nền cho sân khấu"],"correct":1},{"q":"Câu 9: Cho biến a có giá trị lấy ngẫu nhiên từ 7 đến 77, điều nào dưới đây là không thể xảy ra?","a":["a = 7","a < 77","a > 7","a > 77"],"correct":3},{"q":"Câu 10: Trong Scratch, muốn nhân vật Cá bơi tự do và khi nào chạm vào nhân vật Ốc thì dừng lại rồi nói “Xin chào”, em sẽ thiết kế chương trình như thế nào là hợp lý nhất?","a":["Cho Cá lặp lại hành động bơi đến vị trí ngẫu nhiên 10 lần rồi nói “Xin chào”.","Cho Ốc lặp lại hành động bơi đến vị trí ngẫu nhiên cho đến khi chạm vào Cá thì chào.","Cho Cá lặp lại hành động bơi đến vị trí ngẫu nhiên cho đến khi chạm vào Ốc thì chào.","Cho Ốc lặp lại hành động bơi đến vị trí ngẫu nhiên 10 lần rồi nói “Xin chào”."],"correct":2},{"q":"Câu 11: Khi tạo thiệp chúc mừng, việc chèn thêm hình ảnh minh họa có tác dụng gì?","a":["Làm cho thiệp đẹp và sinh động hơn.","Làm cho máy tính chạy nhanh hơn.","Để thay thế hoàn toàn nội dung chữ.","Không có tác dụng gì."],"correct":0},{"q":"Câu 12: Để chèn một hình ảnh vào trang soạn thảo thiệp, em vào thẻ nào?","a":["Home.","Insert.","Design.","View."],"correct":1},{"q":"Câu 13: Trong các bước tạo thiệp chúc mừng, bước \"Trình bày nội dung lời chúc\" thường thực hiện khi nào?","a":["Trước khi mở phần mềm.","Sau khi đã chọn mẫu hoặc trang trí nền.","Sau khi đã in thiệp ra giấy.","Khi đã tắt máy tính."],"correct":1},{"q":"Câu 14: Khi xem video hướng dẫn làm sản phẩm thủ công, em nên làm gì để theo kịp các bước?","a":["Xem hết video một lần rồi mới làm.","Vừa xem vừa làm, có thể tạm dừng video ở mỗi bước.","Chỉ xem, không cần làm theo.","Tua nhanh video đến đoạn cuối."],"correct":1},{"q":"Câu 15: Lợi ích của việc học làm sản phẩm thủ công qua video là gì?","a":["Có thể quan sát trực quan các thao tác thực hiện.","Video tự động làm thay cho em.","Không cần chuẩn bị nguyên vật liệu.","Làm xong sản phẩm sẽ có ngay trên màn hình."],"correct":0},{"q":"Câu 16: Cấu trúc tuần tự trong lập trình được hiểu là:","a":["Các lệnh được thực hiện lặp đi lặp lại.","Các lệnh được thực hiện lần lượt từ trên xuống dưới.","Chỉ thực hiện lệnh khi thỏa mãn điều kiện.","Các lệnh được thực hiện ngẫu nhiên."],"correct":1},{"q":"Câu 17: Trong sơ đồ khối của cấu trúc tuần tự, các bước được nối với nhau bằng:","a":["Hình thoi.","Hình tròn.","Mũi tên chỉ hướng thực hiện.","Hình tam giác."],"correct":2},{"q":"Câu 18: Ví dụ nào sau đây mô tả một cấu trúc tuần tự?","a":["Nếu trời mưa thì nghỉ học.","Đánh răng, rửa mặt, rồi đi học.","Ăn cơm cho đến khi no thì dừng.","Quay kim đồng hồ liên tục."],"correct":1},{"q":"Câu 19: Trong Scratch, các khối lệnh gắn chặt nối tiếp nhau từ trên xuống thể hiện cấu trúc gì?","a":["Cấu trúc rẽ nhánh.","Cấu trúc lặp.","Cấu trúc tuần tự.","Cấu trúc điều kiện."],"correct":2},{"q":"Câu 20: Để nhân vật di chuyển 10 bước rồi nói \"Xin chào\", em cần sắp xếp các khối lệnh như thế nào?","a":["Khối \"Nói\" trước, khối \"Di chuyển\" sau.","Khối \"Di chuyển\" trước, khối \"Nói\" sau.","Hai khối đặt song song.","Chỉ cần dùng một khối."],"correct":1},{"q":"Câu 21: Điều kiện trong cấu trúc rẽ nhánh thường trả về kết quả là:","a":["Một con số.","Một đoạn văn bản.","Đúng hoặc Sai.","Một hình ảnh."],"correct":2},{"q":"Câu 22: Cấu trúc lặp được sử dụng để làm gì?","a":["Thực hiện một công việc duy nhất một lần.","Thực hiện lặp lại một hoặc một nhóm lệnh nhiều lần.","Kiểm tra điều kiện đúng hay sai.","Sắp xếp các lệnh theo thứ tự."],"correct":1},{"q":"Câu 23: Trong Scratch, khối lệnh \"Lặp lại 10\" thuộc loại cấu trúc lặp nào?","a":["Lặp với số lần biết trước.","Lặp với số lần chưa biết trước.","Lặp vô hạn.","Không phải cấu trúc lặp."],"correct":0},{"q":"Câu 24: Để nhân vật vẽ một hình vuông, em cần lặp lại thao tác \"Di chuyển và Xoay 90 độ\" bao nhiêu lần?","a":["2 lần.","3 lần.","4 lần.","5 lần."],"correct":2},{"q":"Câu 25: Biểu thức toán học (10 + 5) x 2 được viết trong ngôn ngữ lập trình (như Scratch) bằng cách:","a":["Sử dụng một khối lệnh duy nhất.","Kết hợp khối lệnh cộng lồng bên trong khối lệnh nhân.","Kết hợp khối lệnh nhân lồng bên trong khối lệnh cộng.","Viết thẳng như trên giấy."],"correct":1},{"q":"Câu 26: Chạy thử chương trình là công việc nhằm mục đích gì?","a":["Để xem chương trình có hoạt động đúng như mong muốn không.","Để máy tính tự động viết nốt phần còn lại.","Để xóa bỏ chương trình.","Để thay đổi màu sắc của nhân vật."],"correct":0},{"q":"Câu 27: Khi chạy thử, nếu kết quả không đúng (ví dụ: 1 + 1 = 3), em cần làm gì?","a":["Tắt máy tính và đi ngủ.","Kiểm tra lại các khối lệnh để tìm và sửa lỗi.","Cứ để nguyên vì máy tính không bao giờ sai.","Xóa toàn bộ chương trình và làm lại từ đầu."],"correct":1},{"q":"Câu 28: Một chương trình yêu cầu nhân vật di chuyển khi nhấn phím Trắng, nhưng khi nhấn phím nhân vật không cử động. Đây gọi là:","a":["Tính năng của chương trình.","Lỗi chương trình.","Sự cố điện lưới.","Do nhân vật đang ngủ."],"correct":1},{"q":"Câu 29: Khi chạy thử chương trình vẽ hình tam giác đều, nhân vật lại vẽ ra hình vuông. Nguyên nhân có thể là do:","a":["Chọn sai màu bút.","Đặt sai số lần lặp hoặc góc xoay.","Máy tính bị nóng.","Do nhân vật di chuyển quá nhanh."],"correct":1},{"q":"Câu 30: Bước cuối cùng sau khi chạy thử và sửa lỗi chương trình là:","a":["Lưu chương trình và chia sẻ (nếu cần).","Xóa chương trình.","Rút phích cắm máy tính.","Thay đổi tên người lập trình."],"correct":0}],
         "thik1hk2": [{"q":"Câu 1: Thiết bị nào sau đây dùng để nhập chữ và số vào máy tính?","a":["Chuột máy tính","Bàn phím máy tính","Màn hình","Loa"],"correct":1},{"q":"Câu 2: Trên bàn phím, phím <b><i>A</i></b> và phím <b><i>S</i></b> nằm ở hàng phím nào?","a":["Hàng phím số","Hàng phím trên","Hàng phím cơ sở","Hàng phím dưới"],"correct":2},{"q":"Câu 3: Hai phím nào trên hàng phím cơ sở có gai (gờ nổi) để làm mốc cho việc đặt ngón tay?","a":["Phím <b>A</b> và <b>L</b>","Phím <b>D</b> và <b>K</b>","Phím <b>F</b> và <b>J</b>","Phím <b>S</b> và <b>G</b>"],"correct":2},{"q":"Câu 4: Để mở phần mềm vẽ Paint, em tìm biểu tượng nào trên màn hình máy tính?","a":["<img src='paint.png' class='opt-img' alt='Paint'>","<img src='word.png'  class='opt-img' alt='Word'>","<img src='chrome.png' class='opt-img' alt='Chrome'>","<img src='Recycle bin.png' class='opt-img' alt='Recycle Bin'>"],"img":true,"correct":0},{"q":"Câu 5: Khi muốn thoát khỏi phần mềm Paint, em nhấn vào nút có biểu tượng hình gì ở góc trên bên phải màn hình?","a":["<img src='minimine.png'    class='opt-img' alt='Minimize'>","<img src='maximine.png'    class='opt-img' alt='Maximize'>","<img src='Close.png'       class='opt-img' alt='Close'>","<img src='restoredown.png' class='opt-img' alt='Restore Down'>"],"img":true,"correct":2},{"q":"Câu 6: Để chọn một hình vẽ và di chuyển sang vị trí khác trong Paint, em sử dụng công cụ nào?","a":["Công cụ bút vẽ (Pencil)","Công cụ chọn (Select)","Công cụ tẩy (Eraser)","Công cụ tô màu (Fill with color)"],"correct":1},{"q":"Câu 7: Biểu tượng của công cụ dùng để tô màu cho hình vẽ là:","a":["<img src='pen.png'   class='opt-img' alt='Bút vẽ'>","<img src='tay.png'   class='opt-img' alt='Tay'>","<img src='tomau.png' class='opt-img' alt='Tô màu'>","<img src='len.png'   class='opt-img' alt='Len'>"],"img":true,"correct":2},{"q":"Câu 8: Để vẽ được một hình tròn thật tròn (không bị méo), em cần nhấn giữ phím nào trong khi kéo chuột?","a":["Phím <b>Enter</b>","Phím <b>Shift</b>","Phím <b>Ctrl</b>","Phím <b>Space</b> (cách)"],"correct":1},{"q":"Câu 9: Khi gõ phím <b><i>L</i></b> trên phần mềm Teach Typing, em sử dụng ngón tay nào của bàn tay phải?","a":["Ngón trỏ","Ngón giữa","Ngón áp út","Ngón út"],"correct":2},{"q":"Câu 10: Để vẽ dây cho chùm bóng bay trong bài vẽ mẫu, em nên sử dụng công cụ nào là phù hợp nhất?","a":["Công cụ vẽ hình chữ nhật","Công cụ vẽ đường thẳng hoặc đường cong","Công cụ vẽ hình tròn","Công cụ tẩy"],"correct":1}],
@@ -800,22 +738,16 @@
             }
 
             // Xác định thư mục dựa trên quizType để fix lỗi đường dẫn ảnh
+            const baseUrl = window.location.origin;
             let folderPrefix = "";
-            if (s.quizType.includes("k1")) folderPrefix = "Lop1/";
-            else if (s.quizType.includes("k2") && s.quizType !== "ontapk2hk2" && s.quizType !== "thik2hk2") {
-                // Đây là logic đặc biệt: nếu mã đề có k2 nhưng là của lớp 2
-                // Tuy nhiên, mã đề ontapk2hk2, thik2hk2 là của Lớp 2.
-                // ontapk1hk2 -> Lớp 1, ontapk2hk2 -> Lớp 2...
-            }
-            
-            // Cách làm an toàn hơn: Kiểm tra mã đề chính xác
-            if (s.quizType.includes("k1")) folderPrefix = "Lop1/";
-            else if (s.quizType.includes("k2") && !s.quizType.startsWith("ontap")) folderPrefix = "Lop2/"; // thik2hk2
-            else if (s.quizType === "ontapk2hk2") folderPrefix = "Lop2/";
-            else if (s.quizType.includes("k3")) folderPrefix = "Lop3/";
-            else if (s.quizType.includes("k5")) folderPrefix = "Lop5/";
-            // Lớp 4 (ontaphk2, thihk2) thường nằm ở thư mục gốc hoặc có thư mục riêng
-            // Nếu ảnh lớp 4 bị lỗi, ta sẽ check lại vị trí ảnh của lớp 4.
+            let qType = s.quizType || "";
+
+            if (qType.startsWith('vbt')) folderPrefix = "VBT/";
+            else if (qType === 'ontaphk1' || qType === 'ontaphk2' || qType === 'thuchanhhk2' || qType === 'thihk2' || qType.startsWith('bai')) folderPrefix = "SGK/";
+            else if (qType.includes("k1")) folderPrefix = "Lop1/";
+            else if (qType.includes("k2")) folderPrefix = "Lop2/";
+            else if (qType.includes("k3")) folderPrefix = "Lop3/";
+            else if (qType.includes("k5")) folderPrefix = "Lop5/";
 
             questions.forEach((q, idx) => {
                 const qNum = idx + 1;
@@ -852,13 +784,13 @@
                         badge = `<span style="background:#e53935;color:#fff;font-size:.65rem;padding:1px 6px;border-radius:10px;font-weight:700;margin-left:6px;">✗ SAI</span>`;
                     }
 
-                    // FIX PATH ẢNH TRONG OPTION
+                    // FIX PATH ẢNH TRONG OPTION (Sử dụng URL tuyệt đối)
                     let displayOpt = opt;
                     if (q.img && displayOpt.includes('<img')) {
-                        // Tìm src='...' và thay bằng src='LopX/...'
                         displayOpt = displayOpt.replace(/src=['"]([^'"]+)['"]/g, (match, p1) => {
-                            if (p1.startsWith('http') || p1.startsWith('/') || p1.startsWith('data:')) return match;
-                            return `src="${folderPrefix}${p1}"`;
+                            if (p1.startsWith('http') || p1.startsWith('data:')) return match;
+                            const path = p1.startsWith('/') ? p1.substring(1) : p1;
+                            return `src="${baseUrl}/${folderPrefix}${path}"`;
                         });
                     }
 
@@ -884,13 +816,14 @@
                 if (displayQ.includes('<img')) {
                     displayQ = displayQ.replace(/<img/g, '<img class="quiz-detail-q-img"');
                     displayQ = displayQ.replace(/src=['"]([^'"]+)['"]/g, (match, p1) => {
-                        if (p1.startsWith('http') || p1.startsWith('/') || p1.startsWith('data:')) return match;
-                        return `src="${folderPrefix}${p1}"`;
+                        if (p1.startsWith('http') || p1.startsWith('data:')) return match;
+                        const path = p1.startsWith('/') ? p1.substring(1) : p1;
+                        return `src="${baseUrl}/${folderPrefix}${path}"`;
                     });
                 }
 
                 html += `
-                <div style="
+                <div class="${forPrint ? 'pdf-avoid-break' : ''}" style="
                     background:${bgColor};
                     border:1px solid ${borderColor};
                     border-left:${borderLeft};
@@ -909,6 +842,7 @@
             });
             return html;
         }
+
 
         window.viewDetails = function(id) {
             const s = allSubmissions.find(x => x.id === id);
@@ -949,87 +883,158 @@
             document.getElementById('detailsModal').style.display = 'none';
         };
 
+
+        // ═══════════════════════════════════════════════════════════════
+        // PDF EXPORT  –  Blob URL + print  /  ZIP nhiều file
+        // ═══════════════════════════════════════════════════════════════
+
+        // Build standalone printable HTML for one student
+        function buildPrintHTML(s) {
+            const timeStr   = s.createdAt ? new Date(s.createdAt).toLocaleString('vi-VN') : '';
+            const pct       = s.total ? Math.round(s.score / s.total * 100) : 0;
+            const good      = pct >= 70;
+            const sc        = good ? '#2e7d32' : '#c0392b';
+            const bg        = good ? '#e8f5e9'  : '#fff3f3';
+            const quizLabel = QUIZ_LABEL[s.quizType] || s.quizType;
+            const body      = buildDetailHTML(s, true);
+
+            return `<!DOCTYPE html>
+<html lang="vi"><head><meta charset="UTF-8">
+<base href="${window.location.origin}/">
+<title>${s.studentName} – ${s.studentClass}</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#222;background:#fff;}
+
+/* ── Cover ── */
+.cover{padding:16px 20px 14px;background:#f8faff;border-bottom:3px solid #1565c0;margin-bottom:14px;}
+.s-name{font-size:17px;font-weight:700;color:#1a1a2e;margin-bottom:3px;}
+.s-meta{font-size:11px;color:#666;margin-bottom:10px;}
+.score-box{display:inline-flex;align-items:center;gap:14px;background:${bg};border-radius:8px;padding:8px 16px;}
+.score-label{font-size:9px;font-weight:700;color:${sc};text-transform:uppercase;letter-spacing:.07em;margin-bottom:2px;}
+.score-val{font-size:17px;font-weight:800;color:${sc};}
+.verdict{font-size:14px;font-weight:800;color:${sc};border-left:2px solid ${sc};padding-left:14px;}
+
+/* ── Questions ── */
+.qs{padding:0 20px 20px;}
+.q-wrap{border-radius:7px;padding:9px 11px;margin-bottom:8px;break-inside:avoid;page-break-inside:avoid;}
+.q-text{font-weight:600;color:#1565c0;font-size:12px;margin-bottom:8px;line-height:1.4;}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:5px;}
+.opt{display:flex;align-items:center;gap:7px;border-radius:6px;padding:6px 8px;font-size:11.5px;break-inside:avoid;}
+.radio{width:11px;height:11px;border-radius:50%;flex-shrink:0;}
+.ltr{color:#1565c0;font-weight:700;font-size:10px;min-width:18px;height:18px;background:#e3f2fd;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;}
+.badge{font-size:9px;padding:1px 5px;border-radius:8px;font-weight:700;margin-left:3px;white-space:nowrap;}
+.opt-img { display: block; max-width: 140px; max-height: 110px; object-fit: contain; margin: 4px auto; border-radius: 4px; }
+.opt-img-sm { height: 18px; object-fit: contain; vertical-align: middle; }
+.quiz-detail-q-img { display: block; max-width: 100%; max-height: 250px; margin: 8px 0; border-radius: 6px; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+.qs img { max-width: 100%; height: auto; }
+
+@media print{
+  @page{size:A4;margin:11mm 11mm 11mm 11mm;}
+  body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  .q-wrap{break-inside:avoid;page-break-inside:avoid;}
+}
+</style></head>
+<body>
+<div class="cover">
+  <div class="s-name">${s.studentName}</div>
+  <div class="s-meta">Lớp ${s.studentClass} | ${quizLabel}${timeStr ? ' | ' + timeStr : ''}</div>
+  <div class="score-box">
+    <div>
+      <div class="score-label">KẾT QUẢ TỔNG QUÁT</div>
+      <div class="score-val">${s.score} / ${s.total} (${pct}%)</div>
+    </div>
+    <div class="verdict">${good ? 'ĐẠT' : 'CHƯA ĐẠT'}</div>
+  </div>
+</div>
+<div class="qs">${body}</div>
+</body></html>`;
+        }
+
+        // Open Blob URL in new tab → auto-print → close
+        function downloadBlobHTML(html, filename) {
+            const blob = new Blob([html], {type:'text/html;charset=utf-8'});
+            const url  = URL.createObjectURL(blob);
+            const a    = document.createElement('a');
+            a.href     = url;
+            a.download = filename + '.html';
+            document.body.appendChild(a);
+            a.click();
+            setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 1000);
+        }
+
         window.exportDetailPDF = function() {
             const s = _currentDetailSub;
             if (!s) return;
+            const btn = document.getElementById('btnPdfDetail');
+            if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; }
+            setTimeout(() => {
+                try {
+                    downloadBlobHTML(buildPrintHTML(s), `${s.studentName}_${s.studentClass}`);
+                } finally {
+                    if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-download"></i> Tải HTML'; }
+                }
+            }, 50);
+        };
 
-            const timeStr = s.createdAt ? new Date(s.createdAt).toLocaleString('vi-VN') : '';
-            const pct = s.total ? Math.round(s.score / s.total * 100) : 0;
-            const quizLabel = QUIZ_LABEL[s.quizType] || s.quizType;
+        window.exportSinglePDF = function(id) {
+            const s = allSubmissions.find(x => x.id === id);
+            if (!s) return;
+            _currentDetailSub = s;
+            exportDetailPDF();
+        };
 
-            const bodyHTML = buildDetailHTML(s, true);
+        window.bulkExportPDF = async function() {
+            const ids = getSelectedIds();
+            if (ids.length === 0) { alert('Vui lòng chọn ít nhất một bài làm!'); return; }
+            if (ids.length === 1) { exportSinglePDF(ids[0]); return; }
 
-            const printHTML = `<!DOCTYPE html>
-<html lang="vi">
-<head>
-<meta charset="UTF-8">
-<title>Bài làm - ${s.studentName}</title>
-<style>
-    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
-    * { box-sizing:border-box; margin:0; padding:0; }
-    body { font-family:'Roboto',sans-serif; color:#222; background:#fff; padding:0; }
-    
-    .cover {
-        padding: 32px 40px 24px;
-        border-bottom: 3px solid #1565c0;
-        background: #f8faff;
-        margin-bottom: 24px;
-    }
-    .student-name { font-size:1.5rem; font-weight:700; color:#1a1a2e; margin-bottom:6px; }
-    .student-meta { font-size:.85rem; color:#666; margin-bottom:16px; }
-    .score-box {
-        display:inline-flex; align-items:center; gap:20px;
-        background:#fff3f3; border-radius:12px; padding:12px 20px;
-    }
-    .score-label { font-size:.65rem; font-weight:700; color:#c0392b; text-transform:uppercase; letter-spacing:.08em; margin-bottom:4px; }
-    .score-val   { font-size:1.5rem; font-weight:800; color:#c0392b; }
-    .score-emoji { font-size:2rem; }
+            const subs = ids.map(id => allSubmissions.find(x => x.id === id)).filter(Boolean);
+            const btn  = document.querySelector('[onclick="bulkExportPDF()"]');
+            const orig = btn ? btn.innerHTML : '';
+            if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang tạo ZIP...'; }
 
-    .questions { padding: 0 40px 40px; }
-    .q-block { break-inside:avoid; page-break-inside:avoid; margin-bottom:12px; }
-    
-    @media print {
-        @page { size: A4; margin: 15mm 15mm 15mm 15mm; }
-        body { -webkit-print-color-adjust:exact; print-color-adjust:exact; }
-        .cover { margin-bottom:18px; }
-    }
-</style>
-</head>
-<body>
-    <div class="cover">
-        <div class="student-name">${s.studentName}</div>
-        <div class="student-meta">Lớp ${s.studentClass} | ${quizLabel}${timeStr ? ' | ' + timeStr : ''}</div>
-        <div class="score-box">
-            <div>
-                <div class="score-label">KẾT QUẢ TỔNG QUÁT</div>
-                <div class="score-val">${s.score} / ${s.total} (${pct}%)</div>
-            </div>
-            <div class="score-emoji">📚</div>
-        </div>
-    </div>
-    <div class="questions">${bodyHTML}</div>
-</body>
-</html>`;
+            try {
+                // Lazy-load JSZip
+                if (!window.JSZip) {
+                    await new Promise((res, rej) => {
+                        const sc = document.createElement('script');
+                        sc.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
+                        sc.onload = res; sc.onerror = () => rej(new Error('Không tải được JSZip'));
+                        document.head.appendChild(sc);
+                    });
+                }
 
-            const frame = document.getElementById('pdfFrame');
-            frame.style.display = 'block';
-            frame.style.position = 'fixed';
-            frame.style.left = '-9999px';
-            frame.style.width = '794px'; // A4 width px
-            frame.style.height = '1px';
+                const zip    = new window.JSZip();
+                const folder = zip.folder('BaiLam_HK2');
 
-            frame.onload = function() {
-                setTimeout(() => {
-                    frame.contentWindow.focus();
-                    frame.contentWindow.print();
-                    setTimeout(() => { frame.style.display = 'none'; }, 1000);
-                }, 400);
-            };
+                // Handle duplicate names
+                const nameCount = {}, nameIdx = {};
+                subs.forEach(s => { const k = s.studentName+'_'+s.studentClass; nameCount[k] = (nameCount[k]||0)+1; });
 
-            const doc = frame.contentDocument || frame.contentWindow.document;
-            doc.open();
-            doc.write(printHTML);
-            doc.close();
+                subs.forEach((s, i) => {
+                    if (btn) btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> (${i+1}/${subs.length}) Đang tạo...`;
+                    const k = s.studentName+'_'+s.studentClass;
+                    nameIdx[k] = (nameIdx[k]||0)+1;
+                    const suffix   = nameCount[k] > 1 ? `_${nameIdx[k]}` : '';
+                    const safeName = k.replace(/\s+/g,'_').replace(/[^\w\-_.]/g,'');
+                    folder.file(`${safeName}${suffix}.html`, buildPrintHTML(s));
+                });
+
+                if (btn) btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang nén...';
+                const zipBlob = await zip.generateAsync({type:'blob', compression:'DEFLATE', compressionOptions:{level:6}});
+                const date    = new Date().toLocaleDateString('vi-VN').replace(/\//g,'-');
+                const a       = document.createElement('a');
+                a.href        = URL.createObjectURL(zipBlob);
+                a.download    = `BaiLam_HK2_${subs.length}HS_${date}.zip`;
+                document.body.appendChild(a); a.click();
+                setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(a.href); }, 1000);
+                alert(`✅ Xuất thành công ${subs.length} file vào ZIP!\n\nMở từng file .html → Ctrl+P để lưu PDF.`);
+            } catch(e) {
+                alert('Lỗi xuất ZIP: ' + e.message);
+            } finally {
+                if (btn) { btn.disabled = false; btn.innerHTML = orig; }
+            }
         };
 
         window.confirmDelete = async function(id) {
