@@ -346,6 +346,20 @@
 
     <!-- PDF print frame (hidden) -->
 
+    <!-- Edit Name Modal -->
+    <div id="editNameModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeEditNameModal()">&times;</span>
+            <div class="modal-header">Chỉnh sửa tên học sinh</div>
+            <div class="form-group">
+                <label>Họ và tên mới</label>
+                <input type="text" id="editNameInput" placeholder="Nhập họ và tên mới">
+                <input type="hidden" id="editNameId">
+            </div>
+            <button class="btn btn-full" id="btnSaveName" onclick="saveStudentName()">Lưu thay đổi</button>
+        </div>
+    </div>
+
     <!-- Password Modal -->
     <div id="passwordModal" class="modal">
         <div class="modal-content">
@@ -614,7 +628,10 @@
                         <input type="checkbox" class="row-check" data-id="${s.id}" onchange="onRowCheck()" style="cursor:pointer;width:16px;height:16px;">
                     </td>
                     <td><span style="color:#0056b3; cursor:pointer; font-weight:500; text-decoration:underline;" onclick="viewDetails('${s.id}')">${splitName(s.studentName).ho}</span></td>
-                    <td><span style="color:#0056b3; cursor:pointer; font-weight:500; text-decoration:underline;" onclick="viewDetails('${s.id}')">${splitName(s.studentName).ten}</span></td>
+                    <td>
+                        <span style="color:#0056b3; cursor:pointer; font-weight:500; text-decoration:underline;" onclick="viewDetails('${s.id}')">${splitName(s.studentName).ten}</span>
+                        <i class="fas fa-edit" style="color:#9e9e9e;cursor:pointer;font-size:12px;margin-left:5px;" onclick="openEditNameModal('${s.id}', '${s.studentName.replace(/'/g, "\\'").replace(/"/g, "&quot;")}')" title="Chỉnh sửa tên"></i>
+                    </td>
                     <td>${s.studentClass}</td>
                     <td>${resultText}</td>
                     <td>${new Date(s.createdAt).toLocaleString('vi-VN')}${s.timeTaken ? `<br><small style="color:#e67e22; font-weight:500;">⏱ ${s.timeTaken}</small>` : ''}</td>
@@ -1366,8 +1383,10 @@ window.addEventListener('load', function() {
             const data = filteredSubmissions.map(s => {
                 let scoreText = s.quizType === 'thuchanhhk2' ? "Hoàn thành" : s.score;
                 let totalText = s.quizType === 'thuchanhhk2' ? "N/A" : s.total;
+                const nameParts = splitName(s.studentName);
                 return {
-                    "Họ và tên": s.studentName,
+                    "Họ": nameParts.ho,
+                    "Tên": nameParts.ten,
                     "Lớp": s.studentClass,
                     "Điểm số": scoreText,
                     "Tổng câu": totalText,
@@ -1383,7 +1402,8 @@ window.addEventListener('load', function() {
 
             // Format column widths
             const wscols = [
-                {wch: 25}, // studentName
+                {wch: 15}, // studentName (Ho)
+                {wch: 10}, // studentName (Ten)
                 {wch: 10}, // studentClass
                 {wch: 10}, // score
                 {wch: 10}, // total
@@ -1473,6 +1493,47 @@ window.addEventListener('load', function() {
 
         window.closePasswordModal = function() {
             document.getElementById('passwordModal').style.display = 'none';
+        };
+
+        window.openEditNameModal = function(id, currentName) {
+            document.getElementById('editNameId').value = id;
+            document.getElementById('editNameInput').value = currentName;
+            document.getElementById('editNameModal').style.display = 'flex';
+        };
+
+        window.closeEditNameModal = function() {
+            document.getElementById('editNameModal').style.display = 'none';
+        };
+
+        window.saveStudentName = async function() {
+            const id = document.getElementById('editNameId').value;
+            const newName = document.getElementById('editNameInput').value.trim();
+            if (!newName) {
+                alert('Tên không được để trống!');
+                return;
+            }
+
+            const btn = document.getElementById('btnSaveName');
+            const origText = btn.innerText;
+            btn.innerText = 'Đang lưu...';
+            btn.disabled = true;
+
+            try {
+                await setDoc(doc(db, "submissions", id), { studentName: newName }, { merge: true });
+                
+                // Cập nhật state local
+                const sub = allSubmissions.find(s => s.id === id);
+                if (sub) sub.studentName = newName;
+                
+                applyFilters(); // Re-render table
+                closeEditNameModal();
+            } catch (e) {
+                console.error("Lỗi cập nhật tên:", e);
+                alert("Lỗi cập nhật tên: " + e.message);
+            } finally {
+                btn.innerText = origText;
+                btn.disabled = false;
+            }
         };
 
         window.updatePassword = async function() {
