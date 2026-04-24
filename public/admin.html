@@ -1024,31 +1024,37 @@ window.addEventListener('load', function() {
             const pct       = s.total ? Math.round(s.score / s.total * 100) : 0;
             const good      = pct >= 70;
             const sc        = good ? '#2e7d32' : '#c0392b';
-            const bg        = good ? '#e8f5e9' : '#fff3f3';
+            const bg        = good ? '#c8e6c9' : '#ffcdd2';  // đậm hơn để html2canvas nhận màu
+            const border    = good ? '#388e3c' : '#c62828';
             const quizLabel = QUIZ_LABEL[s.quizType] || s.quizType;
             const body      = buildDetailHTML(s, true);
 
             const div = document.createElement('div');
             div.style.cssText = [
-                'position:fixed', 'left:-9999px', 'top:0',
-                'width:794px',   // A4 at 96dpi
-                'background:#fff', 'font-family:Arial,Helvetica,sans-serif',
-                'font-size:13px', 'color:#222', 'padding:0'
+                'position:absolute', 'left:-9999px', 'top:0',
+                'width:794px',
+                'background:#ffffff',
+                'font-family:Arial,Helvetica,sans-serif',
+                'font-size:13px', 'color:#222222', 'padding:0', 'margin:0'
             ].join(';');
 
             div.innerHTML = `
-            <div style="padding:16px 24px 12px;background:#f8faff;border-bottom:3px solid #1565c0;margin-bottom:14px;">
-                <div style="font-size:17px;font-weight:700;color:#1a1a2e;margin-bottom:3px;">${s.studentName}</div>
-                <div style="font-size:11px;color:#666;margin-bottom:10px;">Lớp ${s.studentClass} | ${quizLabel}${timeStr ? ' | ' + timeStr : ''}</div>
-                <div style="display:inline-flex;align-items:center;gap:14px;background:${bg};border-radius:8px;padding:8px 16px;">
-                    <div>
-                        <div style="font-size:9px;font-weight:700;color:${sc};text-transform:uppercase;letter-spacing:.07em;margin-bottom:2px;">KẾT QUẢ TỔNG QUÁT</div>
-                        <div style="font-size:17px;font-weight:800;color:${sc};">${s.score} / ${s.total} (${pct}%)</div>
+            <div style="width:100%;background:#f0f4ff;border-bottom:3px solid #1565c0;padding:16px 24px 14px;box-sizing:border-box;">
+                <div style="font-size:18px;font-weight:700;color:#1a1a2e;margin-bottom:4px;">${s.studentName}</div>
+                <div style="font-size:11px;color:#555555;margin-bottom:12px;">Lớp ${s.studentClass} | ${quizLabel}${timeStr ? ' | ' + timeStr : ''}</div>
+                <div style="width:100%;background:${bg};border:2px solid ${border};border-radius:8px;padding:10px 16px;box-sizing:border-box;">
+                    <div style="font-size:9px;font-weight:700;color:${sc};text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">KẾT QUẢ TỔNG QUÁT</div>
+                    <div style="display:table;width:100%;">
+                        <div style="display:table-cell;vertical-align:middle;">
+                            <span style="font-size:20px;font-weight:800;color:${sc};">${s.score} / ${s.total} (${pct}%)</span>
+                        </div>
+                        <div style="display:table-cell;vertical-align:middle;text-align:right;">
+                            <span style="font-size:15px;font-weight:800;color:#ffffff;background:${sc};padding:4px 14px;border-radius:20px;">${good ? '✓ ĐẠT' : '✗ CHƯA ĐẠT'}</span>
+                        </div>
                     </div>
-                    <div style="font-size:14px;font-weight:800;color:${sc};border-left:2px solid ${sc};padding-left:14px;">${good ? 'ĐẠT' : 'CHƯA ĐẠT'}</div>
                 </div>
             </div>
-            <div style="padding:0 20px 20px;">${body}</div>`;
+            <div style="padding:12px 20px 20px;width:100%;box-sizing:border-box;">${body}</div>`;
 
             document.body.appendChild(div);
             return div;
@@ -1091,7 +1097,13 @@ window.addEventListener('load', function() {
                 backgroundColor: '#ffffff',
                 width: 794,
                 windowWidth: 794,
+                scrollX: 0,
+                scrollY: 0,
+                x: 0,
+                y: 0,
                 logging: false,
+                removeContainer: false,
+                foreignObjectRendering: false,
             });
 
             document.body.removeChild(el);
@@ -1196,7 +1208,9 @@ window.addEventListener('load', function() {
 
                     const canvas = await window.html2canvas(el, {
                         scale: 2, useCORS: true, allowTaint: true,
-                        backgroundColor: '#ffffff', width: 794, windowWidth: 794, logging: false,
+                        backgroundColor: '#ffffff', width: 794, windowWidth: 794,
+                        scrollX: 0, scrollY: 0, x: 0, y: 0,
+                        logging: false, removeContainer: false, foreignObjectRendering: false,
                     });
                     document.body.removeChild(el);
 
