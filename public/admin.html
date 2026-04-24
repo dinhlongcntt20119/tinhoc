@@ -973,12 +973,11 @@ window.addEventListener('load', function() {
 </body></html>`;
         }
 
-        // Mở tab mới với Blob URL → tự động trigger print dialog (Ctrl+P / Save as PDF)
+        // Mở tab mới với Blob URL → tự động trigger print dialog
         function openPrintTab(html, filename) {
-            // Inject ?print=1 vào URL để script trong tab tự gọi window.print()
             const blob = new Blob([html], {type: 'text/html;charset=utf-8'});
-            const url  = URL.createObjectURL(blob);
-            const win  = window.open(url + '?print=1', '_blank');
+            const url  = URL.createObjectURL(blob);  // Blob URL thuần, không có query string
+            const win  = window.open(url, '_blank');
             if (!win) {
                 // Popup bị chặn → fallback tải file HTML
                 const a    = document.createElement('a');
@@ -986,17 +985,11 @@ window.addEventListener('load', function() {
                 a.download = filename + '.html';
                 document.body.appendChild(a); a.click();
                 setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 1000);
-                alert('Popup bị chặn — đã tải file HTML. Mở file rồi nhấn Ctrl+P để lưu PDF.');
+                alert('Popup bị chặn — đã tải file HTML.\nMở file rồi nhấn Ctrl+P để lưu PDF.\n\nĐể dùng tính năng tự động, vui lòng cho phép popup từ trang này.');
                 return;
             }
-            win.addEventListener('load', () => {
-                setTimeout(() => {
-                    win.document.title = filename;
-                    win.print();
-                    // Revoke sau khi print dialog đóng
-                    setTimeout(() => URL.revokeObjectURL(url), 30000);
-                }, 500);
-            });
+            // Script trong HTML đã tự gọi window.print() khi load xong
+            setTimeout(() => URL.revokeObjectURL(url), 60000);
         }
 
         window.exportDetailPDF = function() {
