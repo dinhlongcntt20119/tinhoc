@@ -641,17 +641,22 @@ function startTest() {
         el.closest('.question-block').classList.remove('missing-alert');
     }
 
-    /* --- LOGIC KÉO THẢ --- */
-    function allowDrop(ev) { ev.preventDefault(); ev.target.closest('.drop-zone, .drag-source-area').classList.add('drag-over'); }
-    
-    document.addEventListener("dragleave", function(event) { 
-        if (event.target.closest('.drop-zone, .drag-source-area')) {
-            event.target.closest('.drop-zone, .drag-source-area').classList.remove("drag-over");
-        }
+    /* --- LOGIC KÉO THẢ (HỖ TRỢ CẢ MÁY TÍNH VÀ ĐIỆN THOẠI) --- */
+
+    // === DESKTOP: HTML5 Drag & Drop ===
+    function allowDrop(ev) {
+        ev.preventDefault();
+        let t = ev.target.closest('.drop-zone, .drag-source-area');
+        if (t) t.classList.add('drag-over');
+    }
+
+    document.addEventListener("dragleave", function(event) {
+        let t = event.target.closest('.drop-zone, .drag-source-area');
+        if (t) t.classList.remove("drag-over");
     });
 
     function drag(ev) { ev.dataTransfer.setData("text", ev.target.id); }
-    
+
     function drop(ev) {
         ev.preventDefault();
         let target = ev.target.closest('.drop-zone, .drag-source-area');
@@ -662,6 +667,107 @@ function startTest() {
             if (draggedEl) target.appendChild(draggedEl);
         }
     }
+
+    // === MOBILE: Touch Drag & Drop ===
+    let touchDragEl = null;
+    let touchClone = null;
+    let touchOffsetX = 0;
+    let touchOffsetY = 0;
+
+    function initTouchDrag() {
+        document.querySelectorAll('.word-tile').forEach(function(tile) {
+            // Xóa listener cũ để tránh trùng lặp
+            tile.removeEventListener('touchstart', onTileTouch);
+            tile.addEventListener('touchstart', onTileTouch, { passive: false });
+        });
+    }
+
+    function onTileTouch(ev) {
+        ev.preventDefault();
+        touchDragEl = this;
+
+        var touch = ev.touches[0];
+        var rect = touchDragEl.getBoundingClientRect();
+        touchOffsetX = touch.clientX - rect.left;
+        touchOffsetY = touch.clientY - rect.top;
+
+        // Tạo clone để hiển thị khi kéo
+        touchClone = touchDragEl.cloneNode(true);
+        touchClone.style.position = 'fixed';
+        touchClone.style.zIndex = '9999';
+        touchClone.style.opacity = '0.8';
+        touchClone.style.pointerEvents = 'none';
+        touchClone.style.left = (touch.clientX - touchOffsetX) + 'px';
+        touchClone.style.top = (touch.clientY - touchOffsetY) + 'px';
+        touchClone.style.margin = '0';
+        touchClone.style.width = rect.width + 'px';
+        document.body.appendChild(touchClone);
+
+        touchDragEl.style.opacity = '0.4';
+
+        document.addEventListener('touchmove', onTouchMove, { passive: false });
+        document.addEventListener('touchend', onTouchEnd);
+    }
+
+    function onTouchMove(ev) {
+        ev.preventDefault();
+        if (!touchClone) return;
+        var touch = ev.touches[0];
+        touchClone.style.left = (touch.clientX - touchOffsetX) + 'px';
+        touchClone.style.top = (touch.clientY - touchOffsetY) + 'px';
+
+        // Highlight vùng thả bên dưới
+        document.querySelectorAll('.drop-zone.drag-over, .drag-source-area.drag-over').forEach(function(z) {
+            z.classList.remove('drag-over');
+        });
+        touchClone.style.display = 'none';
+        var elBelow = document.elementFromPoint(touch.clientX, touch.clientY);
+        touchClone.style.display = '';
+        if (elBelow) {
+            var zone = elBelow.closest('.drop-zone, .drag-source-area');
+            if (zone) zone.classList.add('drag-over');
+        }
+    }
+
+    function onTouchEnd(ev) {
+        document.removeEventListener('touchmove', onTouchMove);
+        document.removeEventListener('touchend', onTouchEnd);
+
+        if (!touchClone || !touchDragEl) return;
+
+        var touch = ev.changedTouches[0];
+        touchClone.style.display = 'none';
+        var elBelow = document.elementFromPoint(touch.clientX, touch.clientY);
+        touchClone.style.display = '';
+
+        // Xóa clone
+        touchClone.remove();
+        touchClone = null;
+        touchDragEl.style.opacity = '';
+
+        // Tìm vùng thả
+        var dropTarget = null;
+        if (elBelow) dropTarget = elBelow.closest('.drop-zone, .drag-source-area');
+
+        document.querySelectorAll('.drop-zone.drag-over, .drag-source-area.drag-over').forEach(function(z) {
+            z.classList.remove('drag-over');
+        });
+
+        if (dropTarget && touchDragEl) {
+            dropTarget.appendChild(touchDragEl);
+            // Xóa missing-alert nếu có
+            var qBlock = dropTarget.closest('.question-block');
+            if (qBlock) qBlock.classList.remove('missing-alert');
+            dropTarget.classList.remove('missing-alert');
+        }
+
+        touchDragEl = null;
+    }
+
+    // Khởi tạo touch drag cho tất cả tile hiện có và dùng MutationObserver để xử lý tile mới
+    initTouchDrag();
+    var observer = new MutationObserver(function() { initTouchDrag(); });
+    observer.observe(document.body, { childList: true, subtree: true });
 
     /* --- LOGIC VALIDATE (KIỂM TRA HOÀN THÀNH) --- */
     function validateCompletion() {
