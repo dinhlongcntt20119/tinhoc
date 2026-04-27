@@ -839,17 +839,14 @@ function startTest() {
     }
 
     /* --- LOGIC CHẤM ĐIỂM --- */
-    let isSubmitting = false;
-
     let _isSubmitting = false;
     function checkAll() {
         if (_isSubmitting) return;
-        _isSubmitting = true;
-        if (isSubmitting) return;
         if (!validateCompletion()) {
             alert("Bạn chưa hoàn thành tất cả các câu hỏi! Vui lòng kiểm tra các ô được viền đỏ.");
             return;
         }
+        _isSubmitting = true;
 
         const submitBtn = document.querySelector('.btn-check');
         if (submitBtn) {
