@@ -189,10 +189,10 @@ function startTest() {
             <img src="../VBT/trang65c1.png" alt="Cửa sổ làm việc của Word" style="max-width: 100%; border: 1px solid #ccc; border-radius: 5px;">
         </div>
         <div class="drag-source-area" id="src_q2" ondrop="drop(event)" ondragover="allowDrop(event)">
-            <div class="word-tile" draggable="true" ondragstart="drag(event)" id="w_dailenh" data-val="1">Dải lệnh</div>
+            <div class="word-tile" draggable="true" ondragstart="drag(event)" id="w_dailenh" data-val="1">Các thẻ lệnh</div>
             <div class="word-tile" draggable="true" ondragstart="drag(event)" id="w_contro" data-val="2">Con trỏ soạn thảo</div>
             <div class="word-tile" draggable="true" ondragstart="drag(event)" id="w_vung" data-val="3">Vùng soạn thảo</div>
-            <div class="word-tile" draggable="true" ondragstart="drag(event)" id="w_thuoc" data-val="4">Thước kẻ</div>
+            <div class="word-tile" draggable="true" ondragstart="drag(event)" id="w_thuoc" data-val="4">Các nhóm lệnh trong dải lệnh Home</div>
         </div>
         <table class="custom-table" style="width: 70%; margin: 0 auto;">
             <tr><th width="30%">Vị trí trên hình</th><th>Thành phần (Kéo vào đây)</th></tr>
@@ -201,7 +201,7 @@ function startTest() {
             <tr><td align="center"><b>Vị trí 3</b></td><td><div class="drop-zone" data-expect="3" ondrop="drop(event)" ondragover="allowDrop(event)"></div></td></tr>
             <tr><td align="center"><b>Vị trí 4</b></td><td><div class="drop-zone" data-expect="4" ondrop="drop(event)" ondragover="allowDrop(event)"></div></td></tr>
         </table>
-        <div class="show-answer-box">Đáp án đúng từ trên xuống dưới: 1. Dải lệnh -> 2. Con trỏ soạn thảo -> 3. Vùng soạn thảo -> 4. Thước kẻ</div>
+        <div class="show-answer-box">Đáp án đúng từ trên xuống dưới: 1. Các thẻ lệnh -> 2. Các nhóm lệnh trong dải lệnh Home -> 3. Con trỏ soạn thảo -> 4. Vùng soạn thảo</div>
     </div>
 
     <div class="question-block" id="q3">
@@ -274,7 +274,7 @@ function startTest() {
             <input type="text" class="text-input" style="width: 50px; text-align:center; display: inline-block;" data-ans="D"> ➔ 
             <input type="text" class="text-input" style="width: 50px; text-align:center; display: inline-block;" data-ans="E">
         </p>
-        <div class="show-answer-box">Thứ tự đúng: B -> C -> A -> D -> E</div>
+        <div class="show-answer-box">Thứ tự đúng: E -> C -> A -> D -> B</div>
     </div>
 
     <div class="question-block" id="q6">
@@ -462,15 +462,15 @@ function startTest() {
         </div>
 
         <div class="drag-source-area" id="src_q15" ondrop="drop(event)" ondragover="allowDrop(event)">
-            <div class="word-tile" draggable="true" ondragstart="drag(event)" id="sc_1" data-val="the">Các thẻ lệnh</div>
-            <div class="word-tile" draggable="true" ondragstart="drag(event)" id="sc_2" data-val="nhomlenh">Các nhóm lệnh</div>
-            <div class="word-tile" draggable="true" ondragstart="drag(event)" id="sc_3" data-val="khuvuc">Khu vực các khối lệnh</div>
-            <div class="word-tile" draggable="true" ondragstart="drag(event)" id="sc_4" data-val="nut">Nút chạy/dừng</div>
+            <div class="word-tile" draggable="true" ondragstart="drag(event)" id="sc_1" data-val="the">Nút lệnh chọn ngôn ngữ</div>
+            <div class="word-tile" draggable="true" ondragstart="drag(event)" id="sc_2" data-val="nhomlenh">Nút lệnh cờ xanh</div>
+            <div class="word-tile" draggable="true" ondragstart="drag(event)" id="sc_3" data-val="khuvuc">Bảng chọn</div>
+            <div class="word-tile" draggable="true" ondragstart="drag(event)" id="sc_4" data-val="nut">Nút lệnh dừng chương trình</div>
             <div class="word-tile" draggable="true" ondragstart="drag(event)" id="sc_5" data-val="sankhau">Sân khấu</div>
             <div class="word-tile" draggable="true" ondragstart="drag(event)" id="sc_6" data-val="nhanvat">Nhân vật</div>
-            <div class="word-tile" draggable="true" ondragstart="drag(event)" id="sc_7" data-val="kichban">Khu vực kịch bản</div>
-            <div class="word-tile" draggable="true" ondragstart="drag(event)" id="sc_8" data-val="quanly">Quản lý nhân vật</div>
-            <div class="word-tile" draggable="true" ondragstart="drag(event)" id="sc_9" data-val="phongnen">Khu vực phông nền</div>
+            <div class="word-tile" draggable="true" ondragstart="drag(event)" id="sc_7" data-val="kichban">Khu vực lệnh</div>
+            <div class="word-tile" draggable="true" ondragstart="drag(event)" id="sc_8" data-val="quanly">Khu vực chương trình</div>
+            <div class="word-tile" draggable="true" ondragstart="drag(event)" id="sc_9" data-val="phongnen">Khu vực tạo nhân vật và sân khấu</div>
         </div>
 
         <table class="custom-table" style="border: none; margin-top: 20px;">
@@ -492,9 +492,9 @@ function startTest() {
         </table>
         <div class="show-answer-box">
             <b>Gợi ý đáp án đúng:</b><br>
-            1) Các thẻ lệnh &nbsp;&nbsp;|&nbsp;&nbsp; 2) Các nhóm lệnh &nbsp;&nbsp;|&nbsp;&nbsp; 3) Khu vực các khối lệnh<br>
-            4) Nút chạy/dừng &nbsp;&nbsp;|&nbsp;&nbsp; 5) Sân khấu &nbsp;&nbsp;|&nbsp;&nbsp; 6) Nhân vật<br>
-            7) Khu vực kịch bản &nbsp;&nbsp;|&nbsp;&nbsp; 8) Quản lý nhân vật &nbsp;&nbsp;|&nbsp;&nbsp; 9) Khu vực phông nền
+            1) Nút lệnh chọn ngôn ngữ &nbsp;&nbsp;|&nbsp;&nbsp; 2) Nút lệnh cờ xanh &nbsp;&nbsp;|&nbsp;&nbsp; 3) Bảng chọn<br>
+            4) Nút lệnh dừng chương trình &nbsp;&nbsp;|&nbsp;&nbsp; 5) Sân khấu &nbsp;&nbsp;|&nbsp;&nbsp; 6) Nhân vật<br>
+            7) Khu vực lệnh &nbsp;&nbsp;|&nbsp;&nbsp; 8) Khu vực chương trình &nbsp;&nbsp;|&nbsp;&nbsp; 9) Khu vực tạo nhân vật và sân khấu
         </div>
     </div>
 
@@ -560,8 +560,8 @@ function startTest() {
         <div class="show-answer-box" style="margin-top: 15px;">
             <b>Gợi ý đáp án:</b><br>
             a) Chú mèo sẽ lần lượt hiện bong bóng thoại để nói các câu "Chào các bạn!", "Tớ là mèo Scratch", "Từ hôm nay tớ sẽ cùng các bạn học lập trình Scratch nhé", "Chúc các bạn học giỏi!", mỗi câu xuất hiện trong 3 giây.<br>
-            b) Vì trong kịch bản chương trình, dưới khối lệnh sự kiện "khi bấm vào cờ xanh" đã được ghép nối tiếp các khối lệnh "nói ... trong 3 giây".<br>
-            c) Tương tự câu b, vì các khối lệnh hội thoại được gắn liền ngay phía dưới khối lệnh sự kiện bắt đầu (lá cờ xanh).
+            b) Nhờ các lệnh nói có sẵn trong chương trình.<br>
+            c) vì các khối lệnh hội thoại được gắn liền ngay phía dưới khối lệnh sự kiện bắt đầu (lá cờ xanh).
         </div>
     </div>
 
@@ -586,9 +586,9 @@ function startTest() {
         </div>
 
         <div class="drag-source-area" id="src_q20" ondrop="drop(event)" ondragover="allowDrop(event)">
-            <div class="word-tile" draggable="true" ondragstart="drag(event)" id="w20_1" data-val="quanly">Khu vực quản lý nhân vật</div>
-            <div class="word-tile" draggable="true" ondragstart="drag(event)" id="w20_2" data-val="thongtin">Thông tin nhân vật</div>
-            <div class="word-tile" draggable="true" ondragstart="drag(event)" id="w20_3" data-val="chonnhanvat">Chọn một nhân vật</div>
+            <div class="word-tile" draggable="true" ondragstart="drag(event)" id="w20_1" data-val="quanly">Nút lệnh xóa nhân vật</div>
+            <div class="word-tile" draggable="true" ondragstart="drag(event)" id="w20_2" data-val="thongtin">Nút lệnh thêm nhân vật</div>
+            <div class="word-tile" draggable="true" ondragstart="drag(event)" id="w20_3" data-val="chonnhanvat">Nút lệnh thay đổi sân khấu</div>
         </div>
 
         <table class="custom-table" style="width: 80%; margin: 0 auto; border: none;">
@@ -606,7 +606,7 @@ function startTest() {
             </tr>
         </table>
         <div class="show-answer-box">
-            Gợi ý đáp án đúng:<br> 1) Khu vực quản lý nhân vật <br> 2) Thông tin nhân vật <br> 3) Chọn một nhân vật
+            Gợi ý đáp án đúng:<br> 1) Nút lệnh xóa nhân vật <br> 2) Nút lệnh thêm nhân vật <br> 3) Nút lệnh thay đổi sân khấu
         </div>
     </div>
 
