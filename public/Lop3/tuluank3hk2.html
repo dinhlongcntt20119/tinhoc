@@ -48,18 +48,40 @@
         /* ── Header ───────────────────────────────── */
         header {
             display: none;
-            background: linear-gradient(135deg, #1565c0, #1976d2);
-            color: white; padding: 14px 20px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-            border-bottom: 4px solid #90caf9;
+            background: linear-gradient(135deg, #0d47a1 0%, #1565c0 50%, #1976d2 100%);
+            color: white; padding: 0;
+            box-shadow: 0 6px 20px rgba(13,71,161,0.45);
+            border-bottom: 4px solid #fffb70;
+            position: sticky; top: 0; z-index: 500;
         }
         .header-content {
-            max-width: 1000px; margin: 0 auto;
+            max-width: 1100px; margin: 0 auto;
             display: flex; justify-content: space-between; align-items: center;
             flex-wrap: wrap; gap: 10px;
+            padding: 14px 24px;
         }
-        .logo-title { font-family: 'Source Code Pro', monospace; font-size: 1.5rem; font-weight: bold; }
-        .header-info { font-size: 0.9rem; opacity: .9; text-align: right; }
+        .logo-title {
+            font-family: 'Source Code Pro', monospace;
+            font-size: 1.7rem; font-weight: 800;
+            letter-spacing: 3px;
+            display: flex; align-items: center; gap: 12px;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+        .logo-title .icon-wrap {
+            background: rgba(255,255,255,0.15);
+            border: 2px solid rgba(255,251,112,0.6);
+            border-radius: 10px;
+            padding: 6px 10px;
+            display: flex; align-items: center;
+        }
+        .header-info {
+            font-size: 0.92rem; text-align: right;
+            background: rgba(255,255,255,0.12);
+            border: 1px solid rgba(255,255,255,0.25);
+            border-radius: 10px;
+            padding: 8px 16px;
+        }
+        .header-info .gv-name { color: #fffb70; font-weight: 700; }
         .header-info .student-name { color: #fffb70; font-weight: bold; }
 
         /* ── Container & Cards ────────────────────── */
@@ -147,14 +169,19 @@
             <input type="text" id="studentName" placeholder="Nhập họ và tên..." autocomplete="name">
         </div>
         <div class="input-group">
-            <label for="studentClass">Chọn lớp:</label>
-            <select id="studentClass" style="background: white; cursor: pointer;">
-                <option value="3D" selected>3D</option>
-            </select>
+            <label>Lớp:</label>
+            <div style="padding:12px 14px; border:2px solid var(--primary-color); border-radius:8px; font-size:1.1rem; font-weight:800; color:var(--primary-color); background:#e8f0fe; letter-spacing:1px;">
+                🎓 Lớp 3D
+            </div>
+            <input type="hidden" id="studentClass" value="3D">
         </div>
         <button class="btn-start" onclick="startQuiz()">
             <i class="fas fa-play-circle"></i> Vào làm bài
         </button>
+        <div style="margin-top:18px; padding-top:16px; border-top:1px solid #e8e8e8; font-size:0.9rem; color:#888;">
+            <i class="fas fa-chalkboard-teacher" style="color:var(--primary-color); margin-right:6px;"></i>
+            <span style="color:#555;">Giáo viên:</span> <strong style="color:var(--primary-color);">Nguyễn Đình Bạch Long</strong>
+        </div>
     </div>
 </div>
 
@@ -164,11 +191,14 @@
 <header id="mainHeader">
     <div class="header-content">
         <div class="logo-title">
-            <i class="fas fa-laptop-code fa-beat" style="color:#fffb70; margin-right:8px;"></i> TIN HỌC 3
+            <span class="icon-wrap">
+                <i class="fas fa-laptop-code" style="color:#fffb70; font-size:1.3rem;"></i>
+            </span>
+            TIN HỌC 3
         </div>
         <div class="header-info">
-            <div>GV – Nguyễn Đình Bạch Long</div>
-            <div style="margin-top:4px;">Học sinh: <span id="displayInfo" class="student-name"></span></div>
+            <div>GV: <span class="gv-name">Nguyễn Đình Bạch Long</span></div>
+            <div style="margin-top:5px;">Học sinh: <span id="displayInfo" class="student-name"></span></div>
         </div>
     </div>
 </header>
