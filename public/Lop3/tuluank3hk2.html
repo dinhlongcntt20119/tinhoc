@@ -45,7 +45,7 @@
         }
         .btn-start:hover { background: #1565c0; transform: translateY(-1px); }
 
-        /* ── Header ───────────────────────────────── */
+                /* ── Header ───────────────────────────────── */
         header {
             display: none;
             background: linear-gradient(135deg, #0d47a1 0%, #1565c0 50%, #1976d2 100%);
@@ -166,12 +166,15 @@
         <p>Ôn tập Tự luận Học kì 2 – Tin học 3</p>
         <div class="input-group">
             <label for="studentName">Họ và tên:</label>
-            <input type="text" id="studentName" placeholder="Nhập họ và tên..." autocomplete="name">
+            <input type="text" id="studentName" placeholder="Nhập họ và tên..." autocomplete="name" oninput="document.getElementById('studentName').style.borderColor = '';const errEl = document.getElementById('loginError');if (errEl) errEl.style.display = 'none';">
+            <div style="margin-top:6px; font-size:0.82rem; color:#e67e22; display:flex; align-items:center; gap:5px;">
+                <i class="fas fa-info-circle"></i> Lưu ý: HS phải nhập đầy đủ họ và tên
+            </div>
         </div>
-        <div class="input-group">
+                <div class="input-group">
             <label>Lớp:</label>
             <div style="padding:12px 14px; border:2px solid var(--primary-color); border-radius:8px; font-size:1.1rem; font-weight:800; color:var(--primary-color); background:#e8f0fe; letter-spacing:1px;">
-                🎓 Lớp 3D
+                &#127891; Lớp 3D
             </div>
             <input type="hidden" id="studentClass" value="3D">
         </div>
@@ -189,7 +192,7 @@
      HEADER
 ══════════════════════════════════════════ -->
 <header id="mainHeader">
-    <div class="header-content">
+        <div class="header-content">
         <div class="logo-title">
             <span class="icon-wrap">
                 <i class="fas fa-laptop-code" style="color:#fffb70; font-size:1.3rem;"></i>
@@ -394,16 +397,49 @@
     let studentInfo = { name: "", class: "" };
     let _isSubmitting = false;
 
+    const DANH_SACH_HOC_SINH = [
+        "LÊ QUỲNH ANH","LÊ TÚ ANH","ĐOÀN PHẠM THIÊN ÂN","NGUYỄN VÕ CAO CƯỜNG",
+        "TRẦN THỊ MỸ DUYÊN","HUỲNH THÙY DƯƠNG","NGUYỄN NGỌC HẢI ĐĂNG","ĐOÀN MINH ĐỨC",
+        "LA MINH ĐỨC","ĐỒNG VĂN ĐỨC","DANH THỊ NGỌC HẰNG","HUỲNH DƯƠNG GIA HÂN",
+        "NGUYỄN HỒ BẢO HÂN","NGUYỄN THANH HIỀN","NGUYỄN TUẤN KIỆT","LẠI GIA LINH",
+        "ĐOÀN HỒNG TRÚC MAI","TRƯƠNG TRIỆU MẨN","TỪ KHÁNH NGỌC","NGUYỄN LÊ TRÚC NHI",
+        "LÂM GIA PHÚ","NGUYỄN MINH PHÚ","PHAN HOÀNG QUÂN","TRƯƠNG TRƯỜNG SƠN",
+        "NGUYỄN THANH THẢO","TRỊNH TRÙNG THIÊN","LÊ THỊ HỒNG THỦY","NGUYỄN NGỌC BẢO THƯ",
+        "TRỊNH ĐÌNH TOÀN","SẦM NGỌC TƯỜNG VY","LÊ TƯỜNG VY","NGUYỄN ĐÀM NHƯ Ý",
+        "LÊ NGUYỄN THẢO YẾN"
+    ];
     function startQuiz() {
         const name = document.getElementById('studentName').value.trim();
-        const cls  = document.getElementById('studentClass').value.trim();
-        if (!name || !cls) { alert("Vui lòng nhập đủ Họ tên và Lớp!"); return; }
-        studentInfo.name  = name;
+        const cls  = document.getElementById('studentClass').value;
+        if (!name) { showLoginError("Vui lòng nhập họ và tên của em!"); return; }
+
+        const nameNorm = name.toUpperCase().replace(/\s+/g, ' ');
+        const found = DANH_SACH_HOC_SINH.some(s => s === nameNorm);
+        if (!found) {
+            showLoginError("Bạn nhập sai tên hoặc không phải học sinh lớp 3D!");
+            return;
+        }
+
+        studentInfo.name  = name.toUpperCase().replace(/\s+/g, ' ');
         studentInfo.class = cls;
-        document.getElementById('displayInfo').innerText = name + " – " + cls;
+        document.getElementById('displayInfo').innerText = studentInfo.name + " – " + cls;
         document.getElementById('loginScreen').style.display = 'none';
         document.getElementById('mainHeader').style.display  = 'flex';
         document.getElementById('mainPage').style.display    = 'block';
+    }
+
+    function showLoginError(msg) {
+        let el = document.getElementById('loginError');
+        if (!el) {
+            el = document.createElement('div');
+            el.id = 'loginError';
+            el.style.cssText = 'margin-top:12px;padding:10px 14px;background:#fff0f0;border:1.5px solid #e74c3c;border-radius:8px;color:#c0392b;font-size:0.92rem;display:flex;align-items:center;gap:8px;';
+            document.querySelector('.btn-start').insertAdjacentElement('afterend', el);
+        }
+        el.innerHTML = '<i class="fas fa-exclamation-circle"></i> ' + msg;
+        el.style.display = 'flex';
+        document.getElementById('studentName').style.borderColor = '#e74c3c';
+        document.getElementById('studentName').focus();
     }
 
     /* ─── Kiểm tra câu chưa làm ─── */
